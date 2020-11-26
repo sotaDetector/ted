@@ -1,5 +1,6 @@
 import os
 import uuid
+import numpy as np
 from managerPlatform.bean.dataImageItem import dataImageItem
 from managerPlatform.bean.datasetsBean import datasetsBean
 from managerPlatform.bean.rectangleLabelBean import rectangleLabelBean
@@ -139,7 +140,7 @@ class datasetsService:
                     if dsItem["dlidList"].__contains__(item['dlid']):
                         itemLabelList.append([item['dlid'],item['rec_lt_x'],item['rec_lt_y'],item['rec_w'],item['rec_h']])
 
-                LabelsList.append(itemLabelList)
+                LabelsList.append(np.array(itemLabelList))
         for i in range(imagePathList.__len__()):
             print("-----------------**********-----------------")
             print(imagePathList[i])
@@ -148,11 +149,60 @@ class datasetsService:
 
         returlDict={
             "imagePathList":imagePathList,
-            "LabelsList":LabelsList,
-            "imageShapeList":imageShapeList
+            "LabelsList":np.array(LabelsList),
+            "imageShapeList":np.array(imageShapeList)
         }
 
         return returlDict
+
+    def initTestData(self):
+
+        BasePath="/Volumes/study/objectDetection/coco128/labels/train2017"
+        imgBasePath = "/Volumes/study/objectDetection/coco128/images/train2017"
+        allFiles=os.listdir(BasePath)
+        imageItemList=[]
+        for i in allFiles:
+
+
+            print("--------------------------")
+            print(i)
+            f = open(BasePath + "/" + i);  # 打开文件
+            imageSize=imageUtils.getImageSize(imgBasePath + "/" + i.replace(".txt",".jpg"))
+
+            recLabelList=[]
+            labelIdList=[]
+            iter_f = iter(f);  # 创建迭代器
+
+            for line in iter_f:
+                dataItem=line.split(" ")
+                labelId=dataItem[0]
+                if labelIdList.__contains__(labelId)==False:
+                    labelIdList.append(labelId)
+                recLabelList.append(rectangleLabelBean(
+                    rec_lt_x=dataItem[1],
+                    rec_lt_y=dataItem[2],
+                    rec_w=dataItem[3],
+                    rec_h=dataItem[4],
+                    dlid=labelId
+                ))
+
+            imageItemList.append(dataImageItem(
+                ditFileName=i.replace(".txt",".jpg"),
+                ditFilePath="train_test/"+i.replace(".txt",".jpg"),
+                ditWidth=imageSize[0],
+                ditHeight=imageSize[1],
+                dsId=1,
+                recLabelList=recLabelList,
+                labelIdList=labelIdList
+            ))
+        dataImageItem.objects.insert(imageItemList,load_bulk=False)
+
+        return {"rs":1}
+
+
+
+
+
 
 
 

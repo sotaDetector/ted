@@ -2,7 +2,7 @@ import threading
 
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.datasetsManager.datasetsService import datasetsService
-from train import trainYolo
+from trainCustom import trainYolo
 
 datasetService = datasetsService()
 

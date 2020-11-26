@@ -57,3 +57,13 @@ def upImageItemRecLabels():
     data = request.get_json()
 
     return dsService.upImageItemRecLabels(data)
+
+
+
+"""
+上传图片标注数据
+"""
+@dsm_blp.route('/initTestData', methods=['POST'])
+def initTestData():
+
+    return dsService.initTestData()
