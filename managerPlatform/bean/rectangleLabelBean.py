@@ -1,7 +1,6 @@
 from mongoengine import EmbeddedDocument
 
 from managerPlatform.common.dataManager.mongoSource import mongoSource
-from managerPlatform.bean.baseBean import baseBean
 
 
 class rectangleLabelBean(EmbeddedDocument):

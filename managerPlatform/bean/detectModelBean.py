@@ -1,7 +1,5 @@
-import json
-from datetime import datetime
 from managerPlatform.common.dataManager.mongoSource import mongoSource
-from managerPlatform.bean.baseBean import baseBean
+from managerPlatform.common.baseBean.baseBean import baseBean
 
 
 class detectModelBean(baseBean):

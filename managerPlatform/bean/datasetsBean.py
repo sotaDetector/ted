@@ -1,5 +1,5 @@
 from managerPlatform.common.dataManager.mongoSource import mongoSource
-from managerPlatform.bean.baseBean import baseBean
+from managerPlatform.common.baseBean.baseBean import baseBean
 
 
 class datasetsBean(baseBean):

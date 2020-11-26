@@ -1,5 +1,5 @@
 
-from managerPlatform.bean.baseBean import baseBean
+from managerPlatform.common.baseBean.baseBean import baseBean
 from managerPlatform.common.dataManager.mongoSource import mongoSource
 
 
