@@ -1,6 +1,7 @@
 import argparse
 import time
 from pathlib import Path
+import os
 
 import cv2
 import torch
@@ -13,7 +14,7 @@ from utils.general import check_img_size, non_max_suppression, apply_classifier,
     strip_optimizer, set_logging, increment_path
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized
-
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 def detect(save_img=False):
     source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
