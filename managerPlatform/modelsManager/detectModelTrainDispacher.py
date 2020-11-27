@@ -1,6 +1,6 @@
 from flask import Blueprint,request
 
-from managerPlatform.bean.detectModelTrainVersion import detectModelTrainVersion
+from managerPlatform.bean.detectModelVersion import detectModelTrainVersion
 from managerPlatform.modelsManager.detectModelTrainService import detectModelTrainService
 
 detect_model_train_blp = Blueprint("detectModelTrainDispacher", __name__, url_prefix="/detectModelTrain")
@@ -12,6 +12,5 @@ def detectModelVersionTrain():
 
     jsonData=request.get_json()
 
-    modelTrainVersionIns=detectModelTrainVersion.convertToBean(jsonData)
 
-    return modelTrainService.detectModelVersionTrain(modelTrainVersionIns)
+    return modelTrainService.detectModelVersionTrain(jsonData)

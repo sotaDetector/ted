@@ -9,7 +9,7 @@ class detectModelTrainVersion(baseBean):
     dmid = mongoSource.mdb.LongField(required=True)
     #版本名称
     dmtvName=mongoSource.mdb.StringField(required=True)
-    # 模型大小 precision for model xlarge large middle small
+    # 模型大小 precision for model 4xlarge 3large 2middle 1small
     dmPrecision = mongoSource.mdb.IntField(required=True)
 
     # 推断平台
