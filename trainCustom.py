@@ -65,9 +65,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None):
     cuda = device.type != 'cpu'
     init_seeds(2 + rank)
 
-
     nc, names =datasetDict['nc'],datasetDict['names']
-    assert len(names) == nc, '%g names found for nc=%g dataset in %s' % (len(names), nc, opt.data)  # check
 
     # Model
     pretrained = weights.endswith('.pt')

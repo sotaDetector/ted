@@ -5,7 +5,7 @@ from managerPlatform.common.config.configUtils import configUtils
 
 class loggerUtils:
 
-    clevel = logging.DEBUG
+    clevel = logging.INFO
     Flevel = logging.INFO
 
     logger = logging.getLogger("serviceLog")

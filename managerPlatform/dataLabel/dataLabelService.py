@@ -31,3 +31,14 @@ class dataLabelService:
 
         return resultPackerUtils.update_success()
 
+    def getLabelsBylids(self,idsMap):
+        lids=[]
+        for item in idsMap:
+            lids.append(item)
+        labelList=dataLabelBean.objects(dlid__in=lids)
+        labelMap={}
+        for item in labelList:
+            labelMap[item['dlid']]=item['dlName']
+        return labelMap
+
+
