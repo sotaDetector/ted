@@ -12,7 +12,7 @@ from trainCustom import trainYolo
 
 datasetService = datasetsService()
 
-modelSavedBasePath=configUtils.getConfigProperties("detectModel","modelSavePath")
+modelSavedBasePath=configUtils.getConfigProperties("model","modelSavePath")
 
 
 

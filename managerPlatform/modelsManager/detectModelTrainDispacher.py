@@ -20,7 +20,7 @@ def detectModelVersionTrain():
     获取训练数据统计
 """
 @detect_model_train_blp.route('/getTrainStatistics', methods=['POST'])
-def detectModelVersionTrain():
+def getTrainStatistics():
 
     jsonData=request.get_json()
 
