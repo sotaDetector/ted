@@ -26,7 +26,7 @@ class detectModelTrainService:
 
         # 2.训练
         # 2.1. 准备数据
-        datasetDict = datasetService.loadTrainData(modelTrainVersion['ds_dl_list'])
+        trainDataDict,valDataDict = datasetService.loadTrainData(modelTrainVersion['ds_dl_list'])
         # 2.2 组装，保存 训练参数
         trainConfig=jsonData["advancedSet"]
         modelDir=randomUtils.getRandomStr()
@@ -40,14 +40,14 @@ class detectModelTrainService:
         )
         trainConfig.save()
         # #2.3 开启训练线程
-        self.startTrainThread(datasetDict,trainConfig)
+        self.startTrainThread(trainDataDict,valDataDict,trainConfig)
 
         return resultPackerUtils.save_success()
 
 
-    def startTrainThread(self,datasetDict, trainConfig):
+    def startTrainThread(self,trainDataDict,valDataDict,trainConfig):
         loggerUtils.info("start detect model train thread [start]")
-        t1 = threading.Thread(target=trainYolo, args=(datasetDict, trainConfig))
+        t1 = threading.Thread(target=trainYolo, args=(trainDataDict,valDataDict,trainConfig))
         t1.setDaemon(True)
         t1.start()
         loggerUtils.info("start detect model train thread [end]")

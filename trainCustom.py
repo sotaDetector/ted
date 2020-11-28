@@ -42,7 +42,7 @@ except ImportError:
     logger.info("Install Weights & Biases for experiment logging via 'pip install wandb' (recommended)")
 
 
-def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None):
+def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataDict=None):
     logger.info(f'Hyperparameters {hyp}')
     save_dir, epochs, batch_size, total_batch_size, weights, rank = \
         Path(opt.save_dir), opt.epochs, opt.batch_size, opt.total_batch_size, opt.weights, opt.global_rank
@@ -326,7 +326,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None):
                 ema.update_attr(model, include=['yaml', 'nc', 'hyp', 'gr', 'names', 'stride'])
             final_epoch = epoch + 1 == epochs
             if not opt.notest or final_epoch:  # Calculate mAP
-                results, maps, times = test.test(opt.data,
+                results, maps, times = test.test(valDataDict,
                                                  batch_size=total_batch_size,
                                                  imgsz=imgsz_test,
                                                  model=ema.ema,
@@ -403,7 +403,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None):
     return results
 
 
-def trainYolo(datasetDict,modelConfigBean):
+def trainYolo(trainDataDict,valDataDict,modelConfigBean):
 
     opt=translateToOpt(modelConfigBean)
 
@@ -454,9 +454,9 @@ def trainYolo(datasetDict,modelConfigBean):
     if not opt.evolve:
         tb_writer = None  # init loggers
         if opt.global_rank in [-1, 0]:
-            logger.info(f'Start Tensorboard with "tensorboard --logdir {opt.project}", view at http://localhost:6006/')
+            logger.info(f'Start Tensorboard with "tensorboard --logdir {opt.project}{opt.name}", view at http://localhost:6006/')
             tb_writer = SummaryWriter(opt.save_dir)  # Tensorboard
-        train(hyp, opt, device, tb_writer, wandb,datasetDict)
+        train(hyp, opt, device, tb_writer, wandb,trainDataDict,valDataDict)
 
     # Evolve hyperparameters (optional)
     else:

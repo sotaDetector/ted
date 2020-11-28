@@ -19,7 +19,7 @@ from utils.plots import plot_images, output_to_target
 from utils.torch_utils import select_device, time_synchronized
 
 
-def test(data,
+def test(valDataDict,
          weights=None,
          batch_size=32,
          imgsz=640,
@@ -37,6 +37,7 @@ def test(data,
          plots=True,
          log_imgs=0):  # number of logged images
 
+    is_coco=False
     # Initialize/load model and set device
     training = model is not None
     if training:  # called by train.py
@@ -66,11 +67,8 @@ def test(data,
 
     # Configure
     model.eval()
-    is_coco = data.endswith('coco.yaml')  # is COCO dataset
-    with open(data) as f:
-        data = yaml.load(f, Loader=yaml.FullLoader)  # model dict
-    check_dataset(data)  # check
-    nc = 1 if single_cls else int(data['nc'])  # number of classes
+
+    nc = 1 if single_cls else int(valDataDict['nc'])  # number of classes
     iouv = torch.linspace(0.5, 0.95, 10).to(device)  # iou vector for mAP@0.5:0.95
     niou = iouv.numel()
 
@@ -85,7 +83,7 @@ def test(data,
     if not training:
         img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
         _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
-        path = data['test'] if opt.task == 'test' else data['val']  # path to val/test images
+        path = valDataDict['imagePathList']
         dataloader = create_dataloader(path, imgsz, batch_size, model.stride.max(), opt, pad=0.5, rect=True)[0]
 
     seen = 0

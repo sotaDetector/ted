@@ -169,7 +169,7 @@ class datasetsService:
             print(LabelsList[i])
             print(imageShapeList[i])
 
-        returlDict = {
+        trainDataDict = {
             "imagePathList": imagePathList,
             "LabelsList": np.array(LabelsList),
             "imageShapeList": np.array(imageShapeList),
@@ -177,7 +177,15 @@ class datasetsService:
             "names": names
         }
 
-        return returlDict
+        valDataDict = {
+            "imagePathList": imagePathList,
+            "LabelsList": np.array(LabelsList),
+            "imageShapeList": np.array(imageShapeList),
+            "nc": names.__len__(),
+            "names": names
+        }
+
+        return trainDataDict,valDataDict
 
     def initTestData(self):
 
