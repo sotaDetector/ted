@@ -30,8 +30,8 @@ def detect(save_img=False):
     device = select_device(opt.device)
     half = device.type != 'cpu'  # half precision only supported on CUDA
 
-    # Load model
-    model = attempt_load(weights, map_location=device)  # load FP32 model
+    # Load detectModel
+    model = attempt_load(weights, map_location=device)  # load FP32 detectModel
     imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
     if half:
         model.half()  # to FP16
@@ -40,7 +40,7 @@ def detect(save_img=False):
     classify = False
     if classify:
         modelc = load_classifier(name='resnet101', n=2)  # initialize
-        modelc.load_state_dict(torch.load('weights/resnet101.pt', map_location=device)['model']).to(device).eval()
+        modelc.load_state_dict(torch.load('weights/resnet101.pt', map_location=device)['detectModel']).to(device).eval()
 
     # Set Dataloader
     vid_path, vid_writer = None, None
@@ -146,7 +146,7 @@ def detect(save_img=False):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='model.pt path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='detectModel.pt path(s)')
     parser.add_argument('--source', type=str, default='data/images', help='source')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')

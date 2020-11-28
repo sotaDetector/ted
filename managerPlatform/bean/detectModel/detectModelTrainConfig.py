@@ -41,7 +41,7 @@ class detectModelTrainConfig(baseBean):
     device=mongoSource.mdb.StringField(default='')
     #vary img-size +/- 50%%
     multi_scale=mongoSource.mdb.BooleanField(default=False)
-    #train as single-class dataset
+    #train as single-class trainDataset
     single_cls=mongoSource.mdb.BooleanField(default=False)
     #use torch.optim.Adam() optimizer
     adam=mongoSource.mdb.BooleanField(default=False)

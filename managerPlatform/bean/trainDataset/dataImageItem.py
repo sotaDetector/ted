@@ -1,7 +1,7 @@
 from mongoengine import EmbeddedDocumentField
 
 from managerPlatform.common.baseBean.baseBean import baseBean
-from managerPlatform.bean.rectangleLabelBean import rectangleLabelBean
+from managerPlatform.bean.trainDataset.rectangleLabelBean import rectangleLabelBean
 from managerPlatform.common.dataManager.mongoSource import mongoSource
 
 

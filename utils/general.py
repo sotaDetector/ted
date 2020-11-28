@@ -77,7 +77,7 @@ def check_file(file):
 
 
 def check_dataset(dict):
-    # Download dataset if not found locally
+    # Download trainDataset if not found locally
     val, s = dict.get('val'), dict.get('download')
     if val and len(val):
         val = [Path(x).resolve() for x in (val if isinstance(val, list) else [val])]  # val path
@@ -358,8 +358,8 @@ def strip_optimizer(f='weights/best.pt', s=''):  # from utils.general import *; 
     x['optimizer'] = None
     x['training_results'] = None
     x['epoch'] = -1
-    x['model'].half()  # to FP16
-    for p in x['model'].parameters():
+    x['detectModel'].half()  # to FP16
+    for p in x['detectModel'].parameters():
         p.requires_grad = False
     torch.save(x, s or f)
     mb = os.path.getsize(s or f) / 1E6  # filesize

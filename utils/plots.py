@@ -87,7 +87,7 @@ def plot_wh_methods():  # from utils.plots import *; plot_wh_methods()
 
 
 def output_to_target(output):
-    # Convert model output to target format [batch_id, class_id, x, y, w, h, conf]
+    # Convert detectModel output to target format [batch_id, class_id, x, y, w, h, conf]
     targets = []
     for i, o in enumerate(output):
         for *box, conf, cls in o.cpu().numpy():
@@ -248,7 +248,7 @@ def plot_study_txt(f='study.txt', x=None):  # from utils.plots import *; plot_st
 
 
 def plot_labels(labels, save_dir=''):
-    # plot dataset labels
+    # plot trainDataset labels
     c, b = labels[:, 0], labels[:, 1:].transpose()  # classes, boxes
     nc = int(c.max() + 1)  # number of classes
     colors = color_list()

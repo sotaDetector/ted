@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from managerPlatform.bean.dataLabelBean import dataLabelBean
+from managerPlatform.bean.trainDataset.dataLabelBean import dataLabelBean
 from managerPlatform.dataLabel.dataLabelService import dataLabelService
 
 dataLabel_blp = Blueprint("datalLabelDispacher", __name__, url_prefix="/dataLabel")

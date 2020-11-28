@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from managerPlatform.bean.detectModelBean import detectModelBean
+from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
 from managerPlatform.common.baseBean.pageBean import pageBean
 from managerPlatform.modelsManager.detectModelService import detectModelService
 

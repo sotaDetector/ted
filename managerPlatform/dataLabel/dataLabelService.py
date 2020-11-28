@@ -1,5 +1,5 @@
 
-from managerPlatform.bean.dataLabelBean import dataLabelBean
+from managerPlatform.bean.trainDataset.dataLabelBean import dataLabelBean
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 

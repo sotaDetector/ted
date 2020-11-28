@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from managerPlatform.bean.datasetsBean import datasetsBean
+from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.common.baseBean.pageBean import pageBean
 from managerPlatform.datasetsManager.datasetsService import datasetsService
 

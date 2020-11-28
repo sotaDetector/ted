@@ -56,7 +56,7 @@ def exif_size(img):
 
 def create_dataloader(path, imgsz, batch_size, stride, opt, hyp=None, augment=False, cache=False, pad=0.0, rect=False,
                       rank=-1, world_size=1, workers=8):
-    # Make sure only the first process in DDP process the dataset first, and the following others can use the cache
+    # Make sure only the first process in DDP process the trainDataset first, and the following others can use the cache
     with torch_distributed_zero_first(rank):
         dataset = LoadImagesAndLabels(path, imgsz, batch_size,
                                       augment=augment,  # augment images
@@ -430,7 +430,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 pbar.desc = 'Caching images (%.1fGB)' % (gb / 1E9)
 
     def cache_labels(self, path=Path('./labels.cache')):
-        # Cache dataset labels, check images and read shapes
+        # Cache trainDataset labels, check images and read shapes
         x = {}  # dict
         nm, nf, ne, nc = 0, 0, 0, 0  # number missing, found, empty, duplicate
         pbar = tqdm(zip(self.img_files, self.label_files), desc='Scanning images', total=len(self.img_files))
@@ -480,7 +480,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
     # def __iter__(self):
     #     self.count = -1
-    #     print('ran dataset iter')
+    #     print('ran trainDataset iter')
     #     #self.shuffled_vector = np.random.permutation(self.nF) if self.augment else np.arange(self.nF)
     #     return self
 
@@ -578,7 +578,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
 # Ancillary functions --------------------------------------------------------------------------------------------------
 def load_image(self, index):
-    # loads 1 image from dataset, returns img, original hw, resized hw
+    # loads 1 image from trainDataset, returns img, original hw, resized hw
     img = self.imgs[index]
     if img is None:  # not cached
         path = self.img_files[index]
@@ -878,7 +878,7 @@ def flatten_recursive(path='../coco128'):
 
 
 def extract_boxes(path='../coco128/'):  # from utils.datasets import *; extract_boxes('../coco128')
-    # Convert detection dataset into classification dataset, with one directory per class
+    # Convert detection trainDataset into classification trainDataset, with one directory per class
 
     path = Path(path)  # images dir
     shutil.rmtree(path / 'classifier') if (path / 'classifier').is_dir() else None  # remove existing
@@ -913,7 +913,7 @@ def extract_boxes(path='../coco128/'):  # from utils.datasets import *; extract_
 
 
 def autosplit(path='../coco128', weights=(0.9, 0.1, 0.0)):  # from utils.datasets import *; autosplit('../coco128')
-    """ Autosplit a dataset into train/val/test splits and save path/autosplit_*.txt files
+    """ Autosplit a trainDataset into train/val/test splits and save path/autosplit_*.txt files
     # Arguments
         path:       Path to images directory
         weights:    Train, val, test weights (list)

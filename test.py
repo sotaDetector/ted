@@ -38,10 +38,10 @@ def test(valDataDict,
          log_imgs=0):  # number of logged images
 
     is_coco=False
-    # Initialize/load model and set device
+    # Initialize/load detectModel and set device
     training = model is not None
     if training:  # called by train.py
-        device = next(model.parameters()).device  # get model device
+        device = next(model.parameters()).device  # get detectModel device
 
     else:  # called directly
         set_logging()
@@ -52,13 +52,13 @@ def test(valDataDict,
         save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
-        # Load model
-        model = attempt_load(weights, map_location=device)  # load FP32 model
+        # Load detectModel
+        model = attempt_load(weights, map_location=device)  # load FP32 detectModel
         imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
 
         # Multi-GPU disabled, incompatible with .half() https://github.com/ultralytics/yolov5/issues/99
         # if device.type != 'cpu' and torch.cuda.device_count() > 1:
-        #     model = nn.DataParallel(model)
+        #     detectModel = nn.DataParallel(detectModel)
 
     # Half
     half = device.type != 'cpu'  # half precision only supported on CUDA
@@ -103,7 +103,7 @@ def test(valDataDict,
         targets[:, 2:] *= torch.Tensor([width, height, width, height]).to(device)
 
         with torch.no_grad():
-            # Run model
+            # Run detectModel
             t = time_synchronized()
             inf_out, train_out = model(img, augment=augment)  # inference and training outputs
             t0 += time_synchronized() - t
@@ -278,7 +278,7 @@ def test(valDataDict,
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(prog='test.py')
-    parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='model.pt path(s)')
+    parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='detectModel.pt path(s)')
     parser.add_argument('--data', type=str, default='data/coco128.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=32, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
@@ -286,7 +286,7 @@ if __name__ == '__main__':
     parser.add_argument('--iou-thres', type=float, default=0.6, help='IOU threshold for NMS')
     parser.add_argument('--task', default='val', help="'val', 'test', 'study'")
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-    parser.add_argument('--single-cls', action='store_true', help='treat as single-class dataset')
+    parser.add_argument('--single-cls', action='store_true', help='treat as single-class trainDataset')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--verbose', action='store_true', help='report mAP by class')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')

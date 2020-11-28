@@ -67,21 +67,21 @@ class Detect(nn.Module):
 
 
 class Model(nn.Module):
-    def __init__(self, cfg='yolov5s.yaml', ch=3, nc=None):  # model, input channels, number of classes
+    def __init__(self, cfg='yolov5s.yaml', ch=3, nc=None):  # detectModel, input channels, number of classes
         super(Model, self).__init__()
         if isinstance(cfg, dict):
-            self.yaml = cfg  # model dict
+            self.yaml = cfg  # detectModel dict
         else:  # is *.yaml
             import yaml  # for torch hub
             self.yaml_file = Path(cfg).name
             with open(cfg) as f:
-                self.yaml = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+                self.yaml = yaml.load(f, Loader=yaml.FullLoader)  # detectModel dict
 
-        # Define model
+        # Define detectModel
         if nc and nc != self.yaml['nc']:
-            logger.info('Overriding model.yaml nc=%g with nc=%g' % (self.yaml['nc'], nc))
+            logger.info('Overriding detectModel.yaml nc=%g with nc=%g' % (self.yaml['nc'], nc))
             self.yaml['nc'] = nc  # override yaml value
-        self.model, self.save = parse_model(deepcopy(self.yaml), ch=[ch])  # model, savelist, ch_out
+        self.model, self.save = parse_model(deepcopy(self.yaml), ch=[ch])  # detectModel, savelist, ch_out
         # print([x.shape for x in self.forward(torch.zeros(1, ch, 64, 64))])
 
         # Build strides, anchors
@@ -143,7 +143,7 @@ class Model(nn.Module):
 
     def _initialize_biases(self, cf=None):  # initialize biases into Detect(), cf is class frequency
         # https://arxiv.org/abs/1708.02002 section 3.3
-        # cf = torch.bincount(torch.tensor(np.concatenate(dataset.labels, 0)[:, 0]).long(), minlength=nc) + 1.
+        # cf = torch.bincount(torch.tensor(np.concatenate(trainDataset.labels, 0)[:, 0]).long(), minlength=nc) + 1.
         m = self.model[-1]  # Detect() module
         for mi, s in zip(m.m, m.stride):  # from
             b = mi.bias.view(m.na, -1)  # conv.bias(255) to (3,85)
@@ -158,11 +158,11 @@ class Model(nn.Module):
             print(('%6g Conv2d.bias:' + '%10.3g' * 6) % (mi.weight.shape[1], *b[:5].mean(1).tolist(), b[5:].mean()))
 
     # def _print_weights(self):
-    #     for m in self.model.modules():
+    #     for m in self.detectModel.modules():
     #         if type(m) is Bottleneck:
     #             print('%10.3g' % (m.w.detach().sigmoid() * 2))  # shortcut weights
 
-    def fuse(self):  # fuse model Conv2d() + BatchNorm2d() layers
+    def fuse(self):  # fuse detectModel Conv2d() + BatchNorm2d() layers
         print('Fusing layers... ')
         for m in self.model.modules():
             if type(m) is Conv and hasattr(m, 'bn'):
@@ -188,11 +188,11 @@ class Model(nn.Module):
 
     def autoshape(self):  # add autoShape module
         print('Adding autoShape... ')
-        m = autoShape(self)  # wrap model
+        m = autoShape(self)  # wrap detectModel
         copy_attr(m, self, include=('yaml', 'nc', 'hyp', 'names', 'stride'), exclude=())  # copy attributes
         return m
 
-    def info(self, verbose=False, img_size=640):  # print model information
+    def info(self, verbose=False, img_size=640):  # print detectModel information
         model_info(self, verbose, img_size)
 
 
@@ -261,24 +261,24 @@ def parse_model(d, ch):  # model_dict, input_channels(3)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--cfg', type=str, default='yolov5s.yaml', help='model.yaml')
+    parser.add_argument('--cfg', type=str, default='yolov5s.yaml', help='detectModel.yaml')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     opt = parser.parse_args()
     opt.cfg = check_file(opt.cfg)  # check file
     set_logging()
     device = select_device(opt.device)
 
-    # Create model
+    # Create detectModel
     model = Model(opt.cfg).to(device)
     model.train()
 
     # Profile
     # img = torch.rand(8 if torch.cuda.is_available() else 1, 3, 640, 640).to(device)
-    # y = model(img, profile=True)
+    # y = detectModel(img, profile=True)
 
     # Tensorboard
     # from torch.utils.tensorboard import SummaryWriter
     # tb_writer = SummaryWriter()
     # print("Run 'tensorboard --logdir=models/runs' to view tensorboard at http://localhost:6006/")
-    # tb_writer.add_graph(model.model, img)  # add model to tensorboard
-    # tb_writer.add_image('test', img[0], dataformats='CWH')  # add model to tensorboard
+    # tb_writer.add_graph(detectModel.detectModel, img)  # add detectModel to tensorboard
+    # tb_writer.add_image('test', img[0], dataformats='CWH')  # add detectModel to tensorboard

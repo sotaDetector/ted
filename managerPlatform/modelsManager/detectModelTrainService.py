@@ -1,7 +1,7 @@
 import threading
 
-from managerPlatform.bean.detectModelTrainConfig import detectModelTrainConfig
-from managerPlatform.bean.detectModelVersion import detectModelTrainVersion
+from managerPlatform.bean.detectModel.detectModelTrainConfig import detectModelTrainConfig
+from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
@@ -12,7 +12,7 @@ from trainCustom import trainYolo
 
 datasetService = datasetsService()
 
-modelSavedBasePath=configUtils.getConfigProperties("model","modelSavePath")
+modelSavedBasePath=configUtils.getConfigProperties("detectModel","modelSavePath")
 
 
 
@@ -46,8 +46,8 @@ class detectModelTrainService:
 
 
     def startTrainThread(self,trainDataDict,valDataDict,trainConfig):
-        loggerUtils.info("start detect model train thread [start]")
+        loggerUtils.info("start detect detectModel train thread [start]")
         t1 = threading.Thread(target=trainYolo, args=(trainDataDict,valDataDict,trainConfig))
         t1.setDaemon(True)
         t1.start()
-        loggerUtils.info("start detect model train thread [end]")
+        loggerUtils.info("start detect detectModel train thread [end]")

@@ -119,7 +119,7 @@ class NMS(nn.Module):
 
 
 class autoShape(nn.Module):
-    # input-robust model wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
+    # input-robust detectModel wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
     img_size = 640  # inference size (pixels)
     conf = 0.25  # NMS confidence threshold
     iou = 0.45  # NMS IoU threshold

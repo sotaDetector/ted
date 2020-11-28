@@ -1,4 +1,4 @@
-from managerPlatform.bean.detectModelBean import detectModelBean
+from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 
 

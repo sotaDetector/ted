@@ -74,10 +74,10 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
             attempt_download(weights)  # download if not found locally
         ckpt = torch.load(weights, map_location=device)  # load checkpoint
         if hyp.get('anchors'):
-            ckpt['model'].yaml['anchors'] = round(hyp['anchors'])  # force autoanchor
-        model = Model(opt.cfg or ckpt['model'].yaml, ch=3, nc=nc).to(device)  # create
+            ckpt['detectModel'].yaml['anchors'] = round(hyp['anchors'])  # force autoanchor
+        model = Model(opt.cfg or ckpt['detectModel'].yaml, ch=3, nc=nc).to(device)  # create
         exclude = ['anchor'] if opt.cfg or hyp.get('anchors') else []  # exclude keys
-        state_dict = ckpt['model'].float().state_dict()  # to FP32
+        state_dict = ckpt['detectModel'].float().state_dict()  # to FP32
         state_dict = intersect_dicts(state_dict, model.state_dict(), exclude=exclude)  # intersect
         model.load_state_dict(state_dict, strict=False)  # load
         logger.info('Transferred %g/%g items from %s' % (len(state_dict), len(model.state_dict()), weights))  # report
@@ -193,7 +193,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
             labels = np.concatenate(dataset.labels, 0)
             c = torch.tensor(labels[:, 0])  # classes
             # cf = torch.bincount(c.long(), minlength=nc) + 1.  # frequency
-            # model._initialize_biases(cf.to(device))
+            # detectModel._initialize_biases(cf.to(device))
             if plots:
                 plot_labels(labels, save_dir=save_dir)
                 if tb_writer:
@@ -206,9 +206,9 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
                 check_anchors(dataset, model=model, thr=hyp['anchor_t'], imgsz=imgsz)
 
     # Model parameters
-    hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset
-    model.nc = nc  # attach number of classes to model
-    model.hyp = hyp  # attach hyperparameters to model
+    hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current trainDataset
+    model.nc = nc  # attach number of classes to detectModel
+    model.hyp = hyp  # attach hyperparameters to detectModel
     model.gr = 1.0  # iou loss ratio (obj_loss = 1.0 or iou)
     model.class_weights = labels_to_class_weights(dataset.labels, nc).to(device)  # attach class weights
     model.names = names
@@ -243,7 +243,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
 
         # Update mosaic border
         # b = int(random.uniform(0.25 * imgsz, 0.75 * imgsz + gs) // gs * gs)
-        # dataset.mosaic_border = [b - imgsz, -b]  # height, width borders
+        # trainDataset.mosaic_border = [b - imgsz, -b]  # height, width borders
 
         mloss = torch.zeros(4, device=device)  # mean losses
         if rank != -1:
@@ -260,7 +260,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
             # Warmup
             if ni <= nw:
                 xi = [0, nw]  # x interp
-                # model.gr = np.interp(ni, xi, [0.0, 1.0])  # iou loss ratio (obj_loss = 1.0 or iou)
+                # detectModel.gr = np.interp(ni, xi, [0.0, 1.0])  # iou loss ratio (obj_loss = 1.0 or iou)
                 accumulate = max(1, np.interp(ni, xi, [1, nbs / total_batch_size]).round())
                 for j, x in enumerate(optimizer.param_groups):
                     # bias lr falls from 0.1 to lr0, all other lrs rise from 0.0 to lr0
@@ -308,7 +308,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
                     plot_images(images=imgs, targets=targets, paths=paths, fname=f)
                     # if tb_writer:
                     #     tb_writer.add_image(f, result, dataformats='HWC', global_step=epoch)
-                    #     tb_writer.add_graph(model, imgs)  # add model to tensorboard
+                    #     tb_writer.add_graph(detectModel, imgs)  # add detectModel to tensorboard
                 elif plots and ni == 3 and wandb:
                     wandb.log({"Mosaics": [wandb.Image(str(x), caption=x.name) for x in save_dir.glob('train*.jpg')]})
 
@@ -358,14 +358,14 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
             if fi > best_fitness:
                 best_fitness = fi
 
-            # Save model
+            # Save detectModel
             save = (not opt.nosave) or (final_epoch and not opt.evolve)
             if save:
                 with open(results_file, 'r') as f:  # create checkpoint
                     ckpt = {'epoch': epoch,
                             'best_fitness': best_fitness,
                             'training_results': f.read(),
-                            'model': ema.ema,
+                            'detectModel': ema.ema,
                             'optimizer': None if final_epoch else optimizer.state_dict(),
                             'wandb_id': wandb_run.id if wandb else None}
 
@@ -538,13 +538,13 @@ def trainYolo(trainDataDict,valDataDict,modelConfigBean):
         # Plot results
         plot_evolution(yaml_file)
         print(f'Hyperparameter evolution complete. Best results saved as: {yaml_file}\n'
-              f'Command to train a new model with these hyperparameters: $ python train.py --hyp {yaml_file}')
+              f'Command to train a new detectModel with these hyperparameters: $ python train.py --hyp {yaml_file}')
 
 
 def translateToOpt(modelConfigBean):
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', type=str, default=modelConfigBean.weights, help='initial weights path')
-    parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
+    parser.add_argument('--cfg', type=str, default='', help='detectModel.yaml path')
     parser.add_argument('--hyp', type=str, default='data/hyp.scratch.yaml', help='hyperparameters path')
     parser.add_argument('--epochs', type=int, default=modelConfigBean.epochs)
     parser.add_argument('--batch-size', type=int, default=modelConfigBean.batch_size, help='total batch size for all GPUs')
@@ -560,7 +560,7 @@ def translateToOpt(modelConfigBean):
     parser.add_argument('--image-weights', action='store_true', help='use weighted image selection for training')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')
-    parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')
+    parser.add_argument('--single-cls', action='store_true', help='train as single-class trainDataset')
     parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
@@ -570,6 +570,6 @@ def translateToOpt(modelConfigBean):
     parser.add_argument('--name', default=modelConfigBean.name, help='save to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
     opt = parser.parse_args()
-    loggerUtils.info("model train config:")
+    loggerUtils.info("detectModel train config:")
     loggerUtils.info(opt)
     return opt

@@ -1,4 +1,4 @@
-"""Exports a YOLOv5 *.pt model to ONNX and TorchScript formats
+"""Exports a YOLOv5 *.pt detectModel to ONNX and TorchScript formats
 
 Usage:
     $ export PYTHONPATH="$PWD" && python models/export.py --weights ./weights/yolov5s.pt --img 640 --batch 1
@@ -29,8 +29,8 @@ if __name__ == '__main__':
     set_logging()
     t = time.time()
 
-    # Load PyTorch model
-    model = attempt_load(opt.weights, map_location=torch.device('cpu'))  # load FP32 model
+    # Load PyTorch detectModel
+    model = attempt_load(opt.weights, map_location=torch.device('cpu'))  # load FP32 detectModel
     labels = model.names
 
     # Checks
@@ -40,7 +40,7 @@ if __name__ == '__main__':
     # Input
     img = torch.zeros(opt.batch_size, 3, *opt.img_size)  # image size(1,3,320,192) iDetection
 
-    # Update model
+    # Update detectModel
     for k, m in model.named_modules():
         m._non_persistent_buffers_set = set()  # pytorch 1.6.0 compatibility
         if isinstance(m, models.common.Conv) and isinstance(m.act, nn.Hardswish):
@@ -70,9 +70,9 @@ if __name__ == '__main__':
                           output_names=['classes', 'boxes'] if y is None else ['output'])
 
         # Checks
-        onnx_model = onnx.load(f)  # load onnx model
-        onnx.checker.check_model(onnx_model)  # check onnx model
-        # print(onnx.helper.printable_graph(onnx_model.graph))  # print a human readable model
+        onnx_model = onnx.load(f)  # load onnx detectModel
+        onnx.checker.check_model(onnx_model)  # check onnx detectModel
+        # print(onnx.helper.printable_graph(onnx_model.graph))  # print a human readable detectModel
         print('ONNX export success, saved as %s' % f)
     except Exception as e:
         print('ONNX export failure: %s' % e)
@@ -82,7 +82,7 @@ if __name__ == '__main__':
         import coremltools as ct
 
         print('\nStarting CoreML export with coremltools %s...' % ct.__version__)
-        # convert model from torchscript and apply pixel scaling as per detect.py
+        # convert detectModel from torchscript and apply pixel scaling as per detect.py
         model = ct.convert(ts, inputs=[ct.ImageType(name='image', shape=img.shape, scale=1 / 255.0, bias=[0, 0, 0])])
         f = opt.weights.replace('.pt', '.mlmodel')  # filename
         model.save(f)

@@ -1,9 +1,9 @@
 import os
 import uuid
 import numpy as np
-from managerPlatform.bean.dataImageItem import dataImageItem
-from managerPlatform.bean.datasetsBean import datasetsBean
-from managerPlatform.bean.rectangleLabelBean import rectangleLabelBean
+from managerPlatform.bean.trainDataset.dataImageItem import dataImageItem
+from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
+from managerPlatform.bean.trainDataset.rectangleLabelBean import rectangleLabelBean
 from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.imageUtils import imageUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
