@@ -148,8 +148,8 @@ class datasetsService:
                         if not dlid_dlIndex_map.keys().__contains__(dlid):
                             dlid_dlIndex_map[dlid] = labelIndex
                             dlIndex_dlid_map[labelIndex] = dlid
-                            labelIndex += 1
                             labelIndexValue=labelIndex
+                            labelIndex += 1
                         else:
                             labelIndexValue = dlid_dlIndex_map[dlid]
                         itemLabelList.append(
@@ -173,7 +173,7 @@ class datasetsService:
             "imagePathList": imagePathList,
             "LabelsList": np.array(LabelsList),
             "imageShapeList": np.array(imageShapeList),
-            "nc": nc,
+            "nc": names.__len__(),
             "names": names
         }
 
