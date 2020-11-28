@@ -70,7 +70,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     train_path = data_dict['train']
     test_path = data_dict['val']
     nc, names = (1, ['item']) if opt.single_cls else (int(data_dict['nc']), data_dict['names'])  # number classes, names
-    assert len(names) == nc, '%g names found for nc=%g trainDataset in %s' % (len(names), nc, opt.data)  # check
+    assert len(names) == nc, '%g names found for nc=%g dataset in %s' % (len(names), nc, opt.data)  # check
 
     # Model
     pretrained = weights.endswith('.pt')
@@ -79,10 +79,10 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             attempt_download(weights)  # download if not found locally
         ckpt = torch.load(weights, map_location=device)  # load checkpoint
         if hyp.get('anchors'):
-            ckpt['detectModel'].yaml['anchors'] = round(hyp['anchors'])  # force autoanchor
-        model = Model(opt.cfg or ckpt['detectModel'].yaml, ch=3, nc=nc).to(device)  # create
+            ckpt['model'].yaml['anchors'] = round(hyp['anchors'])  # force autoanchor
+        model = Model(opt.cfg or ckpt['model'].yaml, ch=3, nc=nc).to(device)  # create
         exclude = ['anchor'] if opt.cfg or hyp.get('anchors') else []  # exclude keys
-        state_dict = ckpt['detectModel'].float().state_dict()  # to FP32
+        state_dict = ckpt['model'].float().state_dict()  # to FP32
         state_dict = intersect_dicts(state_dict, model.state_dict(), exclude=exclude)  # intersect
         model.load_state_dict(state_dict, strict=False)  # load
         logger.info('Transferred %g/%g items from %s' % (len(state_dict), len(model.state_dict()), weights))  # report
@@ -181,8 +181,9 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
 
     # Trainloader
     dataloader, dataset = create_dataloader(train_path, imgsz, batch_size, gs, opt,
-                                            hyp=hyp, augment=True, cache=opt.cache_images, rect=opt.rect,
-                                            rank=rank, world_size=opt.world_size, workers=opt.workers)
+                                            hyp=hyp, augment=True, cache=opt.cache_images, rect=opt.rect, rank=rank,
+                                            world_size=opt.world_size, workers=opt.workers,
+                                            image_weights=opt.image_weights)
     mlc = np.concatenate(dataset.labels, 0)[:, 0].max()  # max label class
     nb = len(dataloader)  # number of batches
     assert mlc < nc, 'Label class %g exceeds nc=%g in %s. Possible class labels are 0-%g' % (mlc, nc, opt.data, nc - 1)
@@ -198,7 +199,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             labels = np.concatenate(dataset.labels, 0)
             c = torch.tensor(labels[:, 0])  # classes
             # cf = torch.bincount(c.long(), minlength=nc) + 1.  # frequency
-            # detectModel._initialize_biases(cf.to(device))
+            # model._initialize_biases(cf.to(device))
             if plots:
                 plot_labels(labels, save_dir=save_dir)
                 if tb_writer:
@@ -211,9 +212,9 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                 check_anchors(dataset, model=model, thr=hyp['anchor_t'], imgsz=imgsz)
 
     # Model parameters
-    hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current trainDataset
-    model.nc = nc  # attach number of classes to detectModel
-    model.hyp = hyp  # attach hyperparameters to detectModel
+    hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset
+    model.nc = nc  # attach number of classes to model
+    model.hyp = hyp  # attach hyperparameters to model
     model.gr = 1.0  # iou loss ratio (obj_loss = 1.0 or iou)
     model.class_weights = labels_to_class_weights(dataset.labels, nc).to(device)  # attach class weights
     model.names = names
@@ -248,7 +249,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
 
         # Update mosaic border
         # b = int(random.uniform(0.25 * imgsz, 0.75 * imgsz + gs) // gs * gs)
-        # trainDataset.mosaic_border = [b - imgsz, -b]  # height, width borders
+        # dataset.mosaic_border = [b - imgsz, -b]  # height, width borders
 
         mloss = torch.zeros(4, device=device)  # mean losses
         if rank != -1:
@@ -265,7 +266,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             # Warmup
             if ni <= nw:
                 xi = [0, nw]  # x interp
-                # detectModel.gr = np.interp(ni, xi, [0.0, 1.0])  # iou loss ratio (obj_loss = 1.0 or iou)
+                # model.gr = np.interp(ni, xi, [0.0, 1.0])  # iou loss ratio (obj_loss = 1.0 or iou)
                 accumulate = max(1, np.interp(ni, xi, [1, nbs / total_batch_size]).round())
                 for j, x in enumerate(optimizer.param_groups):
                     # bias lr falls from 0.1 to lr0, all other lrs rise from 0.0 to lr0
@@ -313,7 +314,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
                     plot_images(images=imgs, targets=targets, paths=paths, fname=f)
                     # if tb_writer:
                     #     tb_writer.add_image(f, result, dataformats='HWC', global_step=epoch)
-                    #     tb_writer.add_graph(detectModel, imgs)  # add detectModel to tensorboard
+                    #     tb_writer.add_graph(model, imgs)  # add model to tensorboard
                 elif plots and ni == 3 and wandb:
                     wandb.log({"Mosaics": [wandb.Image(str(x), caption=x.name) for x in save_dir.glob('train*.jpg')]})
 
@@ -363,14 +364,14 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
             if fi > best_fitness:
                 best_fitness = fi
 
-            # Save detectModel
+            # Save model
             save = (not opt.nosave) or (final_epoch and not opt.evolve)
             if save:
                 with open(results_file, 'r') as f:  # create checkpoint
                     ckpt = {'epoch': epoch,
                             'best_fitness': best_fitness,
                             'training_results': f.read(),
-                            'detectModel': ema.ema,
+                            'model': ema.ema,
                             'optimizer': None if final_epoch else optimizer.state_dict(),
                             'wandb_id': wandb_run.id if wandb else None}
 
@@ -408,11 +409,11 @@ def train(hyp, opt, device, tb_writer=None, wandb=None):
     return results
 
 
-def trainYolo(datasetDict,configMap):
+if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', type=str, default=configMap['weights'], help='initial weights path')
-    parser.add_argument('--cfg', type=str, default='', help='detectModel.yaml path')
-    parser.add_argument('--data', type=str, default=configMap['data'], help='data.yaml path')
+    parser.add_argument('--weights', type=str, default='yolov5s.pt', help='initial weights path')
+    parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
+    parser.add_argument('--data', type=str, default='data/coco128.yaml', help='data.yaml path')
     parser.add_argument('--hyp', type=str, default='data/hyp.scratch.yaml', help='hyperparameters path')
     parser.add_argument('--epochs', type=int, default=300)
     parser.add_argument('--batch-size', type=int, default=16, help='total batch size for all GPUs')
@@ -428,12 +429,12 @@ def trainYolo(datasetDict,configMap):
     parser.add_argument('--image-weights', action='store_true', help='use weighted image selection for training')
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')
-    parser.add_argument('--single-cls', action='store_true', help='train as single-class trainDataset')
+    parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')
     parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')
     parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
     parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
     parser.add_argument('--log-imgs', type=int, default=16, help='number of images for W&B logging, max 100')
-    parser.add_argument('--workers', type=int, default=0, help='maximum number of dataloader workers')
+    parser.add_argument('--workers', type=int, default=8, help='maximum number of dataloader workers')
     parser.add_argument('--project', default='runs/train', help='save to project/name')
     parser.add_argument('--name', default='exp', help='save to project/name')
     parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
@@ -570,11 +571,4 @@ def trainYolo(datasetDict,configMap):
         # Plot results
         plot_evolution(yaml_file)
         print(f'Hyperparameter evolution complete. Best results saved as: {yaml_file}\n'
-              f'Command to train a new detectModel with these hyperparameters: $ python train.py --hyp {yaml_file}')
-
-if __name__=="__main__":
-    configMap = {
-        "weights": "/Volumes/study/objectDetection/ted/weights/yolov5s.pt",
-        "data": "/Volumes/study/objectDetection/ted/data/coco128.yaml"
-    }
-    trainYolo(None,configMap)
+              f'Command to train a new model with these hyperparameters: $ python train.py --hyp {yaml_file}')

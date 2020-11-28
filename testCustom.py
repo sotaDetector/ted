@@ -15,11 +15,11 @@ from utils.general import coco80_to_coco91_class, check_dataset, check_file, che
     non_max_suppression, scale_coords, xyxy2xywh, xywh2xyxy, set_logging, increment_path
 from utils.loss import compute_loss
 from utils.metrics import ap_per_class, ConfusionMatrix
-from utils.plots import plot_images, output_to_target, plot_study_txt
+from utils.plots import plot_images, output_to_target
 from utils.torch_utils import select_device, time_synchronized
 
 
-def test(data,
+def test(valDataDict,
          weights=None,
          batch_size=32,
          imgsz=640,
@@ -37,10 +37,11 @@ def test(data,
          plots=True,
          log_imgs=0):  # number of logged images
 
-    # Initialize/load model and set device
+    is_coco=False
+    # Initialize/load detectModel and set device
     training = model is not None
     if training:  # called by train.py
-        device = next(model.parameters()).device  # get model device
+        device = next(model.parameters()).device  # get detectModel device
 
     else:  # called directly
         set_logging()
@@ -51,13 +52,13 @@ def test(data,
         save_dir = Path(increment_path(Path(opt.project) / opt.name, exist_ok=opt.exist_ok))  # increment run
         (save_dir / 'labels' if save_txt else save_dir).mkdir(parents=True, exist_ok=True)  # make dir
 
-        # Load model
-        model = attempt_load(weights, map_location=device)  # load FP32 model
+        # Load detectModel
+        model = attempt_load(weights, map_location=device)  # load FP32 detectModel
         imgsz = check_img_size(imgsz, s=model.stride.max())  # check img_size
 
         # Multi-GPU disabled, incompatible with .half() https://github.com/ultralytics/yolov5/issues/99
         # if device.type != 'cpu' and torch.cuda.device_count() > 1:
-        #     model = nn.DataParallel(model)
+        #     detectModel = nn.DataParallel(detectModel)
 
     # Half
     half = device.type != 'cpu'  # half precision only supported on CUDA
@@ -66,11 +67,8 @@ def test(data,
 
     # Configure
     model.eval()
-    is_coco = data.endswith('coco.yaml')  # is COCO dataset
-    with open(data) as f:
-        data = yaml.load(f, Loader=yaml.FullLoader)  # model dict
-    check_dataset(data)  # check
-    nc = 1 if single_cls else int(data['nc'])  # number of classes
+
+    nc = 1 if single_cls else int(valDataDict['nc'])  # number of classes
     iouv = torch.linspace(0.5, 0.95, 10).to(device)  # iou vector for mAP@0.5:0.95
     niou = iouv.numel()
 
@@ -85,7 +83,7 @@ def test(data,
     if not training:
         img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
         _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
-        path = data['test'] if opt.task == 'test' else data['val']  # path to val/test images
+        path = valDataDict['imagePathList']
         dataloader = create_dataloader(path, imgsz, batch_size, model.stride.max(), opt, pad=0.5, rect=True)[0]
 
     seen = 0
@@ -102,9 +100,10 @@ def test(data,
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
         targets = targets.to(device)
         nb, _, height, width = img.shape  # batch size, channels, height, width
+        targets[:, 2:] *= torch.Tensor([width, height, width, height]).to(device)
 
         with torch.no_grad():
-            # Run model
+            # Run detectModel
             t = time_synchronized()
             inf_out, train_out = model(img, augment=augment)  # inference and training outputs
             t0 += time_synchronized() - t
@@ -114,9 +113,8 @@ def test(data,
                 loss += compute_loss([x.float() for x in train_out], targets, model)[1][:3]  # box, obj, cls
 
             # Run NMS
-            targets[:, 2:] *= torch.Tensor([width, height, width, height]).to(device)  # to pixels
-            lb = [targets[targets[:, 0] == i, 1:] for i in range(nb)] if save_txt else []  # for autolabelling
             t = time_synchronized()
+            lb = [targets[targets[:, 0] == i, 1:] for i in range(nb)] if save_txt else []  # for autolabelling
             output = non_max_suppression(inf_out, conf_thres=conf_thres, iou_thres=iou_thres, labels=lb)
             t1 += time_synchronized() - t
 
@@ -279,8 +277,8 @@ def test(data,
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(prog='test.py')
-    parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='model.pt path(s)')
+    parser = argparse.ArgumentParser(prog='testCustom.py')
+    parser.add_argument('--weights', nargs='+', type=str, default='yolov5s.pt', help='detectModel.pt path(s)')
     parser.add_argument('--data', type=str, default='data/coco128.yaml', help='*.data path')
     parser.add_argument('--batch-size', type=int, default=32, help='size of each image batch')
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
@@ -288,7 +286,7 @@ if __name__ == '__main__':
     parser.add_argument('--iou-thres', type=float, default=0.6, help='IOU threshold for NMS')
     parser.add_argument('--task', default='val', help="'val', 'test', 'study'")
     parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
-    parser.add_argument('--single-cls', action='store_true', help='treat as single-class dataset')
+    parser.add_argument('--single-cls', action='store_true', help='treat as single-class trainDataset')
     parser.add_argument('--augment', action='store_true', help='augmented inference')
     parser.add_argument('--verbose', action='store_true', help='report mAP by class')
     parser.add_argument('--save-txt', action='store_true', help='save results to *.txt')
@@ -324,9 +322,8 @@ if __name__ == '__main__':
             y = []  # y axis
             for i in x:  # img-size
                 print('\nRunning %s point %s...' % (f, i))
-                r, _, t = test(opt.data, weights, opt.batch_size, i, opt.conf_thres, opt.iou_thres, opt.save_json,
-                               plots=False)
+                r, _, t = test(opt.data, weights, opt.batch_size, i, opt.conf_thres, opt.iou_thres, opt.save_json)
                 y.append(r + t)  # results and times
             np.savetxt(f, y, fmt='%10.4g')  # save
         os.system('zip -r study.zip study_*.txt')
-        plot_study_txt(f, x)  # plot
+        # utils.plots.plot_study_txt(f, x)  # plot

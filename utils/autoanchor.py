@@ -46,17 +46,17 @@ def check_anchors(dataset, model, thr=4.0, imgsz=640):
             m.anchor_grid[:] = new_anchors.clone().view_as(m.anchor_grid)  # for inference
             m.anchors[:] = new_anchors.clone().view_as(m.anchors) / m.stride.to(m.anchors.device).view(-1, 1, 1)  # loss
             check_anchor_order(m)
-            print('New anchors saved to detectModel. Update detectModel *.yaml to use these anchors in the future.')
+            print('New anchors saved to model. Update model *.yaml to use these anchors in the future.')
         else:
             print('Original anchors better than new anchors. Proceeding with original anchors.')
     print('')  # newline
 
 
 def kmean_anchors(path='./data/coco128.yaml', n=9, img_size=640, thr=4.0, gen=1000, verbose=True):
-    """ Creates kmeans-evolved anchors from training trainDataset
+    """ Creates kmeans-evolved anchors from training dataset
 
         Arguments:
-            path: path to trainDataset *.yaml, or a loaded trainDataset
+            path: path to dataset *.yaml, or a loaded dataset
             n: number of anchors
             img_size: image size used for training
             thr: anchor-label wh ratio threshold hyperparameter hyp['anchor_t'] used for training, default=4.0
@@ -94,11 +94,11 @@ def kmean_anchors(path='./data/coco128.yaml', n=9, img_size=640, thr=4.0, gen=10
 
     if isinstance(path, str):  # *.yaml file
         with open(path) as f:
-            data_dict = yaml.load(f, Loader=yaml.FullLoader)  # detectModel dict
-        from utils.datasetsCustom import LoadImagesAndLabels
+            data_dict = yaml.load(f, Loader=yaml.FullLoader)  # model dict
+        from utils.datasets import LoadImagesAndLabels
         dataset = LoadImagesAndLabels(data_dict['train'], augment=True, rect=True)
     else:
-        dataset = path  # trainDataset
+        dataset = path  # dataset
 
     # Get label wh
     shapes = img_size * dataset.shapes / dataset.shapes.max(1, keepdims=True)

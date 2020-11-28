@@ -20,7 +20,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-import test  # import test.py to get mAP after each epoch
+import testCustom  # import testCustom.py to get mAP after each epoch
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from models.yolo import Model
 from utils.autoanchor import check_anchors
@@ -74,10 +74,10 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
             attempt_download(weights)  # download if not found locally
         ckpt = torch.load(weights, map_location=device)  # load checkpoint
         if hyp.get('anchors'):
-            ckpt['detectModel'].yaml['anchors'] = round(hyp['anchors'])  # force autoanchor
-        model = Model(opt.cfg or ckpt['detectModel'].yaml, ch=3, nc=nc).to(device)  # create
+            ckpt['model'].yaml['anchors'] = round(hyp['anchors'])  # force autoanchor
+        model = Model(opt.cfg or ckpt['model'].yaml, ch=3, nc=nc).to(device)  # create
         exclude = ['anchor'] if opt.cfg or hyp.get('anchors') else []  # exclude keys
-        state_dict = ckpt['detectModel'].float().state_dict()  # to FP32
+        state_dict = ckpt['model'].float().state_dict()  # to FP32
         state_dict = intersect_dicts(state_dict, model.state_dict(), exclude=exclude)  # intersect
         model.load_state_dict(state_dict, strict=False)  # load
         logger.info('Transferred %g/%g items from %s' % (len(state_dict), len(model.state_dict()), weights))  # report
@@ -326,15 +326,15 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
                 ema.update_attr(model, include=['yaml', 'nc', 'hyp', 'gr', 'names', 'stride'])
             final_epoch = epoch + 1 == epochs
             if not opt.notest or final_epoch:  # Calculate mAP
-                results, maps, times = test.test(valDataDict,
-                                                 batch_size=total_batch_size,
-                                                 imgsz=imgsz_test,
-                                                 model=ema.ema,
-                                                 single_cls=opt.single_cls,
-                                                 dataloader=testloader,
-                                                 save_dir=save_dir,
-                                                 plots=plots and final_epoch,
-                                                 log_imgs=opt.log_imgs if wandb else 0)
+                results, maps, times = testCustom.test(valDataDict,
+                                                       batch_size=total_batch_size,
+                                                       imgsz=imgsz_test,
+                                                       model=ema.ema,
+                                                       single_cls=opt.single_cls,
+                                                       dataloader=testloader,
+                                                       save_dir=save_dir,
+                                                       plots=plots and final_epoch,
+                                                       log_imgs=opt.log_imgs if wandb else 0)
 
             # Write
             with open(results_file, 'a') as f:
@@ -365,7 +365,7 @@ def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataD
                     ckpt = {'epoch': epoch,
                             'best_fitness': best_fitness,
                             'training_results': f.read(),
-                            'detectModel': ema.ema,
+                            'model': ema.ema,
                             'optimizer': None if final_epoch else optimizer.state_dict(),
                             'wandb_id': wandb_run.id if wandb else None}
 

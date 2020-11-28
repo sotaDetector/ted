@@ -55,8 +55,8 @@ def exif_size(img):
 
 
 def create_dataloader(path, imgsz, batch_size, stride, opt, hyp=None, augment=False, cache=False, pad=0.0, rect=False,
-                      rank=-1, world_size=1, workers=8):
-    # Make sure only the first process in DDP process the trainDataset first, and the following others can use the cache
+                      rank=-1, world_size=1, workers=8, image_weights=False):
+    # Make sure only the first process in DDP process the dataset first, and the following others can use the cache
     with torch_distributed_zero_first(rank):
         dataset = LoadImagesAndLabels(path, imgsz, batch_size,
                                       augment=augment,  # augment images
@@ -66,17 +66,20 @@ def create_dataloader(path, imgsz, batch_size, stride, opt, hyp=None, augment=Fa
                                       single_cls=opt.single_cls,
                                       stride=int(stride),
                                       pad=pad,
-                                      rank=rank)
+                                      rank=rank,
+                                      image_weights=image_weights)
 
     batch_size = min(batch_size, len(dataset))
     nw = min([os.cpu_count() // world_size, batch_size if batch_size > 1 else 0, workers])  # number of workers
     sampler = torch.utils.data.distributed.DistributedSampler(dataset) if rank != -1 else None
-    dataloader = InfiniteDataLoader(dataset,
-                                    batch_size=batch_size,
-                                    num_workers=nw,
-                                    sampler=sampler,
-                                    pin_memory=True,
-                                    collate_fn=LoadImagesAndLabels.collate_fn)  # torch.utils.data.DataLoader()
+    loader = torch.utils.data.DataLoader if image_weights else InfiniteDataLoader
+    # Use torch.utils.data.DataLoader() if dataset.properties will update during training else InfiniteDataLoader()
+    dataloader = loader(dataset,
+                        batch_size=batch_size,
+                        num_workers=nw,
+                        sampler=sampler,
+                        pin_memory=True,
+                        collate_fn=LoadImagesAndLabels.collate_fn)
     return dataloader, dataset
 
 
@@ -392,6 +395,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
         nb = bi[-1] + 1  # number of batches
         self.batch = bi  # batch index of image
         self.n = n
+        self.indices = range(n)
 
         # Rectangular Training
         if self.rect:
@@ -430,7 +434,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
                 pbar.desc = 'Caching images (%.1fGB)' % (gb / 1E9)
 
     def cache_labels(self, path=Path('./labels.cache')):
-        # Cache trainDataset labels, check images and read shapes
+        # Cache dataset labels, check images and read shapes
         x = {}  # dict
         nm, nf, ne, nc = 0, 0, 0, 0  # number missing, found, empty, duplicate
         pbar = tqdm(zip(self.img_files, self.label_files), desc='Scanning images', total=len(self.img_files))
@@ -480,13 +484,12 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
     # def __iter__(self):
     #     self.count = -1
-    #     print('ran trainDataset iter')
+    #     print('ran dataset iter')
     #     #self.shuffled_vector = np.random.permutation(self.nF) if self.augment else np.arange(self.nF)
     #     return self
 
     def __getitem__(self, index):
-        if self.image_weights:
-            index = self.indices[index]
+        index = self.indices[index]  # linear, shuffled, or image_weights
 
         hyp = self.hyp
         mosaic = self.mosaic and random.random() < hyp['mosaic']
@@ -497,7 +500,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
             # MixUp https://arxiv.org/pdf/1710.09412.pdf
             if random.random() < hyp['mixup']:
-                img2, labels2 = load_mosaic(self, random.randint(0, len(self.labels) - 1))
+                img2, labels2 = load_mosaic(self, random.randint(0, self.n - 1))
                 r = np.random.beta(8.0, 8.0)  # mixup ratio, alpha=beta=8.0
                 img = (img * r + img2 * (1 - r)).astype(np.uint8)
                 labels = np.concatenate((labels, labels2), 0)
@@ -578,7 +581,7 @@ class LoadImagesAndLabels(Dataset):  # for training/testing
 
 # Ancillary functions --------------------------------------------------------------------------------------------------
 def load_image(self, index):
-    # loads 1 image from trainDataset, returns img, original hw, resized hw
+    # loads 1 image from dataset, returns img, original hw, resized hw
     img = self.imgs[index]
     if img is None:  # not cached
         path = self.img_files[index]
@@ -619,7 +622,7 @@ def load_mosaic(self, index):
     labels4 = []
     s = self.img_size
     yc, xc = [int(random.uniform(-x, 2 * s + x)) for x in self.mosaic_border]  # mosaic center x, y
-    indices = [index] + [random.randint(0, len(self.labels) - 1) for _ in range(3)]  # 3 additional image indices
+    indices = [index] + [self.indices[random.randint(0, self.n - 1)] for _ in range(3)]  # 3 additional image indices
     for i, index in enumerate(indices):
         # Load image
         img, _, (h, w) = load_image(self, index)
@@ -878,7 +881,7 @@ def flatten_recursive(path='../coco128'):
 
 
 def extract_boxes(path='../coco128/'):  # from utils.datasets import *; extract_boxes('../coco128')
-    # Convert detection trainDataset into classification trainDataset, with one directory per class
+    # Convert detection dataset into classification dataset, with one directory per class
 
     path = Path(path)  # images dir
     shutil.rmtree(path / 'classifier') if (path / 'classifier').is_dir() else None  # remove existing
@@ -913,7 +916,7 @@ def extract_boxes(path='../coco128/'):  # from utils.datasets import *; extract_
 
 
 def autosplit(path='../coco128', weights=(0.9, 0.1, 0.0)):  # from utils.datasets import *; autosplit('../coco128')
-    """ Autosplit a trainDataset into train/val/test splits and save path/autosplit_*.txt files
+    """ Autosplit a dataset into train/val/test splits and save path/autosplit_*.txt files
     # Arguments
         path:       Path to images directory
         weights:    Train, val, test weights (list)

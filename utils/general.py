@@ -77,7 +77,7 @@ def check_file(file):
 
 
 def check_dataset(dict):
-    # Download trainDataset if not found locally
+    # Download dataset if not found locally
     val, s = dict.get('val'), dict.get('download')
     if val and len(val):
         val = [Path(x).resolve() for x in (val if isinstance(val, list) else [val])]  # val path
@@ -358,8 +358,8 @@ def strip_optimizer(f='weights/best.pt', s=''):  # from utils.general import *; 
     x['optimizer'] = None
     x['training_results'] = None
     x['epoch'] = -1
-    x['detectModel'].half()  # to FP16
-    for p in x['detectModel'].parameters():
+    x['model'].half()  # to FP16
+    for p in x['model'].parameters():
         p.requires_grad = False
     torch.save(x, s or f)
     mb = os.path.getsize(s or f) / 1E6  # filesize
@@ -367,7 +367,7 @@ def strip_optimizer(f='weights/best.pt', s=''):  # from utils.general import *; 
 
 
 def print_mutation(hyp, results, yaml_file='hyp_evolved.yaml', bucket=''):
-    # Print mutation results to evolve.txt (for use with trainCustom.py --evolve)
+    # Print mutation results to evolve.txt (for use with train.py --evolve)
     a = '%10s' * len(hyp) % tuple(hyp.keys())  # hyperparam keys
     b = '%10.3g' * len(hyp) % tuple(hyp.values())  # hyperparam values
     c = '%10.4g' * len(results) % results  # results (P, R, mAP@0.5, mAP@0.5:0.95, val_losses x 3)

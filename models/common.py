@@ -7,7 +7,7 @@ import torch
 import torch.nn as nn
 from PIL import Image, ImageDraw
 
-from utils.datasetsCustom import letterbox
+from utils.datasets import letterbox
 from utils.general import non_max_suppression, make_divisible, scale_coords, xyxy2xywh
 from utils.plots import color_list
 
@@ -119,7 +119,7 @@ class NMS(nn.Module):
 
 
 class autoShape(nn.Module):
-    # input-robust detectModel wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
+    # input-robust model wrapper for passing cv2/np/PIL/torch inputs. Includes preprocessing, inference and NMS
     img_size = 640  # inference size (pixels)
     conf = 0.25  # NMS confidence threshold
     iou = 0.45  # NMS IoU threshold
