@@ -1,4 +1,4 @@
-from detectCustom import startDetectThread, q
+from detectCustom import startDetectThread, q, trheadMap
 from managerPlatform.common.commonUtils.ffmpegUtils import ffmpegUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 
@@ -13,7 +13,26 @@ class nativeCameraService:
 
         configData["weights"]="weights/yolov5s.pt"
         #开启检测线程
-        startDetectThread(configData)
+        sessionId=startDetectThread(configData)
+
+        result={
+            "sessionId":sessionId
+        }
+
+        return result
+
+    def stopNativeCameraDetect(self,jsonData):
+
+        sessionId=jsonData["sessionId"]
+
+        t=trheadMap[sessionId]
+
+        t.join(timeout=0.5)
+
+        return {"rs":1}
+
+
+
 
     def gen_frames(self):
         while True:

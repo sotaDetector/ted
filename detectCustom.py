@@ -1,4 +1,5 @@
 import argparse
+import threading
 import time
 from pathlib import Path
 import os
@@ -9,6 +10,7 @@ import torch
 import torch.backends.cudnn as cudnn
 from numpy import random
 
+from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, non_max_suppression, apply_classifier, scale_coords, xyxy2xywh, \
@@ -17,6 +19,7 @@ from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 q = Queue(maxsize=0)
+trheadMap={}
 def detect(save_img=False,opt=None):
     source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
@@ -149,6 +152,16 @@ def detect(save_img=False,opt=None):
 
 def startDetectThread(configData):
 
+    t1 = threading.Thread(target=startDetect,kwargs={"configData":configData})
+    t1.setDaemon(True)
+    t1.start()
+    sessionId=randomUtils.getRandomStr()
+    trheadMap[sessionId]=t1
+    return sessionId
+
+
+def startDetect(configData):
+    print("接收到参数："+str(configData))
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default=configData['weights'], help='model.pt path(s)')
     parser.add_argument('--source', type=str, default=configData['source'], help='source')  # file/folder, 0 for webcam

@@ -23,3 +23,8 @@ def startNativeCameraDetect():
 @nat_camera_blp.route("/video_feed")
 def videoStreamService():
     return Response(natCameraService.gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+@nat_camera_blp.route("/stopNativeCameraDetect", methods=['POST'])
+def stopNativeCameraDetect():
+    jsonData = request.get_json()
+    return natCameraService.stopNativeCameraDetect(jsonData)
