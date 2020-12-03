@@ -2,6 +2,8 @@ import argparse
 import time
 from pathlib import Path
 import os
+from queue import Queue
+
 import cv2
 import torch
 import torch.backends.cudnn as cudnn
@@ -14,8 +16,8 @@ from utils.general import check_img_size, non_max_suppression, apply_classifier,
 from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
-
-def detect(save_img=False):
+q = Queue(maxsize=0)
+def detect(save_img=False,opt=None):
     source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://'))
@@ -115,9 +117,12 @@ def detect(save_img=False):
 
             # Stream results
             if view_img:
-                cv2.imshow(str(p), im0)
-                if cv2.waitKey(1) == ord('q'):  # q to quit
-                    raise StopIteration
+                # cv2.imshow(str(p), im0)
+                # if cv2.waitKey(1) == ord('q'):  # q to quit
+                #     raise StopIteration
+                ret, buffer = cv2.imencode('.jpg', im0)
+                frame = buffer.tobytes()
+                q.put(frame)
 
             # Save results (image with detections)
             if save_img:
@@ -142,11 +147,11 @@ def detect(save_img=False):
 
     print('Done. (%.3fs)' % (time.time() - t0))
 
+def startDetectThread(configData):
 
-if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default='weights/yolov5s.pt', help='model.pt path(s)')
-    parser.add_argument('--source', type=str, default='data/images', help='source')  # file/folder, 0 for webcam
+    parser.add_argument('--weights', nargs='+', type=str, default=configData['weights'], help='model.pt path(s)')
+    parser.add_argument('--source', type=str, default=configData['source'], help='source')  # file/folder, 0 for webcam
     parser.add_argument('--img-size', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='object confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='IOU threshold for NMS')
@@ -167,7 +172,7 @@ if __name__ == '__main__':
     with torch.no_grad():
         if opt.update:  # update all models (to fix SourceChangeWarning)
             for opt.weights in ['yolov5s.pt', 'yolov5m.pt', 'yolov5l.pt', 'yolov5x.pt']:
-                detect()
+                detect(opt=opt)
                 strip_optimizer(opt.weights)
         else:
-            detect()
+            detect(opt=opt)

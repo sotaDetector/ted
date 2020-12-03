@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, Response
 
 from managerPlatform.serviceCaller.nativeCameraService import nativeCameraService
 
@@ -11,3 +11,15 @@ def getCameraDeviceList():
 
 
     return natCameraService.getCameraDeviceList()
+
+
+@nat_camera_blp.route('/startNativeCameraDetect', methods=['POST'])
+def startNativeCameraDetect():
+
+    jsonData = request.get_json()
+
+    return natCameraService.startNativeCameraDetect(jsonData)
+
+@nat_camera_blp.route("/video_feed")
+def videoStreamService():
+    return Response(natCameraService.gen_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
