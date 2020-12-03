@@ -31,6 +31,17 @@ class resultPackerUtils:
         return result
 
     @classmethod
+    def packJsonListResults(cls, dataList):
+        result = {
+            cls._resultTag: cls._success_tag,
+            cls._resultDataTag: dataList
+        }
+        return result
+
+
+
+
+    @classmethod
     def packPageResult(cls,data):
         result = {
             cls._resultTag: cls._success_tag,
