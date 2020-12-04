@@ -19,8 +19,9 @@ from utils.plots import plot_one_box
 from utils.torch_utils import select_device, load_classifier, time_synchronized
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 q = Queue(maxsize=0)
-trheadMap={}
-def detect(save_img=False,opt=None):
+trheadCAapMap={}
+capTrueState={}
+def detect(save_img=False,opt=None,sessionId=None):
     source, weights, view_img, save_txt, imgsz = opt.source, opt.weights, opt.view_img, opt.save_txt, opt.img_size
     webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
         ('rtsp://', 'rtmp://', 'http://'))
@@ -52,6 +53,7 @@ def detect(save_img=False,opt=None):
         view_img = True
         cudnn.benchmark = True  # set True to speed up constant image size inference
         dataset = LoadStreams(source, img_size=imgsz)
+        trheadCAapMap[sessionId]=dataset.getCap()
     else:
         save_img = True
         dataset = LoadImages(source, img_size=imgsz)
@@ -64,7 +66,10 @@ def detect(save_img=False,opt=None):
     t0 = time.time()
     img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
     _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
+
     for path, img, im0s, vid_cap in dataset:
+        if capTrueState[sessionId] == False:
+            break
         img = torch.from_numpy(img).to(device)
         img = img.half() if half else img.float()  # uint8 to fp16/32
         img /= 255.0  # 0 - 255 to 0.0 - 1.0
@@ -144,6 +149,9 @@ def detect(save_img=False,opt=None):
                         vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
                     vid_writer.write(im0)
 
+
+    print("摄像头关闭.......")
+
     if save_txt or save_img:
         s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
         print(f"Results saved to {save_dir}{s}")
@@ -152,15 +160,15 @@ def detect(save_img=False,opt=None):
 
 def startDetectThread(configData):
 
-    t1 = threading.Thread(target=startDetect,kwargs={"configData":configData})
+    sessionId=randomUtils.getRandomStr()
+    capTrueState[sessionId]=True
+    t1 = threading.Thread(target=startDetect,kwargs={"configData":configData,"sessionId":sessionId})
     t1.setDaemon(True)
     t1.start()
-    sessionId=randomUtils.getRandomStr()
-    trheadMap[sessionId]=t1
     return sessionId
 
 
-def startDetect(configData):
+def startDetect(configData,sessionId):
     print("接收到参数："+str(configData))
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights', nargs='+', type=str, default=configData['weights'], help='model.pt path(s)')
@@ -185,7 +193,7 @@ def startDetect(configData):
     with torch.no_grad():
         if opt.update:  # update all models (to fix SourceChangeWarning)
             for opt.weights in ['yolov5s.pt', 'yolov5m.pt', 'yolov5l.pt', 'yolov5x.pt']:
-                detect(opt=opt)
+                detect(opt=opt,sessionId=sessionId)
                 strip_optimizer(opt.weights)
         else:
-            detect(opt=opt)
+            detect(opt=opt,sessionId=sessionId)

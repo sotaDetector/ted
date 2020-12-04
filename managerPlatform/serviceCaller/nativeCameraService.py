@@ -1,4 +1,4 @@
-from detectCustom import startDetectThread, q, trheadMap
+from detectCustom import startDetectThread, q, trheadCAapMap, capTrueState
 from managerPlatform.common.commonUtils.ffmpegUtils import ffmpegUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 
@@ -22,13 +22,9 @@ class nativeCameraService:
         return result
 
     def stopNativeCameraDetect(self,jsonData):
-
-        sessionId=jsonData["sessionId"]
-
-        t=trheadMap[sessionId]
-
-        t.join(timeout=0.5)
-
+        sessionId=jsonData['sessionId']
+        trheadCAapMap[sessionId].release()
+        capTrueState[sessionId]=False
         return {"rs":1}
 
 
