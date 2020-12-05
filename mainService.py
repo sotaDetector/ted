@@ -6,7 +6,7 @@ from managerPlatform.dataLabel.dataLabelDispacher import dataLabel_blp
 from managerPlatform.datasetsManager.datasetsDispacher import *
 from managerPlatform.modelsManager.detectModelDispacher import *
 from managerPlatform.modelsManager.detectModelTrainDispacher import detect_model_train_blp
-from managerPlatform.serviceCaller.nativeCameraDispacher import nat_camera_blp
+from managerPlatform.serviceCaller.CameraStreamDispacher import nat_camera_blp
 
 print("service start...")
 app = Flask(__name__, static_folder='resources', static_url_path='/resources')
