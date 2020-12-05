@@ -29,7 +29,6 @@ class detectCustom(threading.Thread):
 
     def stopDetect(self):
         self.isDetect = False
-        self.cap.release()
 
 
     def run(self):
@@ -102,7 +101,7 @@ class detectCustom(threading.Thread):
             view_img = True
             cudnn.benchmark = True  # set True to speed up constant image size inference
             dataset = LoadStreams(source, img_size=imgsz)
-            self.cap=dataset.getCap()
+            cap=dataset.getCap()
         else:
             save_img = True
             dataset = LoadImages(source, img_size=imgsz)
@@ -197,16 +196,8 @@ class detectCustom(threading.Thread):
                             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                             vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
                         vid_writer.write(im0)
-
-
-        print("摄像头关闭.......")
-
-        if save_txt or save_img:
-            s = f"\n{len(list(save_dir.glob('labels/*.txt')))} labels saved to {save_dir / 'labels'}" if save_txt else ''
-            print(f"Results saved to {save_dir}{s}")
-
-        print('Done. (%.3fs)' % (time.time() - t0))
-
+        cap.release()
+        print("detect finished.......")
 
 
 

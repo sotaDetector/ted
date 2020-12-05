@@ -1,12 +1,113 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script src="mark_img/src/assets/js/jquery.js"></script>
+    <script>
+        sessionds=""
+        var m = new Map();
+        //获取摄像头列表
+        $(function(){
+            $.ajax({
+              type: 'POST',
+              url: "http://localhost:8100/natCamera/getCameraDeviceList",
+              data: {
+
+              },
+              headers: {
+                    'Accept': "application/json; charset=utf-8"
+              },
+              success:function(result) {
+                   cameras=result.data
+                   for (var i=0;i<cameras.length;i++){
+                       $("#cameraList").append(cameras[i].deviceName)
+                       $("#cameraList").append("&nbsp&nbsp<input type='button' value='open' onclick='startDetect("+cameras[i].deviceIndex+")'>&nbsp&nbsp" +
+                           "<input type='button' value='close' onclick='stopDetect("+cameras[i].deviceIndex+")'><br/>")
+                   }
+              },
+              error : function(e){
+                  alert(e.status)
+              }
+            })
+            setInterval(sendHeartBeat,5000)
+
+        })
+
+        function startDetect(sourceUrl){
+            $.ajax({
+              "async": true,
+              "method": 'POST',
+              url: "http://localhost:8100/natCamera/startNativeCameraDetect",
+              data:"{\"source\":\""+sourceUrl+"\"}",
+              "headers": {
+                "cache-control": "no-cache",
+                "Content-Type": "application/json"
+              },
+              success:function(result) {
+                    var appendContent="<img width='30%' src=\"http://localhost:8100/natCamera/video_feed?sessionId="+result.sessionId+"\"/>";
+                    $("#videoShowArea").append(appendContent)
+                    m.set(sourceUrl,result.sessionId)
+                    sessionds+=result.sessionId+","
+              },
+              error : function(e){
+                  alert(e.status)
+              }
+            })
+        }
+
+        function stopDetect(sourceUrl){
+            if(sessionds==""){
+                return
+            }
+            $.ajax({
+              type: 'POST',
+              url: "http://localhost:8100/natCamera/stopNativeCameraDetect",
+              data: "{\"sessionId\":\""+m.get(sourceUrl)+"\"}",
+              headers: {
+                    'Accept': "application/json; charset=utf-8",
+                    'Content-Type':'application/json'
+
+              },
+              success:function(result) {
+
+              },
+              error : function(e){
+                  alert(e.status)
+              }
+            })
+        }
+
+        function sendHeartBeat(){
+            $.ajax({
+              type: 'POST',
+              url: "http://localhost:8100/natCamera/sendDetectHeartbeat",
+              data: "{\"sessionIds\":\""+sessionds+"\"}",
+              headers: {
+                    'Accept': "application/json; charset=utf-8",
+                    'Content-Type':'application/json'
+
+              },
+              success:function(result) {
+
+              },
+              error : function(e){
+                  alert(e.status)
+              }
+            })
+        }
+
+
+
+
+    </script>
     <meta charset="UTF-8">
     <title>Title</title>
 </head>
 <body>
-    <div>
-            <img src="http://localhost:8100/natCamera/video_feed" width="100%">
+    <div id="cameraList">
+
+    </div>
+    <div id="videoShowArea">
+
         
     </div>
 </body>
