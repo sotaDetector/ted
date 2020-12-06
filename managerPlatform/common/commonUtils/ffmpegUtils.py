@@ -6,6 +6,7 @@ from managerPlatform.common.commonUtils.systemUtils import systemUtils
 
 '''
  https://trac.ffmpeg.org/wiki/Capture/Webcam
+ http://www.voidcn.com/article/p-hosigwtp-bqc.html
 '''
 class ffmpegUtils:
 
@@ -35,3 +36,5 @@ class ffmpegUtils:
 
 
 print(ffmpegUtils.getCameraList())
+
+print(subprocess.getstatusoutput("system_profiler SPCameraDataType"))
