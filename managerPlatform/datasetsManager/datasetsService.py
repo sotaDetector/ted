@@ -1,3 +1,4 @@
+import json
 import os
 import uuid
 import numpy as np
@@ -95,9 +96,25 @@ class datasetsService:
         # extract files
         return fileUtils.extractFiles(newFilePathName, desFolderBasePath)
 
-    def getImageItemList(self, dsId):
+    """
+        获取数据项item
+    """
+    def getImageItemList(self,pageItem, data):
 
-        return resultPackerUtils.packResults()
+        totalCount = dataImageItem.objects(__raw__={'dsId':data['dsId']}).count()
+
+        dataList = dataImageItem.objects(__raw__={'dsId':data['dsId']}).skip(
+            pageItem.skipIndex).limit(pageItem.pageSize)
+
+        pageItem.set_totalCount(totalCount)
+
+        dataArray=json.loads(dataList.to_json())
+        for item in dataArray:
+            item['ditFilePath']=imageItemPrefix+item['ditFilePath']
+
+        pageItem.set_numpy_dataList(dataArray)
+
+        return resultPackerUtils.packPageResult(pageItem);
 
     """
         上传标注数据    

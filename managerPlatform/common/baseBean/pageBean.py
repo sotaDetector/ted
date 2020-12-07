@@ -18,6 +18,11 @@ class pageBean:
 
 
     def set_dataList(self,dataList):
+
         self.dataList=json.loads(dataList.to_json())
+
+    def set_numpy_dataList(self, dataList):
+
+        self.dataList = dataList
 
 

@@ -44,9 +44,9 @@ def upImageData():
 """
 @dsm_blp.route('/getImageItemList', methods=['POST'])
 def getImageItemList():
-    dsId = request.form.get("dsId")
-
-    return dsService.getImageItemList(dsId)
+    data = request.get_json()
+    pageItem = pageBean(data)
+    return dsService.getImageItemList(pageItem,data)
 
 
 """
