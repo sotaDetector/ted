@@ -5,10 +5,11 @@ class cameraDevice:
 
 
     @staticmethod
-    def getCameraDevice(deviceIndex,deviceName):
+    def getCameraDevice(deviceIndex,deviceName,deviceUID):
         return {
             "deviceIndex": deviceIndex,
-            "deviceName":deviceName
+            "deviceName":deviceName,
+            "deviceUID":deviceUID
         }
 
 

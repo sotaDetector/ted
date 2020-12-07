@@ -27,6 +27,6 @@ detectThread.start()
 
 
 print("service start successful...")
-
+print(configUtils.getConfigProperties("service", "service_ip"))
 app.run(host=configUtils.getConfigProperties("service", "service_host"),
         port=configUtils.getConfigProperties("service", "service_ip"))
