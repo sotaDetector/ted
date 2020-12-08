@@ -186,7 +186,7 @@ class datasetsService:
                     imageShapeList.append([imageItem['ditWidth'], imageItem['ditHeight']])
                     LabelsList.append(np.array(itemLabelList))
         print("***************dlid_dlIndex_map**************")
-        labelMap,nameList = labelService.getLabelsBylids(dlid_dlIndex_map.keys())
+        labelMap,nameList = labelService.getLabelsBylids(dsItem["dsId"])
         loggerUtils.info("labelMap:" + str(labelMap))
 
 
