@@ -197,6 +197,7 @@ class detectCustom(threading.Thread):
                             vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
                         vid_writer.write(im0)
         cap.release()
+
         print("detect finished.......")
 
 

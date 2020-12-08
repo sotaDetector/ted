@@ -5,6 +5,7 @@ import numpy as np
 from managerPlatform.bean.trainDataset.dataImageItem import dataImageItem
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.bean.trainDataset.rectangleLabelBean import rectangleLabelBean
+from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.imageUtils import imageUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
@@ -15,7 +16,8 @@ from managerPlatform.dataLabel.dataLabelService import dataLabelService
 compreImgPackPath = configUtils.getConfigProperties("file", "compreImgPackPath")
 imageItemPrefix = configUtils.getConfigProperties("file", "imageItemPrefix")
 
-labelService=dataLabelService()
+labelService = dataLabelService()
+
 
 class datasetsService:
 
@@ -99,18 +101,19 @@ class datasetsService:
     """
         获取数据项item
     """
-    def getImageItemList(self,pageItem, data):
 
-        totalCount = dataImageItem.objects(__raw__={'dsId':data['dsId']}).count()
+    def getImageItemList(self, pageItem, data):
 
-        dataList = dataImageItem.objects(__raw__={'dsId':data['dsId']}).skip(
+        totalCount = dataImageItem.objects(__raw__={'dsId': data['dsId']}).count()
+
+        dataList = dataImageItem.objects(__raw__={'dsId': data['dsId']}).skip(
             pageItem.skipIndex).limit(pageItem.pageSize)
 
         pageItem.set_totalCount(totalCount)
 
-        dataArray=json.loads(dataList.to_json())
+        dataArray = json.loads(dataList.to_json())
         for item in dataArray:
-            item['ditFilePath']=imageItemPrefix+item['ditFilePath']
+            item['ditFilePath'] = imageItemPrefix + item['ditFilePath']
 
         pageItem.set_numpy_dataList(dataArray)
 
@@ -153,7 +156,10 @@ class datasetsService:
         dlIndex_dlid_map = {}
 
         for dsItem in ds_dl_list:
-            datImageList = dataImageItem.objects(dsId=dsItem["dsId"], labelIdList__in=dsItem["dlidList"])
+            if dsItem['isSelectAll'] == ConstantUtils.TRUE_TAG:
+                datImageList = dataImageItem.objects(dsId=dsItem["dsId"], state=1)
+            else:
+                datImageList = dataImageItem.objects(dsId=dsItem["dsId"], labelIdList__in=dsItem["dlidList"], state=1)
             for item in datImageList:
                 imagePathList.append(fileUtils.getABSPath(item['ditFilePath']))
                 imageShapeList.append([item['ditWidth'], item['ditHeight']])
@@ -165,7 +171,7 @@ class datasetsService:
                         if not dlid_dlIndex_map.keys().__contains__(dlid):
                             dlid_dlIndex_map[dlid] = labelIndex
                             dlIndex_dlid_map[labelIndex] = dlid
-                            labelIndexValue=labelIndex
+                            labelIndexValue = labelIndex
                             labelIndex += 1
                         else:
                             labelIndexValue = dlid_dlIndex_map[dlid]
@@ -174,12 +180,12 @@ class datasetsService:
 
                 LabelsList.append(np.array(itemLabelList))
         print("***************dlid_dlIndex_map**************")
-        labelMap=labelService.getLabelsBylids(dlid_dlIndex_map.keys())
-        loggerUtils.info("labelMap:"+str(labelMap))
+        labelMap = labelService.getLabelsBylids(dlid_dlIndex_map.keys())
+        loggerUtils.info("labelMap:" + str(labelMap))
         for item in dlIndex_dlid_map.items():
             names.append(labelMap[item[1]])
 
-        loggerUtils.info("label names:"+str(names))
+        loggerUtils.info("label names:" + str(names))
         for i in range(imagePathList.__len__()):
             print("-----------------**********-----------------")
             print(imagePathList[i])
@@ -202,7 +208,7 @@ class datasetsService:
             "names": names
         }
 
-        return trainDataDict,valDataDict
+        return trainDataDict, valDataDict
 
     def initTestData(self):
 

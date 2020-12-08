@@ -39,6 +39,8 @@ class cameraStreamService:
 
         detectMap[sessionId].stopDetect()
 
+        detectMap[sessionId].join()
+
         return {"rs": 1}
 
     def gen_frames(self, sessionId):

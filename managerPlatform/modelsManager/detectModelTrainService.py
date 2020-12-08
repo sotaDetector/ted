@@ -8,7 +8,7 @@ from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.datasetsManager.datasetsService import datasetsService
-from trainCustom import trainYolo
+from trainModelThread import trainYolo, trainModelThread
 
 datasetService = datasetsService()
 
@@ -29,25 +29,21 @@ class detectModelTrainService:
         trainDataDict,valDataDict = datasetService.loadTrainData(modelTrainVersion['ds_dl_list'])
         # 2.2 组装，保存 训练参数
         trainConfig=jsonData["advancedSet"]
+        isUsePreTraindModel=trainConfig["isUsePreTraindModel"]
         modelDir=randomUtils.getRandomStr()
-        trainConfig=detectModelTrainConfig.getDetectModelTrainConfig(
+        modelTrainConfig=detectModelTrainConfig.getDetectModelTrainConfig(
             dmtvid=modelTrainVersion.dmtvid,
-            weights=ConstantUtils.getModelWeightsPath(modelTrainVersion.dmPrecision),
+            cfg=ConstantUtils.getModelCfgPath(isUsePreTraindModel,modelTrainVersion.dmPrecision),
+            weights=ConstantUtils.getModelWeightsPath(isUsePreTraindModel,modelTrainVersion.dmPrecision),
             epochs=trainConfig['epochs'],
             batch_size=trainConfig['batch_size'],
             project=modelSavedBasePath,
             name=modelDir
         )
-        trainConfig.save()
+        modelTrainConfig.save()
         # #2.3 开启训练线程
-        self.startTrainThread(trainDataDict,valDataDict,trainConfig)
+        trainModelTH=trainModelThread(trainDataDict,valDataDict,modelTrainConfig)
+        trainModelTH.start()
 
-        return resultPackerUtils.save_success()
-
-
-    def startTrainThread(self,trainDataDict,valDataDict,trainConfig):
-        loggerUtils.info("start detect detectModel train thread [start]")
-        t1 = threading.Thread(target=trainYolo, args=(trainDataDict,valDataDict,trainConfig))
-        t1.setDaemon(True)
-        t1.start()
         loggerUtils.info("start detect detectModel train thread [end]")
+        return resultPackerUtils.save_success()

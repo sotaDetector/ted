@@ -61,10 +61,11 @@ class detectModelTrainConfig(baseBean):
     exist_ok=mongoSource.mdb.BooleanField(default=False)
 
     @classmethod
-    def getDetectModelTrainConfig(cls,dmtvid,weights,epochs,batch_size,project,name):
+    def getDetectModelTrainConfig(cls,dmtvid,cfg,weights,epochs,batch_size,project,name):
 
         return detectModelTrainConfig(
             dmtvid=dmtvid,
+            cfg=cfg,
             weights=weights,
             epochs=epochs,
             batch_size=batch_size,
