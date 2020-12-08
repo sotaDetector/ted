@@ -1,5 +1,4 @@
 from flask import Flask
-
 from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.common.dataManager.mongoSource import mongoSource
 from managerPlatform.common.watcherMangaer.detectThreadWatcher import detectThreadWatcher

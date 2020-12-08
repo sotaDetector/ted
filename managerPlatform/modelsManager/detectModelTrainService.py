@@ -8,7 +8,7 @@ from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.datasetsManager.datasetsService import datasetsService
-from trainModelThread import trainYolo, trainModelThread
+from trainModelThread import trainModelThread
 
 datasetService = datasetsService()
 

@@ -44,7 +44,7 @@ except ImportError:
 
 class trainModelThread(threading.Thread):
 
-    def run(self,hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataDict=None):
+    def train(self,hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataDict=None):
         logger.info(f'Hyperparameters {hyp}')
         save_dir, epochs, batch_size, total_batch_size, weights, rank = \
             Path(opt.save_dir), opt.epochs, opt.batch_size, opt.total_batch_size, opt.weights, opt.global_rank
@@ -404,10 +404,20 @@ class trainModelThread(threading.Thread):
         torch.cuda.empty_cache()
         return results
 
-
+    """
+        init function
+    """
     def __init__(self,trainDataDict,valDataDict,modelConfigBean):
+        threading.Thread.__init__(self)
+        self.trainDataDict=trainDataDict
+        self.valDataDict=valDataDict
+        self.modelConfigBean=modelConfigBean
 
-        opt=self.translateToOpt(modelConfigBean)
+
+
+    def run(self):
+
+        opt=self.translateToOpt(self.modelConfigBean)
 
         # Set DDP variables
         opt.total_batch_size = opt.batch_size
@@ -458,7 +468,7 @@ class trainModelThread(threading.Thread):
             if opt.global_rank in [-1, 0]:
                 logger.info(f'Start Tensorboard with "tensorboard --logdir {opt.project}{opt.name}", view at http://localhost:6006/')
                 tb_writer = SummaryWriter(opt.save_dir)  # Tensorboard
-            self.train(hyp, opt, device, tb_writer, wandb,trainDataDict,valDataDict)
+            self.train(hyp, opt, device, tb_writer, wandb,self.trainDataDict,self.valDataDict)
 
         # Evolve hyperparameters (optional)
         else:
@@ -543,7 +553,7 @@ class trainModelThread(threading.Thread):
                   f'Command to train a new detectModel with these hyperparameters: $ python train.py --hyp {yaml_file}')
 
 
-    def translateToOpt(modelConfigBean):
+    def translateToOpt(self,modelConfigBean):
         parser = argparse.ArgumentParser()
         parser.add_argument('--weights', type=str, default=modelConfigBean.weights, help='initial weights path')
         parser.add_argument('--cfg', type=str, default='', help='detectModel.yaml path')
