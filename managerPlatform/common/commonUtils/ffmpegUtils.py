@@ -30,7 +30,7 @@ class ffmpegUtils:
         for item in result[1].split("\n"):
             if item.__contains__("Camera"):
                 tempStr = item[item.index("] [") + 1:].replace("[", "").split("]")
-                cameraList.append(cameraDevice.getCameraDevice(deviceIndex=tempStr[0], deviceName=tempStr[1]))
+                cameraList.append(cameraDevice.getCameraDevice(deviceIndex=tempStr[0], deviceName=tempStr[1],deviceUID=""))
 
         return cameraList
 

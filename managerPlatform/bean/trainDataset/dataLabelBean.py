@@ -6,6 +6,8 @@ from managerPlatform.common.dataManager.mongoSource import mongoSource
 class dataLabelBean(baseBean):
 
     dlid=mongoSource.mdb.SequenceField(primary_key=True)
+
+    dlIndex=mongoSource.mdb.IntField()
     #标签名称
     dlName=mongoSource.mdb.StringField(required=True)
     #数据集id

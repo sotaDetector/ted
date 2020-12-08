@@ -3,6 +3,7 @@ import os
 import uuid
 import numpy as np
 from managerPlatform.bean.trainDataset.dataImageItem import dataImageItem
+from managerPlatform.bean.trainDataset.dataLabelBean import dataLabelBean
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.bean.trainDataset.rectangleLabelBean import rectangleLabelBean
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
@@ -160,25 +161,31 @@ class datasetsService:
                 datImageList = dataImageItem.objects(dsId=dsItem["dsId"], state=1)
             else:
                 datImageList = dataImageItem.objects(dsId=dsItem["dsId"], labelIdList__in=dsItem["dlidList"], state=1)
-            for item in datImageList:
-                imagePathList.append(fileUtils.getABSPath(item['ditFilePath']))
-                imageShapeList.append([item['ditWidth'], item['ditHeight']])
-                reclabelList = item['recLabelList']
-                itemLabelList = []
-                for item in reclabelList:
-                    if dsItem["dlidList"].__contains__(item['dlid']):
-                        dlid = item['dlid']
-                        if not dlid_dlIndex_map.keys().__contains__(dlid):
-                            dlid_dlIndex_map[dlid] = labelIndex
-                            dlIndex_dlid_map[labelIndex] = dlid
-                            labelIndexValue = labelIndex
-                            labelIndex += 1
-                        else:
-                            labelIndexValue = dlid_dlIndex_map[dlid]
-                        itemLabelList.append(
-                            [labelIndexValue, item['rec_lt_x'], item['rec_lt_y'], item['rec_w'], item['rec_h']])
 
-                LabelsList.append(np.array(itemLabelList))
+            for imageItem in datImageList:
+
+                reclabelList = imageItem['recLabelList']
+                #如果图片有标注数据，才参与训练
+                if len(reclabelList) > 0:
+                    itemLabelList = []
+                    for item in reclabelList:
+                        if (dsItem['isSelectAll'] == ConstantUtils.TRUE_TAG or
+                            (dsItem['isSelectAll'] == ConstantUtils.FALSE_TAG and dsItem["dlidList"].__contains__(item['dlid']))):
+
+                            dlid = item['dlid']
+                            if not dlid_dlIndex_map.keys().__contains__(dlid):
+                                dlid_dlIndex_map[dlid] = labelIndex
+                                dlIndex_dlid_map[labelIndex] = dlid
+                                labelIndexValue = labelIndex
+                                labelIndex += 1
+                            else:
+                                labelIndexValue = dlid_dlIndex_map[dlid]
+                            itemLabelList.append(
+                                [labelIndexValue, item['rec_lt_x'], item['rec_lt_y'], item['rec_w'], item['rec_h']])
+
+                    imagePathList.append(fileUtils.getABSPath(imageItem['ditFilePath']))
+                    imageShapeList.append([imageItem['ditWidth'], imageItem['ditHeight']])
+                    LabelsList.append(np.array(itemLabelList))
         print("***************dlid_dlIndex_map**************")
         labelMap = labelService.getLabelsBylids(dlid_dlIndex_map.keys())
         loggerUtils.info("labelMap:" + str(labelMap))
@@ -186,11 +193,13 @@ class datasetsService:
             names.append(labelMap[item[1]])
 
         loggerUtils.info("label names:" + str(names))
+        index=0
         for i in range(imagePathList.__len__()):
-            print("-----------------**********-----------------")
+            print("-----------------****"+str(index)+"******-----------------")
             print(imagePathList[i])
             print(LabelsList[i])
             print(imageShapeList[i])
+            index+=1
 
         trainDataDict = {
             "imagePathList": imagePathList,
@@ -212,41 +221,62 @@ class datasetsService:
 
     def initTestData(self):
 
-        BasePath = "/Volumes/study/objectDetection/coco128/labels/train2017"
-        imgBasePath = "/Volumes/study/objectDetection/coco128/images/train2017"
-        allFiles = os.listdir(BasePath)
-        imageItemList = []
-        for i in allFiles:
+        # BasePath = "/Volumes/study/objectDetection/coco128/labels/train2017"
+        # imgBasePath = "/Volumes/study/objectDetection/coco128/images/train2017"
+        # allFiles = os.listdir(BasePath)
+        # imageItemList = []
+        # for i in allFiles:
+        #
+        #     f = open(BasePath + "/" + i);  # 打开文件
+        #     imageSize = imageUtils.getImageSize(imgBasePath + "/" + i.replace(".txt", ".jpg"))
+        #
+        #     recLabelList = []
+        #     labelIdList = []
+        #     iter_f = iter(f);  # 创建迭代器
+        #
+        #     for line in iter_f:
+        #         dataItem = line.split(" ")
+        #         labelId = dataItem[0]
+        #         if labelIdList.__contains__(labelId) == False:
+        #             labelIdList.append(labelId)
+        #         recLabelList.append(rectangleLabelBean(
+        #             rec_lt_x=dataItem[1],
+        #             rec_lt_y=dataItem[2],
+        #             rec_w=dataItem[3],
+        #             rec_h=dataItem[4],
+        #             dlid=labelId
+        #         ))
+        #
+        #     imageItemList.append(dataImageItem(
+        #         ditFileName=i.replace(".txt", ".jpg"),
+        #         ditFilePath="train_test/" + i.replace(".txt", ".jpg"),
+        #         ditWidth=imageSize[0],
+        #         ditHeight=imageSize[1],
+        #         dsId=1,
+        #         recLabelList=recLabelList,
+        #         labelIdList=labelIdList
+        #     ))
+        # dataImageItem.objects.insert(imageItemList, load_bulk=False)
 
-            f = open(BasePath + "/" + i);  # 打开文件
-            imageSize = imageUtils.getImageSize(imgBasePath + "/" + i.replace(".txt", ".jpg"))
 
-            recLabelList = []
-            labelIdList = []
-            iter_f = iter(f);  # 创建迭代器
-
-            for line in iter_f:
-                dataItem = line.split(" ")
-                labelId = dataItem[0]
-                if labelIdList.__contains__(labelId) == False:
-                    labelIdList.append(labelId)
-                recLabelList.append(rectangleLabelBean(
-                    rec_lt_x=dataItem[1],
-                    rec_lt_y=dataItem[2],
-                    rec_w=dataItem[3],
-                    rec_h=dataItem[4],
-                    dlid=labelId
-                ))
-
-            imageItemList.append(dataImageItem(
-                ditFileName=i.replace(".txt", ".jpg"),
-                ditFilePath="train_test/" + i.replace(".txt", ".jpg"),
-                ditWidth=imageSize[0],
-                ditHeight=imageSize[1],
-                dsId=1,
-                recLabelList=recLabelList,
-                labelIdList=labelIdList
+        #初始化了labels
+        labelArray=['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
+         'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+         'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+         'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+         'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+         'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+         'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
+         'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
+         'hair drier', 'toothbrush']
+        LabelList=[]
+        for i in range(0,len(labelArray)):
+            LabelList.append(dataLabelBean(
+                dlIndex=i,
+                dlName=labelArray[i],
+                dsId=1
             ))
-        dataImageItem.objects.insert(imageItemList, load_bulk=False)
+
+        dataLabelBean.objects.insert(LabelList,load_bulk=False)
 
         return {"rs": 1}
