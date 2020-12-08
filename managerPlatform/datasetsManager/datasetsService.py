@@ -150,7 +150,6 @@ class datasetsService:
         LabelsList = []
         imageShapeList = []
         nc = None
-        names = []
         labelIndex = 0
 
         dlid_dlIndex_map = {}
@@ -187,12 +186,11 @@ class datasetsService:
                     imageShapeList.append([imageItem['ditWidth'], imageItem['ditHeight']])
                     LabelsList.append(np.array(itemLabelList))
         print("***************dlid_dlIndex_map**************")
-        labelMap = labelService.getLabelsBylids(dlid_dlIndex_map.keys())
+        labelMap,nameList = labelService.getLabelsBylids(dlid_dlIndex_map.keys())
         loggerUtils.info("labelMap:" + str(labelMap))
-        for item in dlIndex_dlid_map.items():
-            names.append(labelMap[item[1]])
 
-        loggerUtils.info("label names:" + str(names))
+
+        loggerUtils.info("label names:" + str(nameList))
         index=0
         for i in range(imagePathList.__len__()):
             print("-----------------****"+str(index)+"******-----------------")
@@ -205,16 +203,16 @@ class datasetsService:
             "imagePathList": imagePathList,
             "LabelsList": np.array(LabelsList),
             "imageShapeList": np.array(imageShapeList),
-            "nc": names.__len__(),
-            "names": names
+            "nc": nameList.__len__(),
+            "names": nameList
         }
 
         valDataDict = {
             "imagePathList": imagePathList,
             "LabelsList": np.array(LabelsList),
             "imageShapeList": np.array(imageShapeList),
-            "nc": names.__len__(),
-            "names": names
+            "nc": nameList.__len__(),
+            "names": nameList
         }
 
         return trainDataDict, valDataDict

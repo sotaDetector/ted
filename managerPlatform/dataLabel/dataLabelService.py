@@ -41,12 +41,14 @@ class dataLabelService:
         #     labelMap[item['dlid']]=item['dlName']
         # return labelMap
         lids = []
+        nameList=[]
         for item in idsMap:
             lids.append(item)
         labelList = dataLabelBean.objects(dlIndex__in=lids)
         labelMap = {}
         for item in labelList:
             labelMap[item['dlIndex']] = item['dlName']
-        return labelMap
+            nameList.append(item['dlName'])
+        return labelMap,nameList
 
 
