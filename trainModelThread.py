@@ -187,7 +187,7 @@ class trainModelThread(threading.Thread):
         # Process 0
         if rank in [-1, 0]:
             ema.updates = start_epoch * nb // accumulate  # set EMA updates
-            testloader = create_dataloader(datasetDict, imgsz_test, total_batch_size, gs, opt,
+            testloader = create_dataloader(valDataDict, imgsz_test, total_batch_size, gs, opt,
                                            hyp=hyp, cache=opt.cache_images and not opt.notest, rect=True,
                                            rank=-1, world_size=opt.world_size, workers=opt.workers)[0]  # testloader
 

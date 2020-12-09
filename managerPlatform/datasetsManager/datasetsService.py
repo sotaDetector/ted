@@ -174,8 +174,6 @@ class datasetsService:
         print("***************dlid_dlIndex_map**************")
         labelMap, nameList = labelService.getLabelsBylids(dsItem["dsId"])
         loggerUtils.info("labelMap:" + str(labelMap))
-
-        loggerUtils.info("label names:" + str(nameList))
         index = 0
         for i in range(imagePathList.__len__()):
             print("-----------------****" + str(index) + "******-----------------")
