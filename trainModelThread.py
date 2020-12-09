@@ -330,7 +330,7 @@ class trainModelThread(threading.Thread):
                     ema.update_attr(model, include=['yaml', 'nc', 'hyp', 'gr', 'names', 'stride'])
                 final_epoch = epoch + 1 == epochs
                 if not opt.notest or final_epoch:  # Calculate mAP
-                    results, maps, times = testCustom.test(opt.data,
+                    results, maps, times = testCustom.test(valDataDict,
                                                                 batch_size=total_batch_size,
                                                                 imgsz=imgsz_test,
                                                                 model=ema.ema,
@@ -464,7 +464,7 @@ class trainModelThread(threading.Thread):
         if not opt.evolve:
             tb_writer = None  # init loggers
             if opt.global_rank in [-1, 0]:
-                logger.info(f'Start Tensorboard with "tensorboard --logdir {opt.project}", view at http://localhost:6006/')
+                logger.info(f'Start Tensorboard with "tensorboard --logdir {opt.project}{opt.name}", view at http://localhost:6006/')
                 tb_writer = SummaryWriter(opt.save_dir)  # Tensorboard
             self.train(hyp, opt, device, tb_writer, wandb,datasetDict=self.trainDataDict,valDataDict=self.valDataDict)
 
