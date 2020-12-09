@@ -16,7 +16,6 @@ class detectThreadWatcher(threading.Thread):
     def run(self):
         while(True):
             time.sleep(5)
-            print("-------------")
             sessMap=redisSource.redisPool.hgetall(keyGenarator.getDetectWatchKey())
             nowTimeStamp=dateUtils.getTimeStamp()
             for i in sessMap:
