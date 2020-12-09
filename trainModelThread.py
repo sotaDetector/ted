@@ -21,7 +21,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-import test  # import test.py to get mAP after each epoch
+import testCustom  # import test.py to get mAP after each epoch
 from models.yolo import Model
 from utils.autoanchor import check_anchors
 from utils.datasetsCustom import create_dataloader
@@ -43,7 +43,7 @@ except ImportError:
 
 class trainModelThread(threading.Thread):
 
-    def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataDict=None):
+    def train(self,hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataDict=None):
         logger.info(f'Hyperparameters {hyp}')
         save_dir, epochs, batch_size, total_batch_size, weights, rank = \
             Path(opt.save_dir), opt.epochs, opt.batch_size, opt.total_batch_size, opt.weights, opt.global_rank
@@ -330,15 +330,15 @@ class trainModelThread(threading.Thread):
                     ema.update_attr(model, include=['yaml', 'nc', 'hyp', 'gr', 'names', 'stride'])
                 final_epoch = epoch + 1 == epochs
                 if not opt.notest or final_epoch:  # Calculate mAP
-                    results, maps, times = test.test(opt.data,
-                                                     batch_size=total_batch_size,
-                                                     imgsz=imgsz_test,
-                                                     model=ema.ema,
-                                                     single_cls=opt.single_cls,
-                                                     dataloader=testloader,
-                                                     save_dir=save_dir,
-                                                     plots=plots and final_epoch,
-                                                     log_imgs=opt.log_imgs if wandb else 0)
+                    results, maps, times = testCustom.test(opt.data,
+                                                                batch_size=total_batch_size,
+                                                                imgsz=imgsz_test,
+                                                                model=ema.ema,
+                                                                single_cls=opt.single_cls,
+                                                                dataloader=testloader,
+                                                                save_dir=save_dir,
+                                                                plots=plots and final_epoch,
+                                                                log_imgs=opt.log_imgs if wandb else 0)
 
                 # Write
                 with open(results_file, 'a') as f:
