@@ -21,8 +21,7 @@ from torch.nn.parallel import DistributedDataParallel as DDP
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-import testCustom  # import testCustom.py to get mAP after each epoch
-from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
+import test  # import test.py to get mAP after each epoch
 from models.yolo import Model
 from utils.autoanchor import check_anchors
 from utils.datasetsCustom import create_dataloader
@@ -44,7 +43,7 @@ except ImportError:
 
 class trainModelThread(threading.Thread):
 
-    def train(self,hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataDict=None):
+    def train(hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataDict=None):
         logger.info(f'Hyperparameters {hyp}')
         save_dir, epochs, batch_size, total_batch_size, weights, rank = \
             Path(opt.save_dir), opt.epochs, opt.batch_size, opt.total_batch_size, opt.weights, opt.global_rank
@@ -67,7 +66,9 @@ class trainModelThread(threading.Thread):
         cuda = device.type != 'cpu'
         init_seeds(2 + rank)
 
-        nc, names =datasetDict['nc'],datasetDict['names']
+
+        nc, names = datasetDict['nc'],datasetDict['names']  # number classes, names
+        assert len(names) == nc, '%g names found for nc=%g dataset in %s' % (len(names), nc, opt.data)  # check
 
         # Model
         pretrained = weights.endswith('.pt')
@@ -178,11 +179,12 @@ class trainModelThread(threading.Thread):
 
         # Trainloader
         dataloader, dataset = create_dataloader(datasetDict, imgsz, batch_size, gs, opt,
-                                                hyp=hyp, augment=True, cache=opt.cache_images, rect=opt.rect,
-                                                rank=rank, world_size=opt.world_size, workers=opt.workers)
+                                                hyp=hyp, augment=True, cache=opt.cache_images, rect=opt.rect, rank=rank,
+                                                world_size=opt.world_size, workers=opt.workers,
+                                                image_weights=opt.image_weights)
         mlc = np.concatenate(dataset.labels, 0)[:, 0].max()  # max label class
         nb = len(dataloader)  # number of batches
-        assert mlc < nc, 'Label class %g exceeds nc=%g  Possible class labels are 0-%g' % (mlc, nc, nc - 1)
+        assert mlc < nc, 'Label class %g exceeds nc=%g in %s. Possible class labels are 0-%g' % (mlc, nc, opt.data, nc - 1)
 
         # Process 0
         if rank in [-1, 0]:
@@ -195,7 +197,7 @@ class trainModelThread(threading.Thread):
                 labels = np.concatenate(dataset.labels, 0)
                 c = torch.tensor(labels[:, 0])  # classes
                 # cf = torch.bincount(c.long(), minlength=nc) + 1.  # frequency
-                # detectModel._initialize_biases(cf.to(device))
+                # model._initialize_biases(cf.to(device))
                 if plots:
                     plot_labels(labels, save_dir=save_dir)
                     if tb_writer:
@@ -208,9 +210,9 @@ class trainModelThread(threading.Thread):
                     check_anchors(dataset, model=model, thr=hyp['anchor_t'], imgsz=imgsz)
 
         # Model parameters
-        hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current trainDataset
-        model.nc = nc  # attach number of classes to detectModel
-        model.hyp = hyp  # attach hyperparameters to detectModel
+        hyp['cls'] *= nc / 80.  # scale coco-tuned hyp['cls'] to current dataset
+        model.nc = nc  # attach number of classes to model
+        model.hyp = hyp  # attach hyperparameters to model
         model.gr = 1.0  # iou loss ratio (obj_loss = 1.0 or iou)
         model.class_weights = labels_to_class_weights(dataset.labels, nc).to(device)  # attach class weights
         model.names = names
@@ -245,7 +247,7 @@ class trainModelThread(threading.Thread):
 
             # Update mosaic border
             # b = int(random.uniform(0.25 * imgsz, 0.75 * imgsz + gs) // gs * gs)
-            # trainDataset.mosaic_border = [b - imgsz, -b]  # height, width borders
+            # dataset.mosaic_border = [b - imgsz, -b]  # height, width borders
 
             mloss = torch.zeros(4, device=device)  # mean losses
             if rank != -1:
@@ -262,7 +264,7 @@ class trainModelThread(threading.Thread):
                 # Warmup
                 if ni <= nw:
                     xi = [0, nw]  # x interp
-                    # detectModel.gr = np.interp(ni, xi, [0.0, 1.0])  # iou loss ratio (obj_loss = 1.0 or iou)
+                    # model.gr = np.interp(ni, xi, [0.0, 1.0])  # iou loss ratio (obj_loss = 1.0 or iou)
                     accumulate = max(1, np.interp(ni, xi, [1, nbs / total_batch_size]).round())
                     for j, x in enumerate(optimizer.param_groups):
                         # bias lr falls from 0.1 to lr0, all other lrs rise from 0.0 to lr0
@@ -310,7 +312,7 @@ class trainModelThread(threading.Thread):
                         plot_images(images=imgs, targets=targets, paths=paths, fname=f)
                         # if tb_writer:
                         #     tb_writer.add_image(f, result, dataformats='HWC', global_step=epoch)
-                        #     tb_writer.add_graph(detectModel, imgs)  # add detectModel to tensorboard
+                        #     tb_writer.add_graph(model, imgs)  # add model to tensorboard
                     elif plots and ni == 3 and wandb:
                         wandb.log({"Mosaics": [wandb.Image(str(x), caption=x.name) for x in save_dir.glob('train*.jpg')]})
 
@@ -328,15 +330,15 @@ class trainModelThread(threading.Thread):
                     ema.update_attr(model, include=['yaml', 'nc', 'hyp', 'gr', 'names', 'stride'])
                 final_epoch = epoch + 1 == epochs
                 if not opt.notest or final_epoch:  # Calculate mAP
-                    results, maps, times = testCustom.test(valDataDict,
-                                                           batch_size=total_batch_size,
-                                                           imgsz=imgsz_test,
-                                                           model=ema.ema,
-                                                           single_cls=opt.single_cls,
-                                                           dataloader=testloader,
-                                                           save_dir=save_dir,
-                                                           plots=plots and final_epoch,
-                                                           log_imgs=opt.log_imgs if wandb else 0)
+                    results, maps, times = test.test(opt.data,
+                                                     batch_size=total_batch_size,
+                                                     imgsz=imgsz_test,
+                                                     model=ema.ema,
+                                                     single_cls=opt.single_cls,
+                                                     dataloader=testloader,
+                                                     save_dir=save_dir,
+                                                     plots=plots and final_epoch,
+                                                     log_imgs=opt.log_imgs if wandb else 0)
 
                 # Write
                 with open(results_file, 'a') as f:
@@ -360,7 +362,7 @@ class trainModelThread(threading.Thread):
                 if fi > best_fitness:
                     best_fitness = fi
 
-                # Save detectModel
+                # Save model
                 save = (not opt.nosave) or (final_epoch and not opt.evolve)
                 if save:
                     with open(results_file, 'r') as f:  # create checkpoint
@@ -378,7 +380,7 @@ class trainModelThread(threading.Thread):
                     del ckpt
             # end epoch ----------------------------------------------------------------------------------------------------
         # end training
-        torch.save(model,"weights/final.pt")
+
         if rank in [-1, 0]:
             # Strip optimizers
             n = opt.name if opt.name.isnumeric() else ''
@@ -404,20 +406,16 @@ class trainModelThread(threading.Thread):
         torch.cuda.empty_cache()
         return results
 
-    """
-        init function
-    """
-    def __init__(self,trainDataDict,valDataDict,modelConfigBean):
+    def __init__(self, trainDataDict, valDataDict, modelConfigBean):
         threading.Thread.__init__(self)
-        self.trainDataDict=trainDataDict
-        self.valDataDict=valDataDict
-        self.modelConfigBean=modelConfigBean
-
-
+        self.trainDataDict = trainDataDict
+        self.valDataDict = valDataDict
+        self.modelConfigBean = modelConfigBean
 
     def run(self):
+        opt = self.translateToOpt(self.modelConfigBean)
 
-        opt=self.translateToOpt(self.modelConfigBean)
+
 
         # Set DDP variables
         opt.total_batch_size = opt.batch_size
@@ -437,7 +435,7 @@ class trainModelThread(threading.Thread):
             logger.info('Resuming training from %s' % ckpt)
         else:
             # opt.hyp = opt.hyp or ('hyp.finetune.yaml' if opt.weights else 'hyp.scratch.yaml')
-            opt.cfg, opt.hyp =  check_file(opt.cfg), check_file(opt.hyp)  # check files
+            opt.data, opt.cfg, opt.hyp = check_file(opt.data), check_file(opt.cfg), check_file(opt.hyp)  # check files
             assert len(opt.cfg) or len(opt.weights), 'either --cfg or --weights must be specified'
             opt.img_size.extend([opt.img_size[-1]] * (2 - len(opt.img_size)))  # extend to 2 sizes (train, test)
             opt.name = 'evolve' if opt.evolve else opt.name
@@ -466,9 +464,9 @@ class trainModelThread(threading.Thread):
         if not opt.evolve:
             tb_writer = None  # init loggers
             if opt.global_rank in [-1, 0]:
-                logger.info(f'Start Tensorboard with "tensorboard --logdir {opt.project}{opt.name}", view at http://localhost:6006/')
+                logger.info(f'Start Tensorboard with "tensorboard --logdir {opt.project}", view at http://localhost:6006/')
                 tb_writer = SummaryWriter(opt.save_dir)  # Tensorboard
-            self.train(hyp, opt, device, tb_writer, wandb,self.trainDataDict,self.valDataDict)
+            self.train(hyp, opt, device, tb_writer, wandb,datasetDict=self.trainDataDict,valDataDict=self.valDataDict)
 
         # Evolve hyperparameters (optional)
         else:
@@ -542,7 +540,7 @@ class trainModelThread(threading.Thread):
                     hyp[k] = round(hyp[k], 5)  # significant digits
 
                 # Train mutation
-                results = self.train(hyp.copy(), opt, device, wandb=wandb)
+                results = self.train(hyp.copy(), opt, device, wandb=wandb,datasetDict=self.trainDataDict,valDataDict=self.valDataDict)
 
                 # Write mutation results
                 print_mutation(hyp.copy(), results, yaml_file, opt.bucket)
@@ -550,13 +548,12 @@ class trainModelThread(threading.Thread):
             # Plot results
             plot_evolution(yaml_file)
             print(f'Hyperparameter evolution complete. Best results saved as: {yaml_file}\n'
-                  f'Command to train a new detectModel with these hyperparameters: $ python train.py --hyp {yaml_file}')
-
-
+                  f'Command to train a new model with these hyperparameters: $ python train.py --hyp {yaml_file}')
     def translateToOpt(self,modelConfigBean):
         parser = argparse.ArgumentParser()
         parser.add_argument('--weights', type=str, default=modelConfigBean.weights, help='initial weights path')
-        parser.add_argument('--cfg', type=str, default='', help='detectModel.yaml path')
+        parser.add_argument('--cfg', type=str, default='', help='model.yaml path')
+        parser.add_argument('--data', type=str, default='data/coco128.yaml', help='data.yaml path')
         parser.add_argument('--hyp', type=str, default='data/hyp.scratch.yaml', help='hyperparameters path')
         parser.add_argument('--epochs', type=int, default=modelConfigBean.epochs)
         parser.add_argument('--batch-size', type=int, default=modelConfigBean.batch_size, help='total batch size for all GPUs')
@@ -572,7 +569,7 @@ class trainModelThread(threading.Thread):
         parser.add_argument('--image-weights', action='store_true', help='use weighted image selection for training')
         parser.add_argument('--device', default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
         parser.add_argument('--multi-scale', action='store_true', help='vary img-size +/- 50%%')
-        parser.add_argument('--single-cls', action='store_true', help='train as single-class trainDataset')
+        parser.add_argument('--single-cls', action='store_true', help='train as single-class dataset')
         parser.add_argument('--adam', action='store_true', help='use torch.optim.Adam() optimizer')
         parser.add_argument('--sync-bn', action='store_true', help='use SyncBatchNorm, only available in DDP mode')
         parser.add_argument('--local_rank', type=int, default=-1, help='DDP parameter, do not modify')
@@ -582,6 +579,4 @@ class trainModelThread(threading.Thread):
         parser.add_argument('--name', default=modelConfigBean.name, help='save to project/name')
         parser.add_argument('--exist-ok', action='store_true', help='existing project/name ok, do not increment')
         opt = parser.parse_args()
-        loggerUtils.info("detectModel train config:")
-        loggerUtils.info(opt)
         return opt
