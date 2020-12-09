@@ -149,11 +149,7 @@ class datasetsService:
         imagePathList = []
         LabelsList = []
         imageShapeList = []
-        nc = None
-        labelIndex = 0
 
-        dlid_dlIndex_map = {}
-        dlIndex_dlid_map = {}
 
         for dsItem in ds_dl_list:
             if dsItem['isSelectAll'] == ConstantUtils.TRUE_TAG:
@@ -164,40 +160,29 @@ class datasetsService:
             for imageItem in datImageList:
 
                 reclabelList = imageItem['recLabelList']
-                #如果图片有标注数据，才参与训练
+                # 如果图片有标注数据，才参与训练
                 if len(reclabelList) > 0:
                     itemLabelList = []
                     for item in reclabelList:
                         if (dsItem['isSelectAll'] == ConstantUtils.TRUE_TAG or
-                            (dsItem['isSelectAll'] == ConstantUtils.FALSE_TAG and dsItem["dlidList"].__contains__(item['dlid']))):
-
-                            dlid = item['dlid']
-                            if not dlid_dlIndex_map.keys().__contains__(dlid):
-                                dlid_dlIndex_map[dlid] = labelIndex
-                                dlIndex_dlid_map[labelIndex] = dlid
-                                labelIndexValue = labelIndex
-                                labelIndex += 1
-                            else:
-                                labelIndexValue = dlid_dlIndex_map[dlid]
-                            itemLabelList.append(
-                                [labelIndexValue, item['rec_lt_x'], item['rec_lt_y'], item['rec_w'], item['rec_h']])
+                                (dsItem['isSelectAll'] == ConstantUtils.FALSE_TAG and dsItem["dlidList"].__contains__(item['dlid']))):
+                            itemLabelList.append([item['dlid'], item['rec_lt_x'], item['rec_lt_y'], item['rec_w'], item['rec_h']])
 
                     imagePathList.append(fileUtils.getABSPath(imageItem['ditFilePath']))
                     imageShapeList.append([imageItem['ditWidth'], imageItem['ditHeight']])
                     LabelsList.append(np.array(itemLabelList))
         print("***************dlid_dlIndex_map**************")
-        labelMap,nameList = labelService.getLabelsBylids(dsItem["dsId"])
+        labelMap, nameList = labelService.getLabelsBylids(dsItem["dsId"])
         loggerUtils.info("labelMap:" + str(labelMap))
 
-
         loggerUtils.info("label names:" + str(nameList))
-        index=0
+        index = 0
         for i in range(imagePathList.__len__()):
-            print("-----------------****"+str(index)+"******-----------------")
+            print("-----------------****" + str(index) + "******-----------------")
             print(imagePathList[i])
             print(LabelsList[i])
             print(imageShapeList[i])
-            index+=1
+            index += 1
 
         trainDataDict = {
             "imagePathList": imagePathList,
@@ -256,25 +241,31 @@ class datasetsService:
         #     ))
         # dataImageItem.objects.insert(imageItemList, load_bulk=False)
 
-
-        #初始化了labels
-        labelArray=['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat', 'traffic light',
-         'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
-         'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-         'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
-         'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
-         'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-         'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone',
-         'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear',
-         'hair drier', 'toothbrush']
-        LabelList=[]
-        for i in range(0,len(labelArray)):
+        # 初始化了labels
+        labelArray = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
+                      'traffic light',
+                      'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep',
+                      'cow',
+                      'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase',
+                      'frisbee',
+                      'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard',
+                      'surfboard',
+                      'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana',
+                      'apple',
+                      'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+                      'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard',
+                      'cell phone',
+                      'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
+                      'teddy bear',
+                      'hair drier', 'toothbrush']
+        LabelList = []
+        for i in range(0, len(labelArray)):
             LabelList.append(dataLabelBean(
                 dlIndex=i,
                 dlName=labelArray[i],
                 dsId=1
             ))
 
-        dataLabelBean.objects.insert(LabelList,load_bulk=False)
+        dataLabelBean.objects.insert(LabelList, load_bulk=False)
 
         return {"rs": 1}
