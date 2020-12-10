@@ -28,15 +28,17 @@ detectThread.start()
 
 @app.before_request
 def appInterceptor():
-    if request.path.__contains__("login") or request.path.__contains__("userLogin"):
-        return
+    unInterceptPath=["login","userLogin","userRegister"]
+    for item in unInterceptPath:
+        if request.path.__contains__(item):
+            return
     if session.get("userId")==None:
         return redirect(url_for('login'))
 
 
 @app.route("/login")
 def login():
-    return app.send_static_file("login.html")
+    return app.send_static_file("index.html")
 
 print("service start successful...")
 print(configUtils.getConfigProperties("service", "service_ip"))
