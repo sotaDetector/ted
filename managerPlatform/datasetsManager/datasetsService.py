@@ -40,14 +40,36 @@ class datasetsService:
         # only("dsName","dsType")
 
         #获取数据集下的所有标签
+        dsIdList=[]
+        for item in datasetList:
+            dsIdList.append(item['dsId'])
 
+        labelList=dataLabelBean.objects(dsId__in=dsIdList)
 
+        labelMap={}
+        for labelItem in labelList:
+            dsId=labelItem['dsId']
+            if labelMap.keys().__contains__(dsId):
+                labelMap[dsId].append(labelItem['dlName'])
+            else:
+                labelMap[dsId]=[labelItem['dlName']]
 
+        datasetsList=[]
+        for item in datasetList:
+            datasetItem={
+                "dsId":item['dsId'],
+                "dsName":item['dsName'],
+                "dsType":item['dsType'],
+                "dsImageCount":item['dsImageCount'],
+                "dsImgTagSP":item['dsImgTagSP'],
+                "labelCount":len(labelMap[item['dsId']]),
+                "labelList":labelMap[item['dsId']]
+            }
+            datasetsList.append(datasetItem)
 
         pageItem.set_totalCount(totalCount)
 
-
-        pageItem.set_dataList(dataList)
+        pageItem.set_numpy_dataList(datasetsList)
 
         return resultPackerUtils.packPageResult(pageItem);
 

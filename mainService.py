@@ -9,7 +9,6 @@ from managerPlatform.modelsManager.detectModelTrainDispacher import detect_model
 from managerPlatform.serviceCaller.cameraStreamDispacher import nat_camera_blp
 from managerPlatform.userManager.userManagerDispacher import user_manager_blp
 from flask_cors import *
-print("service start...")
 app = Flask(__name__, static_folder='resources', static_url_path='/resources')
 app.register_blueprint(dsm_blp)
 app.register_blueprint(detect_model_blp)
@@ -47,3 +46,5 @@ print("service start successful...")
 print(configUtils.getConfigProperties("service", "service_ip"))
 app.run(host=configUtils.getConfigProperties("service", "service_host"),
         port=configUtils.getConfigProperties("service", "service_ip"))
+print("service start...")
+
