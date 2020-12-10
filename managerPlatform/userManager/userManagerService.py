@@ -1,4 +1,4 @@
-from flask import session
+from flask import session, redirect, url_for
 
 from managerPlatform.bean.user.userBean import userBean
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
@@ -28,7 +28,7 @@ class userManagerService:
 
     def loginOut(self):
         session.pop("userId")
-        return resultPackerUtils.update_success()
+        return redirect(url_for('login'))
 
 
 
