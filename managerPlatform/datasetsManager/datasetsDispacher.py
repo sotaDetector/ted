@@ -1,4 +1,4 @@
-from flask import Blueprint, request
+from flask import Blueprint, request, session
 
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.common.baseBean.pageBean import pageBean
@@ -20,6 +20,8 @@ def addDataSet():
 @dsm_blp.route('/getDataSetPages', methods=['POST'])
 def getDataSetPages():
     data = request.get_json()
+    print("userId")
+    print(session.get("userId"))
     dsName = data['dsName']
     pageItem = pageBean(data)
     return dsService.getDataSetPages(pageItem,dsName)

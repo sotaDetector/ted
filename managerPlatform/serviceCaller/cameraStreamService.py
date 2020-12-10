@@ -3,7 +3,7 @@ from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.commonUtils.ffmpegUtils import ffmpegUtils
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
-from managerPlatform.common.dataManager.redisSource import redisPool
+from managerPlatform.common.dataManager.redisSource import redisClient
 from managerPlatform.common.keyGen.keyGenarator import keyGenarator
 
 detectMap = {}
@@ -52,6 +52,6 @@ class cameraStreamService:
 
         for i in data['sessionIds'].split(","):
             if i != "":
-                redisPool.hset(keyGenarator.getDetectWatchKey(), i, str(dateUtils.getTimeStamp()))
+                redisClient.hset(keyGenarator.getDetectWatchKey(), i, str(dateUtils.getTimeStamp()))
 
         return resultPackerUtils.save_success()
