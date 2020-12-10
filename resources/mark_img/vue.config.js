@@ -8,9 +8,9 @@ module.exports = {
         "windows.jQuery": 'jquery'
       })
     ],
-    publicPath: './', //输出的根路径  默认是/ 如果你的网站是app.com/vue 这更改此配置项
-    outputDir: 'iben',
-    assetsDir: 'static',
+    // publicPath: './', //输出的根路径  默认是/ 如果你的网站是app.com/vue 这更改此配置项
+    // outputDir: 'iben',
+    // assetsDir: 'static',
   //   devServer: {
   //     proxy: {
   //       // detail: https://cli.vuejs.org/config/#devserver-proxy
