@@ -16,13 +16,13 @@ class detectThreadWatcher(threading.Thread):
     def run(self):
         while(True):
             time.sleep(5)
-            sessMap=redisSource.redisPool.hgetall(keyGenarator.getDetectWatchKey())
+            sessMap=redisSource.redisClient.hgetall(keyGenarator.getDetectWatchKey())
             nowTimeStamp=dateUtils.getTimeStamp()
             for i in sessMap:
                 if nowTimeStamp-(10*1000)>int(sessMap[i]):
                     print(i)
                     if not detectMap.keys().__contains__(str(i,'utf-8')):
-                        redisSource.redisPool.hdel(keyGenarator.getDetectWatchKey(),i)
+                        redisSource.redisClient.hdel(keyGenarator.getDetectWatchKey(),i)
                     else:
                         detectMap[str(i,'utf-8')].stopDetect()
 

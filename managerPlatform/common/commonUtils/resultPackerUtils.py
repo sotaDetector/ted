@@ -4,21 +4,29 @@ from flask import make_response
 
 
 class resultPackerUtils:
+    EC_NAME_PASS_ERROR = 1001
+    ERRORMAP = {
+        EC_NAME_PASS_ERROR: "用户名或密码错误"
+    }
+
     _resultTag = "rs"
     _resultDataTag="data"
+    _errorCodeTag="erroCode"
     _success_tag = 1
 
     @classmethod
     def save_success(cls):
         result = {
-            cls._resultTag: cls._success_tag
+            cls._resultTag: cls._success_tag,
+            cls._resultDataTag:"添加成功！"
         }
         return json.dumps(result)
 
     @classmethod
     def update_success(cls):
         result = {
-            cls._resultTag: cls._success_tag
+            cls._resultTag: cls._success_tag,
+            cls._resultDataTag: "修改成功！"
         }
         return json.dumps(result)
 
@@ -39,8 +47,6 @@ class resultPackerUtils:
         return result
 
 
-
-
     @classmethod
     def packPageResult(cls,data):
         result = {
@@ -48,3 +54,21 @@ class resultPackerUtils:
             "pageData":data.__dict__
         }
         return json.dumps(result)
+
+    @classmethod
+    def packErrorMsg(cls,errorCode):
+        result = {
+            cls._resultTag: cls._success_tag,
+            cls._errorCodeTag: errorCode,
+            cls._resultDataTag:cls.ERRORMAP[errorCode]
+        }
+        return json.dumps(result)
+
+    @classmethod
+    def packCusResult(cls,resultMap):
+        resultMap[cls._resultTag]=cls._success_tag
+        return json.dumps(resultMap)
+
+
+
+
