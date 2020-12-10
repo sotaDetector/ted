@@ -33,7 +33,6 @@ export function request(config) {
     headers: {
       'Content-Type': 'application/json'
     },
-    //该选项只适用于以下请求方式：`put/post/patch`--formDate格式
     transformRequest: [
       function (data) {
         return JSON.stringify(data)
