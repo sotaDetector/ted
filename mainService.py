@@ -38,6 +38,7 @@ def appInterceptor():
         return redirect(url_for('login'))
 
 
+
 @app.route("/login")
 def login():
     return app.send_static_file("index.html")
