@@ -27,7 +27,8 @@ class userManagerService:
             return resultPackerUtils.packErrorMsg(resultPackerUtils.EC_NAME_PASS_ERROR)
 
     def loginOut(self):
-        session.pop("userId")
+        if session.keys().__contains__("userId"):
+            session.pop("userId")
         return redirect(url_for('login'))
 
 

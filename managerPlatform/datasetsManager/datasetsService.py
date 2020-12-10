@@ -34,10 +34,18 @@ class datasetsService:
 
         totalCount = datasetsBean.objects().count()
 
-        dataList = datasetsBean.objects(__raw__={'dsName': {'$regex': dsName}},state=1,userId=session['userId']).order_by('-create_date').skip(
+        #获取数据集
+        datasetList = datasetsBean.objects(__raw__={'dsName': {'$regex': dsName}},state=1,userId=session['userId']).order_by('-create_date').skip(
             pageItem.skipIndex).exclude("state","userId").limit(pageItem.pageSize)
         # only("dsName","dsType")
+
+        #获取数据集下的所有标签
+
+
+
+
         pageItem.set_totalCount(totalCount)
+
 
         pageItem.set_dataList(dataList)
 
