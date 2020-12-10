@@ -8,7 +8,7 @@ class baseBean(mongoSource.mdb.Document):
     create_date = mongoSource.mdb.DateTimeField(default=datetime.now)
     update_date = mongoSource.mdb.DateTimeField(default=datetime.now)
     state=mongoSource.mdb.IntField(default=ConstantUtils.DATA_STATUS_ACTIVE)
-    userId=mongoSource.mdb.LongField(default=session['userId'])
+    userId=mongoSource.mdb.LongField()
 
     # meta = {'allow_inheritance': True}
     meta = {

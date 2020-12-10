@@ -12,7 +12,7 @@ dsService = datasetsService()
 @dsm_blp.route('/addDataSet', methods=['POST'])
 def addDataSet():
 
-    datasetsItem=datasetsBean.convertToBean(request.get_json())
+    datasetsItem=datasetsBean.convertToBean(request.get_json(),session)
 
     return dsService.addDataSet(datasetsItem)
 

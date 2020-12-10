@@ -2,6 +2,8 @@ import json
 import os
 import uuid
 import numpy as np
+from flask import session
+
 from managerPlatform.bean.trainDataset.dataImageItem import dataImageItem
 from managerPlatform.bean.trainDataset.dataLabelBean import dataLabelBean
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
@@ -32,8 +34,8 @@ class datasetsService:
 
         totalCount = datasetsBean.objects().count()
 
-        dataList = datasetsBean.objects(__raw__={'dsName': {'$regex': dsName}}).order_by('-create_date').skip(
-            pageItem.skipIndex).exclude("state").limit(pageItem.pageSize)
+        dataList = datasetsBean.objects(__raw__={'dsName': {'$regex': dsName}},state=1,userId=session['userId']).order_by('-create_date').skip(
+            pageItem.skipIndex).exclude("state","userId").limit(pageItem.pageSize)
         # only("dsName","dsType")
         pageItem.set_totalCount(totalCount)
 

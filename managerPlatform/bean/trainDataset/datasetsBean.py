@@ -9,10 +9,11 @@ class datasetsBean(baseBean):
     dsType=mongoSource.mdb.IntField()
 
     @staticmethod
-    def convertToBean(jsonData):
+    def convertToBean(jsonData,session):
         return datasetsBean(
             dsName=jsonData['dsName'],
-            dsType=jsonData['dsType']
+            dsType=jsonData['dsType'],
+            userId=session.get("userId")
         )
 
 
