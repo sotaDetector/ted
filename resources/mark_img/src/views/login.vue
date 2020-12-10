@@ -29,11 +29,13 @@
 
 <script>
 import { loginMethod } from '@/network/login'
+import { menuList } from '@/utils/menu'
 let Base64 = require('js-base64').Base64
 export default {
   name: 'Login',
   data () {
     return {
+      menuList,
       checked: true,
       userInfo: {
         name: '',
@@ -49,8 +51,8 @@ export default {
     }
   },
   methods: {
-    register() {
-      this.$router.push({path: '/register'})
+    register () {
+      this.$router.push({ path: '/register' })
     },
     //登录方法
     handleSubmit (name) {
@@ -73,31 +75,13 @@ export default {
               }
               this.$Message.success('登录成功!');
               // 将用户token,menuList,userName保存到vuex中
-              this.$store.commit('refreshCurrentUserInfo',
-                {
-                  token: data._token_iben,
-                  menuList: data.menuList,
-                  requestPaths: data.requestPaths,
-                  userName: data.userInfo.userName,
-                  currentUserInfo: data.currentUserInfo
-                })
-              if(data.userInfo.headImage) {
-                this.$store.commit('refreshHeadImg', data.userInfo.headImage)
-              } else {
-                this.$store.commit('refreshHeadImg', '')
-              }
-              this.menuList = data.menuList
               //type用户类型：1-运营；2-渠道；3-企业
-              if(data.userInfo.type !== 3) {
-                this.menuList.some(item => {
-                  if(item.children && item.children.length > 0) {
-                    this.$router.push('/' + item.children[0].url)
-                    return true
-                  }
-                })
-              } else {
-                this.$router.push('/home')
-              }
+              this.menuList.some(item => {
+                if(item.children && item.children.length > 0) {
+                  this.$router.push('/' + item.children[0].url)
+                  return true
+                }
+              })
             } else {
               if(data.data && data.data.errorMsg) {
                 this.$Message.error(data.data.errorMsg);

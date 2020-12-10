@@ -1,1 +1,1 @@
-export const baseUrl = "http://192.168.1.105:8100/resources/"
+export const baseUrl = "http://192.168.1.105:8100/"
