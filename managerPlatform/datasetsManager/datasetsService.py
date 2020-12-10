@@ -56,14 +56,18 @@ class datasetsService:
 
         datasetsList=[]
         for item in datasetList:
+            if labelMap.keys().__contains__(item['dsId']):
+                labelList=labelMap[item['dsId']]
+            else:
+                labelList=[]
             datasetItem={
                 "dsId":item['dsId'],
                 "dsName":item['dsName'],
                 "dsType":item['dsType'],
                 "dsImageCount":item['dsImageCount'],
                 "dsImgTagSP":item['dsImgTagSP'],
-                "labelCount":len(labelMap[item['dsId']]),
-                "labelList":labelMap[item['dsId']]
+                "labelCount":len(labelList),
+                "labelList":labelList
             }
             datasetsList.append(datasetItem)
 
