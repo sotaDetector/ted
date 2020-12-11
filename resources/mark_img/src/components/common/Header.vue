@@ -17,7 +17,6 @@
         >
         <div class="modal_body modal_body_delete">
             <p><img src="@/assets/img/warn_tip.png" alt="">您确定要退出系统吗?</p>
-            <p>您确定要退出系统吗?</p>
         </div>
         <div slot="footer">
           <Button type="primary" class="confirm_btn" ghost @click="ok()">确定</Button>

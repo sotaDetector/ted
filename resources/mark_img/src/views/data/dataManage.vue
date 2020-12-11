@@ -22,7 +22,7 @@
         </div>
         <!-- 表格列表 -->
         <div class="container_table">
-          <Table :columns="columns" :data="pageInfo.data"></Table>
+          <Table :columns="columns" :data="pageInfo.dataList"></Table>
         </div>
         <div class="pageInfo">
           <Page size="small" :total="total" :page-size='pagesize' @on-change="handleChange" show-total show-elevator></Page>
@@ -121,21 +121,37 @@ export default {
         }, {
           "title": "标注类型",
           "align": "center",
-          "key": "dsType"
+          "key": "dsType",
+          render: (h, params) => {
+            return h('span', params.row.dsType == 1 ? '图片' : '其它')
+          }
         }, {
           "title": "标注进度",
           "align": "center",
-          "key": "phoneNum"
+          "key": "dsImgTagSP"
         }, {
           "title": "标签数量",
           "align": "center",
-          "key": "email",
+          "key": "labelCount",
           "width": 190,
         }, {
           "title": "标签",
           "align": "center",
-          "key": "email",
+          "key": "labelList",
           "width": 190,
+          render: (h, params) => {
+            return h('div', {
+              style: {
+                color: '#2db7f5',
+                cursor: 'pointer'
+              },
+              on: {
+                click: () => {
+                  this.viewLabel(params.row.labelList)
+                }
+              }
+            }, '查看')
+          }
         }, {
           'title': '操作',
           'align': 'center',
@@ -143,18 +159,42 @@ export default {
           render: (h, params) => {
             return h('div', [
               h('span', {
-                class: 'iconfont icon-bianji',
                 style: {
-                  fontSize: '18px', // 改变icon的样式
+                  color: '#2db7f5',
                   cursor: 'pointer'
                 },
                 on: {
                   click: () => {
                     // 点击操作事件
-                    this.modifyModal(params.row.enterpriseId)
+                    this.markDatas(params.row.dsId)
                   }
                 }
-              })
+              }, '标注'),
+              h('span', {
+                style: {
+                  color: '#2db7f5',
+                  cursor: 'pointer',
+                  margin: '0 4px'
+                },
+                on: {
+                  click: () => {
+                    // 点击操作事件
+                    this.importDatas(params.row.dsId)
+                  }
+                }
+              }, '导入'),
+              h('span', {
+                style: {
+                  color: '#2db7f5',
+                  cursor: 'pointer'
+                },
+                on: {
+                  click: () => {
+                    // 点击操作事件
+                    this.delDatas(params.row.dsId)
+                  }
+                }
+              }, '删除'),
             ])
           }
         }],
@@ -173,10 +213,10 @@ export default {
       this.$post('/dsc/getDataSetPages', params).then(data => {
         this.$Spin.hide()
         if(data.rs === 1) {
-          this.pageInfo = data.pageInfo;
-          this.total = data.pageInfo.totalRows;//总数
-          this.chosePage = data.pageInfo.page;//选择页
-          this.pageNow = data.pageInfo.page;//当前页
+          this.pageInfo = data.pageData;
+          this.total = data.pageData.totalPages;//总数
+          this.chosePage = data.pageData.page;//选择页
+          this.pageNow = data.pageData.page;//当前页
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
@@ -257,8 +297,6 @@ export default {
       }).then(data => {
         if(data.rs === 1) {
           this.modifyInfo = data.enterpriseInfo
-          this.modifyInfo.serviceBeginDate = new Date(data.enterpriseInfo.serviceBeginDate)
-          this.modifyInfo.serviceEndDate = new Date(data.enterpriseInfo.serviceEndDate)
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
@@ -294,6 +332,18 @@ export default {
           this.$Message.error('修改失败!');
         }
       })
+    },
+    viewLabel (list) {
+      console.log(list)
+    },
+    markDatas (id) {
+      console.log(id)
+    },
+    importDatas (id) {
+      console.log(id)
+    },
+    delDatas (id) {
+      console.log(id)
     },
     cancel (name) {
       this.modal_add = false

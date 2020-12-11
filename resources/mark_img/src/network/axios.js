@@ -7,6 +7,9 @@ import {
 } from '@/network/urlUtil'
 import router from '@/router/index'
 
+// axio.defaults.crossDomain = true;
+axios.defaults.withCredentials = true
+// axios.defaults.baseURL = '/api'
 
 export function request(config) {
   /* const instance = new axios.create({
@@ -27,11 +30,17 @@ export function request(config) {
       }
     ]
   }); */
+  if(process.env.NODE_ENV != 'development') {
+    axios.defaults.baseURL = baseUrl
+  } else {
+    axios.defaults.baseURL = '/api'
+  }
   const instance = new axios.create({
-    baseURL: baseUrl,
+    // baseURL: baseUrl,
     timeout: 60 * 1000,
     headers: {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
+      // 'Authorization': document.cookie
     },
     transformRequest: [
       function (data) {

@@ -18,9 +18,11 @@
       <Button type="success" size="small" @click="addLabel">新增标签</Button>
       <ul class="add">
         <li class="add_li" v-for="(item, idx) in labelList" :key="idx">
-          <Input v-if="isEdit" type="text" placeholder="请输入标签名称" size="small" style="width: 150px" :value="item" @input="inputAddLabel(idx, $event)"></Input>
-          <span v-if="!isEdit">{{ item }}</span>
-          <img src="@/assets/img/delete_red.png" alt="" class="delete delete_label" @click="delLabel(idx)" />
+          <Input v-if="!item.edited" type="text" placeholder="请输入标签名称" size="small" style="width:150px;margin-right:5px;" :value="item.label" @input="inputAddLabel(idx, $event)"></Input>
+          <span style="color:#fff;margin-right:18px;" v-if="item.edited">{{ item.label }}</span>
+          <span v-if="item.edited" class="iconfont icon-bianji label_icon" style="font-size:18px;" @click="editLabel(idx)"></span>
+          <Icon class="label_icon" type="ios-trash" @click="delLabel(idx)" />
+          <Icon v-if="!item.edited" class="label_icon" type="ios-cloud-upload" @click="saveLabel(item,idx)" />
         </li>
       </ul>
     </div>
@@ -52,9 +54,9 @@ export default {
     ImgList
   },
   computed: {
-    myLabelList () {
-      return this.labelList.filter((item) => item);
-    },
+    // myLabelList () {
+    //   return this.labelList.filter((item) => item);
+    // },
   },
   // mounted () {
   //   this.initPage()
@@ -68,6 +70,7 @@ export default {
       //   'nose'
       // ],
       labelList: [],
+      myLabelList: [],
       // divList: [],
       divList: [
         // {
@@ -97,11 +100,10 @@ export default {
           y: 0.4592600830367734
         },
       ],
-      isEdit: true,
     };
   },
   methods: {
-    chooseImg(src) {
+    chooseImg (src) {
       $('#img').attr('src', src)
       setTimeout(() => {
         $('.box').remove()
@@ -118,7 +120,12 @@ export default {
         ratio = img.width / img.height;
       };
 
-      this.labelList = this.divList.map((item) => item.label);
+      this.labelList = this.divList.map((item) => {
+        return {
+          label: item.label,
+          edited: true
+        }
+      });
 
       var _this = this;
 
@@ -394,10 +401,23 @@ export default {
       }, 100);
     },
     addLabel () {
-      this.labelList.push("");
+      this.labelList.push({
+        label: '',
+        edited: false
+      });
+    },
+    editLabel (idx) {
+      if(!this.labelList[idx].edited) return false
+      this.labelList[idx].edited = false
+    },
+    saveLabel (item, idx) {
+      console.log(item)
+      if(!item.label || item.edited) return false
+      this.$set(this.labelList[idx], 'edited', true)
+      console.log(item, idx)
     },
     inputAddLabel (idx, e) {
-      this.$set(this.labelList, idx, e);
+      this.$set(this.labelList[idx], 'label', e);
     },
     openSelect (item) {
       var { id } = item;
@@ -440,7 +460,7 @@ export default {
 }
 .container {
   width: 1200px;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 72px);
   margin: 0 auto;
   text-align: center;
   background: #333;
@@ -455,7 +475,7 @@ export default {
   }
   .img_box {
     // max-width: 710px;
-    width: 60%;
+    width: 52%;
     // height: 90%;
     height: 80%;
     position: absolute;
@@ -530,5 +550,11 @@ export default {
       margin: 20px 0;
     }
   }
+}
+.label_icon {
+  cursor: pointer;
+  color: #ccc;
+  font-size: 20px;
+  margin: 0 5px;
 }
 </style>

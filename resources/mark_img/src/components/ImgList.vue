@@ -119,7 +119,7 @@ export default {
   position: absolute;
   bottom: 0;
   left: 0;
-  padding: 0 60px;
+  padding: 20px 60px 0;
 }
 .img_list {
   width: calc(100% - 40px);
@@ -160,7 +160,7 @@ export default {
   text-align: center;
   background: rgba(255, 255, 255, 0.3);
   position: absolute;
-  top: 0;
+  top: 20px;
 }
 .left {
   left: 0;

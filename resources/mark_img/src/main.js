@@ -8,6 +8,9 @@ import '@/assets/css/reset.css'
 import ViewUI from 'view-design';
 import 'view-design/dist/styles/iview.css'
 
+// 引入iconfont
+import '@/assets/font_icon/iconfont.css'
+
 // md5加密
 import md5 from 'js-md5'
 

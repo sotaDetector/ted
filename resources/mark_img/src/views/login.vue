@@ -50,6 +50,9 @@ export default {
       }
     }
   },
+  mounted() {
+    this.getCookie()
+  },
   methods: {
     register () {
       this.$router.push({ path: '/register' })

@@ -10,18 +10,19 @@ module.exports = {
     ],
   },
   publicPath: './', //输出的根路径  默认是/ 如果你的网站是app.com/vue 这更改此配置项
-  // outputDir: 'ted',
+  outputDir: 'ted',
   assetsDir: 'static',
-  //   devServer: {
-  //     proxy: {
-  //       // detail: https://cli.vuejs.org/config/#devserver-proxy
-  //       '/api': {
-  //         target: `http://192.168.1.105:8100/resources/`,
-  //         changeOrigin: true,
-  //         pathRewrite: {
-  //           '^/api' : ''
-  //         }
-  //       }
-  //     }
-  // }
+  devServer: {
+    proxy: {
+      // detail: https://cli.vuejs.org/config/#devserver-proxy
+      '/api': {
+        target: `http://192.168.1.105:8100/`,
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api': ''
+        }
+      }
+    }
+  },
+
 }

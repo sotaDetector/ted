@@ -9,7 +9,7 @@ export const menuList = [{
   },{
     menuId: 3,
     menuName: '数据标注',
-    url: 'markImg'
+    url: 'markData'
   }]
 },{
   menuId: 4,
