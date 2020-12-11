@@ -16,7 +16,8 @@
         width="316"
         >
         <div class="modal_body modal_body_delete">
-            <!-- <p><img src="~/assets/images/warn_tip.png" alt="">您确定要退出系统吗?</p> -->
+            <p><img src="@/assets/img/warn_tip.png" alt="">您确定要退出系统吗?</p>
+            <p>您确定要退出系统吗?</p>
         </div>
         <div slot="footer">
           <Button type="primary" class="confirm_btn" ghost @click="ok()">确定</Button>
@@ -47,11 +48,11 @@ export default {
       //退出方法
       quitMethod(this.$store.state.userName,this.$store.state.token).then( () => {
           // 清除localStorage token值
-          localStorage.removeItem('token');// token值
-          localStorage.removeItem('menuList');// 菜单
-          localStorage.removeItem('requestPaths');// 权限
-          localStorage.removeItem('userName');// userName
-          localStorage.removeItem('headImg');// headImg
+          // localStorage.removeItem('token');// token值
+          // localStorage.removeItem('menuList');// 菜单
+          // localStorage.removeItem('requestPaths');// 权限
+          // localStorage.removeItem('userName');// userName
+          // localStorage.removeItem('headImg');// headImg
           
           this.$router.push('/login')
       })

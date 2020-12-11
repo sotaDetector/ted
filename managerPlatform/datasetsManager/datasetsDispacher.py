@@ -22,8 +22,7 @@ def addDataSet():
 @dsm_blp.route('/getDataSetPages', methods=['POST'])
 def getDataSetPages():
     data = request.get_json()
-    print("userId")
-    print(session.get("userId"))
+
     dsName = data['dsName']
     pageItem = pageBean(data)
     return dsService.getDataSetPages(pageItem,dsName)

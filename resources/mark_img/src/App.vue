@@ -5,6 +5,8 @@
 </template>
 
 <style lang="scss">
+@import "../src/assets/css/base.css";
+
 #app{
     background: #ffffff;
     width: 100%;

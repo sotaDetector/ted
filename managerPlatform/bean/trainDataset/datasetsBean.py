@@ -12,6 +12,8 @@ class datasetsBean(baseBean):
     #标注进度
     dsImgTagSP=mongoSource.mdb.FloatField(required=True,default=0.0)
 
+    dataLabelsList=mongoSource.mdb.ListField()
+
     @staticmethod
     def convertToBean(jsonData,session):
         return datasetsBean(
