@@ -29,14 +29,17 @@ mongoSource.initMongoDBSource(app)
 detectThread=detectThreadWatcher()
 detectThread.start()
 
-# @app.before_request
-# def appInterceptor():
-#     unInterceptPath=["login","userLogin","userRegister"]
-#     for item in unInterceptPath:
-#         if request.path.__contains__(item):
-#             return
-#     if session.get("userId")==None:
-#         return redirect(url_for('login'))
+@app.before_request
+def appInterceptor():
+    unInterceptPath=["login","userLogin","userRegister"]
+    print(session.get("userId"))
+    for item in unInterceptPath:
+        if request.path.__contains__(item):
+            return
+    if session.get("userId")==None:
+        return redirect(url_for('login'))
+    else:
+        return
 
 
 
