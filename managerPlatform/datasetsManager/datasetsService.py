@@ -34,8 +34,11 @@ class datasetsService:
 
         totalCount = datasetsBean.objects().count()
 
+        userSearchDict={}
+        if dsName!=None:
+            userSearchDict['dsName']={'$regex': dsName}
         #获取数据集
-        datasetList = datasetsBean.objects(__raw__={'dsName': {'$regex': dsName}},state=1,userId=session['userId']).order_by('-create_date').skip(
+        datasetList = datasetsBean.objects(__raw__=userSearchDict,state=1,userId=session['userId']).order_by('-create_date').skip(
             pageItem.skipIndex).exclude("state","userId").limit(pageItem.pageSize)
         # only("dsName","dsType")
 
