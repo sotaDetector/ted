@@ -31,7 +31,7 @@ detectThread.start()
 
 @app.before_request
 def appInterceptor():
-    unInterceptPath=["login","userLogin","userRegister"]
+    unInterceptPath=["login","userLogin","userRegister","index.html",".js",".css",".jpg",".png"]
     print(session.get("userId"))
     for item in unInterceptPath:
         if request.path.__contains__(item):
@@ -45,7 +45,7 @@ def appInterceptor():
 
 @app.route("/login")
 def login():
-    return app.send_static_file("index.html")
+    return app.send_static_file("mark_img/ted/index.html")
 
 print("service start successful...")
 print(configUtils.getConfigProperties("service", "service_ip"))
