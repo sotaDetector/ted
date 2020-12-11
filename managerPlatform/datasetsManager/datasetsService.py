@@ -169,6 +169,7 @@ class datasetsService:
         dataImage = dataImageItem.objects(ditId=data["ditId"]).first()
 
         jsons = data["recLabelList"]
+        jsons=imageUtils.addYOLOCorrdinate(jsons)
 
         labelIdList = []
 
