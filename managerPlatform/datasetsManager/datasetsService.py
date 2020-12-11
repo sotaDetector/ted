@@ -81,6 +81,25 @@ class datasetsService:
 
         return resultPackerUtils.packPageResult(pageItem);
 
+
+    def getDataSetDetail(self,dsId):
+        result = datasetsBean.objects(dsId=dsId, state=1).exclude("state", "userId").to_json()
+        return resultPackerUtils.packDataItemResults(result)
+
+
+    def updateDataSet(self,data):
+        datasetIns = datasetsBean.objects(dsId=data['dsId'])
+
+        print(data['updateClolumn'])
+        datasetIns.update(**data['updateClolumn'])
+
+        return resultPackerUtils.update_success()
+
+    def delDataSet(self,dsId):
+        detectsetItem = datasetsBean.objects(dsId=dsId)
+        detectsetItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
+        return resultPackerUtils.update_success()
+
     def upImageData(self, dsId, fileType, compreImgPack, imageslist):
         imageFiles = None
 

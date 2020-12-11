@@ -1,6 +1,7 @@
 from flask import session
 
 from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
+from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 
 
@@ -43,5 +44,10 @@ class detectModelService:
     def getDetectModelDetail(self,dmId):
         result=detectModelBean.objects(dmId=dmId, state=1).exclude("state", "userId").to_json()
         return resultPackerUtils.packDataItemResults(result)
+
+    def delDetectModelDetail(self,dmId):
+        detectModelItem=detectModelBean.objects(dmId=dmId)
+        detectModelItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
+        return resultPackerUtils.update_success()
 
 

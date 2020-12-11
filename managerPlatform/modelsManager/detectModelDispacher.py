@@ -40,3 +40,9 @@ def updateDetectModel():
 def getDetectModelDetail():
     dmId=request.get_json()['dmId']
     return dctMoldeService.getDetectModelDetail(dmId)
+
+
+@detect_model_blp.route('/delDetectModel', methods=['POST'])
+def delDetectModelDetail():
+    dmId=request.get_json()['dmId']
+    return dctMoldeService.delDetectModelDetail(dmId)

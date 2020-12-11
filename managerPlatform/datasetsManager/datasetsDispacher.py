@@ -30,6 +30,24 @@ def getDataSetPages():
     return dsService.getDataSetPages(pageItem,dsName)
 
 
+@dsm_blp.route('/getDataSetDetail', methods=['POST'])
+def getDataSetDetail():
+    dsId = request.get_json()['dsId']
+    return dsService.getDataSetDetail(dsId)
+
+
+@dsm_blp.route('/updateDataSet', methods=['POST'])
+def updateDataSet():
+    data=request.get_json()
+    return dsService.updateDataSet(data)
+
+
+@dsm_blp.route('/delDataSet', methods=['POST'])
+def delDataSet():
+    dsId = request.get_json()['dsId']
+    return dsService.delDataSet(dsId)
+
+
 @dsm_blp.route('/upImageData', methods=['POST'])
 def upImageData():
     # get parameters

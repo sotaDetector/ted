@@ -1,6 +1,7 @@
 class ConstantUtils:
 
     DATA_STATUS_ACTIVE=1
+    DATA_STATUS_DELETED = 0
 
 
     TRUE_TAG="true"
