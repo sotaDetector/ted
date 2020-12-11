@@ -22,20 +22,22 @@ app.config["SECRET_KEY"] = '79537d00f4834892986f09a100aa1edf'
 
 CORS(app,supports_credentials=True)
 
+
+
 mongoSource.initMongoDBSource(app)
 
 #启动监控线程
 detectThread=detectThreadWatcher()
 detectThread.start()
 
-@app.before_request
-def appInterceptor():
-    unInterceptPath=["login","userLogin","userRegister"]
-    for item in unInterceptPath:
-        if request.path.__contains__(item):
-            return
-    if session.get("userId")==None:
-        return redirect(url_for('login'))
+# @app.before_request
+# def appInterceptor():
+#     unInterceptPath=["login","userLogin","userRegister"]
+#     for item in unInterceptPath:
+#         if request.path.__contains__(item):
+#             return
+#     if session.get("userId")==None:
+#         return redirect(url_for('login'))
 
 
 

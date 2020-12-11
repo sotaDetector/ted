@@ -1,10 +1,12 @@
 from flask import Blueprint, request, session
-
+from flask_cors import CORS,cross_origin
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.common.baseBean.pageBean import pageBean
 from managerPlatform.datasetsManager.datasetsService import datasetsService
 
 dsm_blp = Blueprint("datasetsDispacher", __name__, url_prefix="/dsc")
+
+
 
 dsService = datasetsService()
 
