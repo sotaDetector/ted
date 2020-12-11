@@ -34,20 +34,50 @@ class datasetsService:
 
         totalCount = datasetsBean.objects().count()
 
+        userSearchDict={}
+        if dsName!=None:
+            userSearchDict['dsName']={'$regex': dsName}
         #获取数据集
-        datasetList = datasetsBean.objects(__raw__={'dsName': {'$regex': dsName}},state=1,userId=session['userId']).order_by('-create_date').skip(
+
+        datasetList = datasetsBean.objects(__raw__=userSearchDict,state=1,userId=session['userId']).order_by('-create_date').skip(
             pageItem.skipIndex).exclude("state","userId").limit(pageItem.pageSize)
         # only("dsName","dsType")
 
         #获取数据集下的所有标签
+        dsIdList=[]
+        for item in datasetList:
+            dsIdList.append(item['dsId'])
 
+        labelList=dataLabelBean.objects(dsId__in=dsIdList)
 
+        labelMap={}
+        for labelItem in labelList:
+            dsId=labelItem['dsId']
+            if labelMap.keys().__contains__(dsId):
+                labelMap[dsId].append(labelItem['dlName'])
+            else:
+                labelMap[dsId]=[labelItem['dlName']]
 
+        datasetsList=[]
+        for item in datasetList:
+            if labelMap.keys().__contains__(item['dsId']):
+                labelList=labelMap[item['dsId']]
+            else:
+                labelList=[]
+            datasetItem={
+                "dsId":item['dsId'],
+                "dsName":item['dsName'],
+                "dsType":item['dsType'],
+                "dsImageCount":item['dsImageCount'],
+                "dsImgTagSP":item['dsImgTagSP'],
+                "labelCount":len(labelList),
+                "labelList":labelList
+            }
+            datasetsList.append(datasetItem)
 
         pageItem.set_totalCount(totalCount)
 
-
-        pageItem.set_dataList(dataList)
+        pageItem.set_numpy_dataList(datasetsList)
 
         return resultPackerUtils.packPageResult(pageItem);
 
@@ -139,6 +169,7 @@ class datasetsService:
         dataImage = dataImageItem.objects(ditId=data["ditId"]).first()
 
         jsons = data["recLabelList"]
+        jsons=imageUtils.addYOLOCorrdinate(jsons)
 
         labelIdList = []
 

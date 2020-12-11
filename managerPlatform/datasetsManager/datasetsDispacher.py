@@ -1,10 +1,12 @@
 from flask import Blueprint, request, session
-
+from flask_cors import CORS,cross_origin
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.common.baseBean.pageBean import pageBean
 from managerPlatform.datasetsManager.datasetsService import datasetsService
 
 dsm_blp = Blueprint("datasetsDispacher", __name__, url_prefix="/dsc")
+
+
 
 dsService = datasetsService()
 
@@ -20,9 +22,10 @@ def addDataSet():
 @dsm_blp.route('/getDataSetPages', methods=['POST'])
 def getDataSetPages():
     data = request.get_json()
-    print("userId")
-    print(session.get("userId"))
-    dsName = data['dsName']
+    dsName=None
+    if data.keys().__contains__("dsName"):
+
+        dsName = data['dsName']
     pageItem = pageBean(data)
     return dsService.getDataSetPages(pageItem,dsName)
 
