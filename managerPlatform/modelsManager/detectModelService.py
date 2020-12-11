@@ -1,3 +1,5 @@
+from flask import session
+
 from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 
@@ -15,7 +17,11 @@ class detectModelService:
 
         totalCount=detectModelBean.objects().count()
 
-        dataList=detectModelBean.objects(__raw__={'dmName':{'$regex':dmName}}).order_by('-create_date').skip(pageItem.skipIndex).limit(pageItem.pageSize)
+        selfQuery={}
+        if dmName!=None:
+            selfQuery['dmName']={'$regex':dmName}
+
+        dataList=detectModelBean.objects(__raw__=selfQuery,state=1,userId=session['userId']).order_by('-create_date').skip(pageItem.skipIndex).limit(pageItem.pageSize)
 
         pageItem.set_totalCount(totalCount)
 
@@ -32,3 +38,10 @@ class detectModelService:
         detecModeltIns.update(**data['updateClolumn'])
 
         return resultPackerUtils.update_success()
+
+
+    def getDetectModelDetail(self,dmId):
+        result=detectModelBean.objects(dmId=dmId, state=1).exclude("state", "userId").to_json()
+        return resultPackerUtils.packDataItemResults(result)
+
+

@@ -1,3 +1,5 @@
+from flask import session
+
 from managerPlatform.common.dataManager.mongoSource import mongoSource
 from managerPlatform.common.baseBean.baseBean import baseBean
 
@@ -17,6 +19,7 @@ class detectModelBean(baseBean):
         return detectModelBean(
             dmName=jsonData['dmName'],
             dmType=jsonData['dmType'],
-            dmRemark=jsonData['dmRemark']
+            dmRemark=jsonData['dmRemark'],
+            userId=session.get("userId")
         )
 

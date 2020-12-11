@@ -22,7 +22,10 @@ def addDetectModel():
 @detect_model_blp.route('/getDetectModelsPages', methods=['POST'])
 def getDetectModelsPages():
     data = request.get_json()
-    dmName=data['dmName']
+    if data.keys().__contains__('dmName'):
+        dmName=data['dmName']
+    else:
+        dmName=None
     pageItem=pageBean(data)
 
     return dctMoldeService.getDetectModelsPages(pageItem,dmName)
@@ -31,3 +34,9 @@ def getDetectModelsPages():
 def updateDetectModel():
     jsonData = request.get_json()
     return dctMoldeService.updateDetectModel(jsonData)
+
+
+@detect_model_blp.route('/getDetectModelDetail', methods=['POST'])
+def getDetectModelDetail():
+    dmId=request.get_json()['dmId']
+    return dctMoldeService.getDetectModelDetail(dmId)

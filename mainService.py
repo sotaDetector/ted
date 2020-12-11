@@ -33,7 +33,6 @@ detectThread.start()
 @app.before_request
 def appInterceptor():
     unInterceptPath=["login","userLogin","userRegister","index.html",".js",".css",".jpg",".png"]
-    print(session.get("userId"))
     for item in unInterceptPath:
         if request.path.__contains__(item):
             return
