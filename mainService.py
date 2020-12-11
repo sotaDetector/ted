@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, session, render_template
+from flask import Flask, redirect, url_for, session, render_template,make_response
 from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.common.dataManager.mongoSource import mongoSource
 from managerPlatform.common.watcherMangaer.detectThreadWatcher import detectThreadWatcher
@@ -18,8 +18,9 @@ app.register_blueprint(nat_camera_blp)
 app.register_blueprint(user_manager_blp)
 
 app.config["SECRET_KEY"] = '79537d00f4834892986f09a100aa1edf'
+app.config["SESSION_COOKIE_HTTPONLY"]=False
 
-CORS(app,supports_credentials=True)
+CORS(app,supports_credentials=True,resources=r'/*')
 
 
 
@@ -42,10 +43,11 @@ def appInterceptor():
         return
 
 
-
 @app.route("/login")
 def login():
     return app.send_static_file("index.html")
+
+
 
 print("service start successful...")
 print(configUtils.getConfigProperties("service", "service_ip"))
