@@ -22,10 +22,11 @@ class imageDetectService:
             print("找到相关检测模型...")
             detectThread=detectThreadMap[serviceSessionId]
             detectConfig=detectConfigUtils.getBasicDetectConfig(source=savedPath,outPath=ConstantUtils.singleImgDetectOut)
-            detectThread.detect(detectConfig)
+            detectResult=detectThread.detect(detectConfig)
 
             result={
-                "imagePath":ConstantUtils.imageItemPrefix+"singleImgDetectOut_"+FileNewName
+                "imagePath":ConstantUtils.imageItemPrefix+"singleImgDetectOut_"+FileNewName,
+                "detectResult":detectResult
             }
 
             return resultPackerUtils.packCusResult(result)

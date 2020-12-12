@@ -76,6 +76,9 @@ class detectServiceThread(threading.Thread):
         self.loadModel(modelConfig)
 
     def detect(self, detetConfig=None):
+
+        detectResult=[]
+
         print("检测参数：" + str(detetConfig))
         model = self.model
         save_img = False
@@ -166,7 +169,9 @@ class detectServiceThread(threading.Thread):
                         s += '%g %ss, ' % (n, names[int(c)])  # add to string
 
                     # Write results
+                    detectObjectItems=[]
                     for *xyxy, conf, cls in reversed(det):
+
                         if save_txt:  # Write to file
                             xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                             line = (cls, *xywh, conf) if detetConfig["save_conf"] else (cls, *xywh)  # label format
@@ -176,6 +181,20 @@ class detectServiceThread(threading.Thread):
                         if save_img or view_img:  # Add bbox to image
                             label = '%s %.2f' % (names[int(cls)], conf)
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+                            detectObjectItems.append({
+                                "x": int(xyxy[0]),
+                                "y": int(xyxy[1]),
+                                "w": int(xyxy[2]),
+                                "h": int(xyxy[3]),
+                                "label":label,
+                                "class":int(cls.int()),
+                                "conf":float(conf.float())
+                            })
+
+                    detectResult.append({
+                        "file":p.name,
+                        "detectObject":detectObjectItems
+                    })
 
                 # Print time (inference + NMS)
                 print('%sDone. (%.3fs)' % (s, t2 - t1))
@@ -207,3 +226,5 @@ class detectServiceThread(threading.Thread):
             cap.release()
 
         print("detect finished.......")
+
+        return detectResult
