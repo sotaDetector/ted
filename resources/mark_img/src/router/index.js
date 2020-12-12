@@ -34,8 +34,16 @@ const routes = [{
       component: () => import( /* webpackChunkName: "about" */ '@/views/data/markData.vue')
     },
     {
-      path: '/markImg/:id',
+      path: '/markImg/:id/',
       name: 'MarkImg',
+      // route level code-splitting
+      // this generates a separate chunk (about.[hash].js) for this route
+      // which is lazy-loaded when the route is visited.
+      component: () => import( /* webpackChunkName: "about" */ '@/views/data/markImg.vue')
+    },
+    {
+      path: '/markImg/:id/:ditId',
+      name: 'MarkImgDetail',
       // route level code-splitting
       // this generates a separate chunk (about.[hash].js) for this route
       // which is lazy-loaded when the route is visited.

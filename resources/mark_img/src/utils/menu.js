@@ -6,11 +6,13 @@ export const menuList = [{
     menuId: 2,
     menuName: '数据集管理',
     url: 'dataManage'
-  },{
-    menuId: 3,
-    menuName: '数据标注',
-    url: 'markData'
-  }]
+  },
+  // {
+  //   menuId: 3,
+  //   menuName: '数据标注',
+  //   url: 'markData'
+  // }
+]
 },{
   menuId: 4,
   menuName: '模型管理',

@@ -10,9 +10,9 @@
               <img class="menuicon" :src="info.ico" alt="">
               {{info.menuName}}
             </template>
-            <MenuItem :name="item.url" :to="{ path: item.url}" v-for="item in info.children" :key="item.menuId" ref="menu_item">{{item.menuName}}</MenuItem>
+            <MenuItem :name="item.url" :to="{ path: '/' +item.url}" v-for="item in info.children" :key="item.menuId" ref="menu_item">{{item.menuName}}</MenuItem>
           </Submenu>
-          <MenuItem v-else active-name="$route.path" :name="info.url" :to="{ path: info.url }" ref="menu_item">
+          <MenuItem v-else active-name="$route.path" :name="info.url" :to="{ path: '/' + info.url }" ref="menu_item">
           <img class="menuicon" :src="info.ico" />
           {{info.menuName}}
           </MenuItem>
