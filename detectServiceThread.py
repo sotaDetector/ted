@@ -21,7 +21,7 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
-class detectCustom(threading.Thread):
+class detectServiceThread(threading.Thread):
 
     # 创建流队列
     def createStreamQueue(self):
@@ -49,36 +49,21 @@ class detectCustom(threading.Thread):
         if self.half:
             model.half()  # to FP16
 
-        self.modelConfig=modelConfig
         self.model=model
-        return model
 
     #加载配置参数
     def setDetectConfig(self,detectConfig):
         # 配置检测参数
-        detectConfig['update'] = False  # action='store_true', help='update all models'
-        detectConfig['device'] = ''  # default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu'
-        detectConfig['imgsz'] = 640
-        detectConfig['save_img'] = False
-        detectConfig['view_img'] = False  # display results
-        detectConfig['save_txt'] = False  # save results to *.txt
-        detectConfig['saveDir'] = "/Volumes/study/objectDetection/ted/runs/detect/test"  #
-        detectConfig['conf_thres'] = 0.25  # default=0.25, help='object confidence threshold'
-        detectConfig['iou_thres'] = 0.45  # type=float, default=0.45, help='IOU threshold for NMS'
-        detectConfig['classes'] = ""  # nargs='+', type=int, help='filter by class: --class 0, or --class 0 2 3'
-        detectConfig['agnostic_nms'] = False  # action='store_true', help='class-agnostic NMS'
-        detectConfig['augment'] = False  # action='store_true', help='augmented inference'
-        detectConfig['save_conf'] = False  # action='store_true', help='save confidences in --save-txt labels'
         self.detectConfig=detectConfig
 
     #创建线程时，运行该函数
     def run(self):
 
         with torch.no_grad():
-            self.detect(self.model,self.detectConfig)
+            self.detect(self.detectConfig)
 
-    # 初始化一些参数
-    def __init__(self):
+    # 初始化一些参数 并加载模型
+    def __init__(self,modelConfig):
         threading.Thread.__init__(self)
         set_logging()
 
@@ -87,7 +72,11 @@ class detectCustom(threading.Thread):
         # 创建stream队列，用于传输图像信息
         self.createStreamQueue()
 
-    def detect(self, model,detetConfig=None):
+        #加载模型
+        self.loadModel(modelConfig)
+
+    def detect(self,detetConfig=None):
+        model=self.model
         save_img = False
         #初始化若干参数
         source,view_img,save_txt=detetConfig["source"],detetConfig["view_img"],detetConfig["save_txt"]

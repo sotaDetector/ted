@@ -1,8 +1,9 @@
-from detectCustom import detectCustom
+from detectServiceThread import detectServiceThread
 from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.commonUtils.ffmpegUtils import ffmpegUtils
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
+from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
 from managerPlatform.common.dataManager.redisSource import redisClient
 from managerPlatform.common.keyGen.keyGenarator import keyGenarator
 
@@ -17,19 +18,18 @@ class cameraStreamService:
     def startNativeCameraDetect(self,config):
 
 
-        # 创建检测对象
-        detectThread = detectCustom()
+
 
         #加载模型
         modelConfig = {}
         modelConfig["weights"] = "weights/yolov5s.pt"
         modelConfig["device"]=''
-        detectThread.loadModel(modelConfig)
+        # 创建检测对象
+        detectThread = detectServiceThread(modelConfig)
 
         #加载检测参数
-        detectConfig={
-            "source":config['source']
-        }
+        detectConfig=detectConfigUtils.getBasicDetectConfig(config['source'])
+
         detectThread.setDetectConfig(detectConfig)
 
         #开始线程
