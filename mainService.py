@@ -8,6 +8,7 @@ from managerPlatform.modelsManager.detectModelDispacher import *
 from managerPlatform.modelsManager.detectModelTrainDispacher import detect_model_train_blp
 from managerPlatform.serviceCaller.cameraStreamDispacher import nat_camera_blp
 from managerPlatform.userManager.userManagerDispacher import user_manager_blp
+from managerPlatform.serviceCaller.imageDetectDispacher import iamge_detect_blp
 from flask_cors import *
 app = Flask(__name__, static_folder='resources', static_url_path='/resources')
 app.register_blueprint(dsm_blp)
@@ -16,6 +17,7 @@ app.register_blueprint(dataLabel_blp)
 app.register_blueprint(detect_model_train_blp)
 app.register_blueprint(nat_camera_blp)
 app.register_blueprint(user_manager_blp)
+app.register_blueprint(iamge_detect_blp)
 
 app.config["SECRET_KEY"] = '79537d00f4834892986f09a100aa1edf'
 app.config["SESSION_COOKIE_HTTPONLY"]=False
@@ -33,7 +35,6 @@ detectThread.start()
 @app.before_request
 def appInterceptor():
     unInterceptPath=["login","userLogin","userRegister","index.html",".js",".css",".jpg",".png"]
-    print(session.get("userId"))
     for item in unInterceptPath:
         if request.path.__contains__(item):
             return

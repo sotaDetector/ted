@@ -16,8 +16,7 @@ from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUti
 from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.dataLabel.dataLabelService import dataLabelService
 
-compreImgPackPath = configUtils.getConfigProperties("file", "compreImgPackPath")
-imageItemPrefix = configUtils.getConfigProperties("file", "imageItemPrefix")
+
 
 labelService = dataLabelService()
 
@@ -81,16 +80,36 @@ class datasetsService:
 
         return resultPackerUtils.packPageResult(pageItem);
 
+
+    def getDataSetDetail(self,dsId):
+        result = datasetsBean.objects(dsId=dsId, state=1).exclude("state", "userId").to_json()
+        return resultPackerUtils.packDataItemResults(result)
+
+
+    def updateDataSet(self,data):
+        datasetIns = datasetsBean.objects(dsId=data['dsId'])
+
+        print(data['updateClolumn'])
+        datasetIns.update(**data['updateClolumn'])
+
+        return resultPackerUtils.update_success()
+
+    def delDataSet(self,dsId):
+        detectsetItem = datasetsBean.objects(dsId=dsId)
+        detectsetItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
+        return resultPackerUtils.update_success()
+
     def upImageData(self, dsId, fileType, compreImgPack, imageslist):
         imageFiles = None
 
         folderName = str(uuid.uuid4())
 
-        desFolderBasePath = compreImgPackPath + folderName
+        desFolderBasePath = ConstantUtils.imageItemBasePath + folderName
 
-        if fileType == "1":
+        imageNameList,imagePathList=None,None
+        if fileType == ConstantUtils.UP_FILE_TYPE_COMPRESSFILE:
             imageNameList, imagePathList = self.saveCompressedFile(desFolderBasePath, compreImgPack)
-        elif fileType == "2":
+        elif fileType == ConstantUtils.UP_FILE_TYPE_IMAGEFILE:
             imageNameList, imagePathList = self.saveMultiImages(desFolderBasePath, imageslist)
 
         # 保存到数据库
@@ -145,20 +164,36 @@ class datasetsService:
 
     def getImageItemList(self, pageItem, data):
 
-        totalCount = dataImageItem.objects(__raw__={'dsId': data['dsId']}).count()
+        totalCount = dataImageItem.objects(__raw__={'dsId': data['dsId']},state=ConstantUtils.DATA_STATUS_ACTIVE).count()
 
-        dataList = dataImageItem.objects(__raw__={'dsId': data['dsId']}).skip(
+        dataList = dataImageItem.objects(__raw__={'dsId': data['dsId']},state=ConstantUtils.DATA_STATUS_ACTIVE).skip(
             pageItem.skipIndex).limit(pageItem.pageSize)
 
         pageItem.set_totalCount(totalCount)
 
+
+        #获取该数据集下所有的标签
+        labelMap,nameList=labelService.getLabelsBylids(data['dsId'])
+
         dataArray = json.loads(dataList.to_json())
         for item in dataArray:
-            item['ditFilePath'] = imageItemPrefix + item['ditFilePath']
+            item['ditFilePath'] = ConstantUtils.imageItemPrefix + item['ditFilePath'].replace("/","_")
+            if item.keys().__contains__("recLabelList"):
+                recLabelList=item['recLabelList']
+                for item in recLabelList:
+                    item['dlName']=labelMap[item['dlid']]
+
 
         pageItem.set_numpy_dataList(dataArray)
 
         return resultPackerUtils.packPageResult(pageItem);
+
+
+    def delImageItem(self,ditId):
+        imageItem = dataImageItem.objects(ditId=ditId)
+        imageItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
+        return resultPackerUtils.update_success()
+
 
     """
         上传标注数据    

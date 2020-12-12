@@ -14,12 +14,25 @@ class cameraStreamService:
     def getCameraDeviceList(self):
         return resultPackerUtils.packJsonListResults(ffmpegUtils.getCameraList())
 
-    def startNativeCameraDetect(self, configData):
+    def startNativeCameraDetect(self,config):
 
-        configData["weights"] = "weights/yolov5s.pt"
-        # 开启检测线程
-        detectThread = detectCustom(configData)
 
+        # 创建检测对象
+        detectThread = detectCustom()
+
+        #加载模型
+        modelConfig = {}
+        modelConfig["weights"] = "weights/yolov5s.pt"
+        modelConfig["device"]=''
+        detectThread.loadModel(modelConfig)
+
+        #加载检测参数
+        detectConfig={
+            "source":config['source']
+        }
+        detectThread.setDetectConfig(detectConfig)
+
+        #开始线程
         detectThread.start()
 
         # 为每个检测线程分配sessionId
