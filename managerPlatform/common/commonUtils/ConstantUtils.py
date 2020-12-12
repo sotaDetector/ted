@@ -1,3 +1,4 @@
+from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.config.configUtils import configUtils
 
 
@@ -16,7 +17,12 @@ class ConstantUtils:
     MODEL_WEIGHT_X = 4
 
     imageItemBasePath = configUtils.getConfigProperties("file", "compreImgPackPath")
-    singleImgDetect=imageItemBasePath+"singleImgDetect/"
+
+    singleImgDetectSource = imageItemBasePath + "SingleImgDetectSource/"
+    fileUtils.detectPath(singleImgDetectSource)
+    singleImgDetectOut = imageItemBasePath + "singleImgDetectOut/"
+    fileUtils.detectPath(singleImgDetectOut)
+
     imageItemPrefix = configUtils.getConfigProperties("file", "imageItemPrefix")+"dsc/imageItem/"
 
 

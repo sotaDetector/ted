@@ -31,12 +31,12 @@ class detectServiceThread(threading.Thread):
     def getStreamQueue(self):
         return self.q
 
-    #停止检测
+    # 停止检测
     def stopDetect(self):
         self.isDetect = False
 
-    #加载模型
-    def loadModel(self,modelConfig):
+    # 加载模型
+    def loadModel(self, modelConfig):
         print("模型配置：" + str(modelConfig))
         # 设置设备类型
         self.device = select_device(modelConfig["device"])
@@ -49,21 +49,21 @@ class detectServiceThread(threading.Thread):
         if self.half:
             model.half()  # to FP16
 
-        self.model=model
+        self.model = model
 
-    #加载配置参数
-    def setDetectConfig(self,detectConfig):
+    # 加载配置参数
+    def setDetectConfig(self, detectConfig):
         # 配置检测参数
-        self.detectConfig=detectConfig
+        self.detectConfig = detectConfig
 
-    #创建线程时，运行该函数
+    # 创建线程时，运行该函数
     def run(self):
 
         with torch.no_grad():
             self.detect(self.detectConfig)
 
     # 初始化一些参数 并加载模型
-    def __init__(self,modelConfig):
+    def __init__(self, modelConfig):
         threading.Thread.__init__(self)
         set_logging()
 
@@ -72,14 +72,16 @@ class detectServiceThread(threading.Thread):
         # 创建stream队列，用于传输图像信息
         self.createStreamQueue()
 
-        #加载模型
+        # 加载模型
         self.loadModel(modelConfig)
 
-    def detect(self,detetConfig=None):
-        model=self.model
+    def detect(self, detetConfig=None):
+        print("检测参数：" + str(detetConfig))
+        model = self.model
         save_img = False
-        #初始化若干参数
-        source,view_img,save_txt=detetConfig["source"],detetConfig["view_img"],detetConfig["save_txt"]
+        cap=None
+        # 初始化若干参数
+        source, view_img, save_txt = detetConfig["source"], detetConfig["view_img"], detetConfig["save_txt"]
 
         webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
             ('rtsp://', 'rtmp://', 'http://'))
@@ -133,7 +135,8 @@ class detectServiceThread(threading.Thread):
             pred = model(img, augment=detetConfig["augment"])[0]
 
             # Apply NMS
-            pred = non_max_suppression(pred, detetConfig["conf_thres"], detetConfig["iou_thres"], classes=detetConfig["classes"],
+            pred = non_max_suppression(pred, detetConfig["conf_thres"], detetConfig["iou_thres"],
+                                       classes=detetConfig["classes"],
                                        agnostic=detetConfig["agnostic_nms"])
             t2 = time_synchronized()
 
@@ -179,9 +182,6 @@ class detectServiceThread(threading.Thread):
 
                 # Stream results
                 if view_img:
-                    # cv2.imshow(str(p), im0)
-                    # if cv2.waitKey(1) == ord('q'):  # q to quit
-                    #     raise StopIteration
                     ret, buffer = cv2.imencode('.jpg', im0)
                     frame = buffer.tobytes()
                     self.q.put(frame)
@@ -202,6 +202,8 @@ class detectServiceThread(threading.Thread):
                             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                             vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
                         vid_writer.write(im0)
-        cap.release()
+
+        if cap != None:
+            cap.release()
 
         print("detect finished.......")

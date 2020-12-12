@@ -8,7 +8,7 @@ imgDetefctService=imageDetectService()
 
 @iamge_detect_blp.route('/getSingleImageDetectResult', methods=['POST'])
 def getSingleImageDetectResult():
-    serviceSessionId=request.args.get("serviceSessionId")
+    serviceSessionId=request.form.get("serviceSessionId")
     imgData = request.files["detectedImage"]
     threshold = request.form.get('threshold')
 
