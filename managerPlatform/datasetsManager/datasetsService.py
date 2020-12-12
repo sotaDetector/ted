@@ -128,6 +128,10 @@ class datasetsService:
             ))
 
         dataImageItem.objects.insert(saveImageItemList, load_bulk=False)
+        #更新数据集数量
+        dsItem=datasetsBean.objects(dsId=dsId,state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
+        nowCount=dsItem["dsImageCount"]+imageNameList.__len__()
+        dsItem.update(dsImageCount=nowCount)
         return resultPackerUtils.save_success()
 
     def saveMultiImages(self, desFolderBasePath, imageslist):
@@ -215,8 +219,14 @@ class datasetsService:
                 labelIdList.append(dlid)
             recLabelList.append(rectangleLabelBean.convertToBean(item))
 
-        dataImage.update(recLabelList=recLabelList, labelIdList=labelIdList)
+        dataImage.update(recLabelList=recLabelList, labelIdList=labelIdList,isLabeled=1)
 
+        #查询一下该数据集下所有标注过的图片
+        labledCount=dataImageItem.objects(isLabeled=1,state=1).count()
+        #更新数据集更新进度
+        dsItem = datasetsBean.objects(dsId=data["dsId"], state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
+        # dsItem.update(inc__dsImgTagSP=1)
+        dsItem.update(dsImgTagSP=labledCount)
         return resultPackerUtils.update_success()
 
     # 根据训练版本勾选的数据集查出数据并组装

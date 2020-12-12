@@ -21,6 +21,8 @@ class dataImageItem(baseBean):
 
     #数据集ID
     dsId=mongoSource.mdb.LongField(required=True)
+    #是否被标注过
+    isLabeled=mongoSource.mdb.IntField(required=True,default=0)
     #标签ID
     recLabelList = mongoSource.mdb.ListField(EmbeddedDocumentField(rectangleLabelBean))
     #标签id列表
