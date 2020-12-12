@@ -22,7 +22,15 @@
         </div>
         <!-- 表格列表 -->
         <div class="container_table">
-          <Table :columns="columns" :data="pageInfo.dataList"></Table>
+          <Table :columns="columns" :data="pageInfo.dataList">
+            <template slot-scope="{row, index}" slot="action">
+              <div>
+                <span class="action" @click="markDatas(row.dsId,index)">标注</span>
+                <span class="action" style="margin:0 4px;" @click="clickImport(row.dsId)">导入</span>
+                <span class="action" @click="delDatas(row.dsId)">删除</span>
+              </div>
+            </template>
+          </Table>
         </div>
         <div class="pageInfo">
           <Page size="small" :total="total" :page-size='pagesize' @on-change="handleChange" show-total show-elevator></Page>
@@ -30,15 +38,33 @@
       </div>
     </div>
     <!-- 模态框 -->
+    <Modal class="sys_modal" v-model="modal_list" class-name="vertical_modal" width="400">
+      <div class="modal_body modal_body_delete">
+        <Upload style="display:inline-block;margin:0 4px;" multiple ref="upload" :before-upload="handleBeforeUpload" :action="$baseUrl + '/dsc/upImageData'">
+          <Button type="primary" ghost>选择文件</Button>
+        </Upload>
+        <ul>
+          <li v-for="(item,idx) in files" :key="idx">
+            <span>{{item.name}}</span>
+            <Icon type="md-remove-circle" @click="delFile(idx)" style="margin-left:10px;" />
+          </li>
+        </ul>
+      </div>
+      <div slot="footer">
+        <Button type="success" @click="importDatas" icon="ios-cloud-upload-outline" style="width:115px;">点击上传</Button>
+        <!-- <Button type="primary" class="confirm_btn" ghost @click="deleteMethod(channelId)">确定</Button> -->
+        <Button type="default" class="clear_btn" @click="cancel()">取消</Button>
+      </div>
+    </Modal>
     <Modal class="sys_modal" v-model="modal_delete" class-name="vertical_modal" width="316">
       <div class="modal_body modal_body_delete">
         <p>
           <img src="@/assets/img/warn_tip.png" alt="">
-          您确定要删除该企业吗?
+          您确定要删除该数据集吗?
         </p>
       </div>
       <div slot="footer">
-        <Button type="primary" class="confirm_btn" ghost @click="deleteMethod(channelId)">确定</Button>
+        <Button type="primary" class="confirm_btn" ghost @click="deleteMethod()">确定</Button>
         <Button type="default" class="clear_btn" @click="cancel()">取消</Button>
       </div>
     </Modal>
@@ -93,6 +119,7 @@ export default {
       pageNow: 1,
       pagesize: 20,// 每页显示多少条
       search: {},
+      modal_list: false,
       modal_delete: false,
       modal_add: false,
       modal_modify: false,
@@ -156,49 +183,51 @@ export default {
           'title': '操作',
           'align': 'center',
           'key': 'action',
-          render: (h, params) => {
-            return h('div', [
-              h('span', {
-                style: {
-                  color: '#2db7f5',
-                  cursor: 'pointer'
-                },
-                on: {
-                  click: () => {
-                    // 点击操作事件
-                    this.markDatas(params.row.dsId)
-                  }
-                }
-              }, '标注'),
-              h('span', {
-                style: {
-                  color: '#2db7f5',
-                  cursor: 'pointer',
-                  margin: '0 4px'
-                },
-                on: {
-                  click: () => {
-                    // 点击操作事件
-                    this.importDatas(params.row.dsId)
-                  }
-                }
-              }, '导入'),
-              h('span', {
-                style: {
-                  color: '#2db7f5',
-                  cursor: 'pointer'
-                },
-                on: {
-                  click: () => {
-                    // 点击操作事件
-                    this.delDatas(params.row.dsId)
-                  }
-                }
-              }, '删除'),
-            ])
-          }
+          'slot': 'action'
+          // render: (h, params) => {
+          //   return h('div', [
+          //     h('span', {
+          //       style: {
+          //         color: '#2db7f5',
+          //         cursor: 'pointer'
+          //       },
+          //       on: {
+          //         click: () => {
+          //           // 点击操作事件
+          //           this.markDatas(params.row.dsId)
+          //         }
+          //       }
+          //     }, '标注'),
+          //     h('span', {
+          //       style: {
+          //         color: '#2db7f5',
+          //         cursor: 'pointer',
+          //         margin: '0 4px'
+          //       },
+          //       on: {
+          //         click: () => {
+          //           // 点击操作事件
+          //           this.importDatas(params.row.dsId)
+          //         }
+          //       }
+          //     }, '导入'),
+          //     h('span', {
+          //       style: {
+          //         color: '#2db7f5',
+          //         cursor: 'pointer'
+          //       },
+          //       on: {
+          //         click: () => {
+          //           // 点击操作事件
+          //           this.delDatas(params.row.dsId)
+          //         }
+          //       }
+          //     }, '删除'),
+          //   ])
+          // }
         }],
       pageInfo: {},
+      files: []
     }
   },
   methods: {
@@ -230,6 +259,25 @@ export default {
     handleChange (page) {
       this.pageNow = page;//赋值当前页
       this.queryPageInfo();
+    },
+
+    handleBeforeUpload (e) {
+      console.log(e)
+      if(e.type == 'application/x-zip-compressed') {
+        this.fileType = 1
+        this.files.push(e)
+      } else if(e.type.indexOf('image/') >= 0) {
+        this.fileType = 2
+        this.files.push(e)
+      } else {
+        this.$Message.error('请上传图片或zip压缩包！')
+      }
+
+      // this.importDatas()
+      return false
+    },
+    delFile (idx) {
+      this.files.splice(idx, 1)
     },
     // 删除弹框
     deleteModal (channelId) {
@@ -336,19 +384,81 @@ export default {
     viewLabel (list) {
       console.log(list)
     },
-    markDatas (id) {
-      console.log(id)
+    markDatas (id, idx) {
+      this.$router.push({ path: '/markImg/' + id })
     },
-    importDatas (id) {
-      console.log(id)
+    clickImport (id) {
+      this.dsId = id
+      this.files = []
+      this.modal_list = true
+    },
+    importDatas () {
+      // console.log(id)
+      // this.dsId = id
+      var fd = new FormData()
+      if(this.fileType == 1) { // 压缩包
+        if(this.files.length > 1) {
+          this.$Message.error('请上传图片或zip压缩包！')
+          return false
+        }
+        fd.append('compreImgPack', this.files[0])
+      } else {
+        this.files.forEach(item => {
+          if(item.type.indexOf('image') < 0) {
+            this.$Message.error('请上传图片或zip压缩包！')
+            return false
+          }
+          fd.append('imageslist', item)
+        })
+      }
+      fd.append('dsId', this.dsId)
+      fd.append('fileType', this.fileType)
+
+      this.$Spin.show()
+      this.$post_('/dsc/upImageData', fd).then(data => {
+        this.$Spin.hide()
+        if(data.rs === 1) {
+          this.$Message.success('导入成功');
+          this.files = []
+          this.fileType = ''
+          this.modal_list = false
+          this.queryPageInfo()
+        } else {
+          if(data.data && data.data.errorMsg) {
+            this.$Message.error(data.data.errorMsg);
+          } else {
+            this.$Message.error(data.errorMsg);
+          }
+        }
+      })
     },
     delDatas (id) {
       console.log(id)
+      this.dsId = id
+      this.modal_delete = true
+    },
+    deleteMethod () {
+      this.$Spin.show()
+      this.$post('/dsc/delDataSet', { dsId: this.dsId }).then(data => {
+        this.$Spin.hide()
+        if(data.rs === 1) {
+          this.modal_delete = false
+          this.$Message.success('删除成功!');
+          this.queryPageInfo();
+        } else {
+          if(data.data && data.data.errorMsg) {
+            this.$Message.error(data.data.errorMsg);
+          } else {
+            this.$Message.error(data.errorMsg);
+          }
+        }
+      })
     },
     cancel (name) {
       this.modal_add = false
       this.modal_modify = false
       this.modal_delete = false
+      this.modal_list = false
       if(name) {
         this.$refs[name].resetFields();
       }
@@ -365,4 +475,8 @@ export default {
 
 
 <style lang="scss" scoped>
+.action {
+  color: #2db7f5;
+  cursor: pointer;
+}
 </style>
