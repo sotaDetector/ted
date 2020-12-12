@@ -9,7 +9,7 @@
         $(function(){
             $.ajax({
               type: 'POST',
-              url: "http://192.168.1.86:8100/natCamera/getCameraDeviceList",
+              url: "http://localhost:8100/natCamera/getCameraDeviceList",
               data: {
 
               },
@@ -36,14 +36,14 @@
             $.ajax({
               "async": true,
               "method": 'POST',
-              url: "http://192.168.1.86:8100/natCamera/startNativeCameraDetect",
+              url: "http://localhost:8100/natCamera/startNativeCameraDetect",
               data:"{\"source\":\""+sourceUrl+"\"}",
               "headers": {
                 "cache-control": "no-cache",
                 "Content-Type": "application/json"
               },
               success:function(result) {
-                    var appendContent="<img width='30%' src=\"http://192.168.1.86:8100/natCamera/video_feed?sessionId="+result.sessionId+"\"/>";
+                    var appendContent="<img width='30%' src=\"http://localhost:8100/natCamera/video_feed?sessionId="+result.sessionId+"\"/>";
                     $("#videoShowArea").append(appendContent)
                     m.set(sourceUrl,result.sessionId)
                     sessionds+=result.sessionId+","
@@ -60,7 +60,7 @@
             }
             $.ajax({
               type: 'POST',
-              url: "http://192.168.1.86:8100/natCamera/stopNativeCameraDetect",
+              url: "http://localhost:8100/natCamera/stopNativeCameraDetect",
               data: "{\"sessionId\":\""+m.get(sourceUrl)+"\"}",
               headers: {
                     'Accept': "application/json; charset=utf-8",
@@ -79,7 +79,7 @@
         function sendHeartBeat(){
             $.ajax({
               type: 'POST',
-              url: "http://192.168.1.86:8100/natCamera/sendDetectHeartbeat",
+              url: "http://localhost:8100/natCamera/sendDetectHeartbeat",
               data: "{\"sessionIds\":\""+sessionds+"\"}",
               headers: {
                     'Accept': "application/json; charset=utf-8",
@@ -90,7 +90,6 @@
 
               },
               error : function(e){
-                  alert(e.status)
               }
             })
         }

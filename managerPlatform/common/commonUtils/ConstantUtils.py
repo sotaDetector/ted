@@ -16,7 +16,10 @@ class ConstantUtils:
     MODEL_WEIGHT_X = 4
 
     imageItemBasePath = configUtils.getConfigProperties("file", "compreImgPackPath")
+    singleImgDetect=imageItemBasePath+"singleImgDetect/"
     imageItemPrefix = configUtils.getConfigProperties("file", "imageItemPrefix")+"dsc/imageItem/"
+
+
 
     UP_FILE_TYPE_COMPRESSFILE="1"
     UP_FILE_TYPE_IMAGEFILE = "2"
