@@ -1,3 +1,6 @@
+from managerPlatform.common.config.configUtils import configUtils
+
+
 class ConstantUtils:
 
     DATA_STATUS_ACTIVE=1
@@ -11,6 +14,12 @@ class ConstantUtils:
     MODEL_WEIGHT_M = 2
     MODEL_WEIGHT_L = 3
     MODEL_WEIGHT_X = 4
+
+    imageItemBasePath = configUtils.getConfigProperties("file", "compreImgPackPath")
+    imageItemPrefix = configUtils.getConfigProperties("file", "imageItemPrefix")+"dsc/imageItem/"
+
+    UP_FILE_TYPE_COMPRESSFILE="1"
+    UP_FILE_TYPE_IMAGEFILE = "2"
 
     WEIGHT_MAP={
         MODEL_WEIGHT_S:"yolov5s.pt",

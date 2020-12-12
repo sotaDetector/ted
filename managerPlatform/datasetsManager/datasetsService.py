@@ -16,8 +16,7 @@ from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUti
 from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.dataLabel.dataLabelService import dataLabelService
 
-compreImgPackPath = configUtils.getConfigProperties("file", "compreImgPackPath")
-imageItemPrefix = configUtils.getConfigProperties("file", "imageItemPrefix")
+
 
 labelService = dataLabelService()
 
@@ -105,11 +104,12 @@ class datasetsService:
 
         folderName = str(uuid.uuid4())
 
-        desFolderBasePath = compreImgPackPath + folderName
+        desFolderBasePath = ConstantUtils.imageItemBasePath + folderName
 
-        if fileType == "1":
+        imageNameList,imagePathList=None,None
+        if fileType == ConstantUtils.UP_FILE_TYPE_COMPRESSFILE:
             imageNameList, imagePathList = self.saveCompressedFile(desFolderBasePath, compreImgPack)
-        elif fileType == "2":
+        elif fileType == ConstantUtils.UP_FILE_TYPE_IMAGEFILE:
             imageNameList, imagePathList = self.saveMultiImages(desFolderBasePath, imageslist)
 
         # 保存到数据库
@@ -173,7 +173,7 @@ class datasetsService:
 
         dataArray = json.loads(dataList.to_json())
         for item in dataArray:
-            item['ditFilePath'] = imageItemPrefix + item['ditFilePath']
+            item['ditFilePath'] = ConstantUtils.imageItemPrefix + item['ditFilePath'].replace("/","_")
 
         pageItem.set_numpy_dataList(dataArray)
 
