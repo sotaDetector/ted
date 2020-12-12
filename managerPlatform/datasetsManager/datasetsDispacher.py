@@ -76,6 +76,12 @@ def getImageItemList():
     return dsService.getImageItemList(pageItem,data)
 
 
+@dsm_blp.route('/delImageItem', methods=['POST'])
+def delImageItem():
+    ditId = request.get_json()['ditId']
+    return dsService.delImageItem(ditId)
+
+
 """
 上传图片标注数据
 """

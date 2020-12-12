@@ -164,9 +164,9 @@ class datasetsService:
 
     def getImageItemList(self, pageItem, data):
 
-        totalCount = dataImageItem.objects(__raw__={'dsId': data['dsId']}).count()
+        totalCount = dataImageItem.objects(__raw__={'dsId': data['dsId']},state=ConstantUtils.DATA_STATUS_ACTIVE).count()
 
-        dataList = dataImageItem.objects(__raw__={'dsId': data['dsId']}).skip(
+        dataList = dataImageItem.objects(__raw__={'dsId': data['dsId']},state=ConstantUtils.DATA_STATUS_ACTIVE).skip(
             pageItem.skipIndex).limit(pageItem.pageSize)
 
         pageItem.set_totalCount(totalCount)
@@ -178,6 +178,13 @@ class datasetsService:
         pageItem.set_numpy_dataList(dataArray)
 
         return resultPackerUtils.packPageResult(pageItem);
+
+
+    def delImageItem(self,ditId):
+        imageItem = dataImageItem.objects(ditId=ditId)
+        imageItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
+        return resultPackerUtils.update_success()
+
 
     """
         上传标注数据    
