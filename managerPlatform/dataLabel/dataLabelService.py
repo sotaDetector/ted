@@ -32,19 +32,12 @@ class dataLabelService:
         return resultPackerUtils.update_success()
 
     def getLabelsBylids(self,dsId):
-        # lids=[]
-        # for item in idsMap:
-        #     lids.append(item)
-        # labelList=dataLabelBean.objects(dlid__in=lids)
-        # labelMap={}
-        # for item in labelList:
-        #     labelMap[item['dlid']]=item['dlName']
-        # return labelMap
+
         nameList=[]
         labelList = dataLabelBean.objects(dsId=dsId)
         labelMap = {}
         for item in labelList:
-            labelMap[item['dlIndex']] = item['dlName']
+            labelMap[item['dlid']] = item['dlName']
             nameList.append(item['dlName'])
         return labelMap,nameList
 

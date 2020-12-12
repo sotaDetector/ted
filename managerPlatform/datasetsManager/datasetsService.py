@@ -171,9 +171,18 @@ class datasetsService:
 
         pageItem.set_totalCount(totalCount)
 
+
+        #获取该数据集下所有的标签
+        labelMap,nameList=labelService.getLabelsBylids(data['dsId'])
+
         dataArray = json.loads(dataList.to_json())
         for item in dataArray:
             item['ditFilePath'] = ConstantUtils.imageItemPrefix + item['ditFilePath'].replace("/","_")
+            if item.keys().__contains__("recLabelList"):
+                recLabelList=item['recLabelList']
+                for item in recLabelList:
+                    item['dlName']=labelMap[item['dlid']]
+
 
         pageItem.set_numpy_dataList(dataArray)
 
