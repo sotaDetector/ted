@@ -52,7 +52,7 @@ class detectModelTrainConfig(baseBean):
     #number of images for W&B logging, max 100
     log_imgs=mongoSource.mdb.IntField(default=16)
     #maximum number of dataloader workers
-    workers=mongoSource.mdb.IntField(default=8)
+    workers=mongoSource.mdb.IntField(default=0)
     #工程名称 每个模型需指定一个唯一名称 default='runs/train' save to project/name
     project=mongoSource.mdb.StringField(required=True)
     #文件夹名称 default='exp', help='save to project/name'

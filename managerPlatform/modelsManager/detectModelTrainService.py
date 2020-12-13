@@ -47,3 +47,5 @@ class detectModelTrainService:
 
         loggerUtils.info("start detect detectModel train thread [end]")
         return resultPackerUtils.save_success()
+
+
