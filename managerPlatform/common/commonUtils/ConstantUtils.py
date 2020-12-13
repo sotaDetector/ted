@@ -16,12 +16,17 @@ class ConstantUtils:
     MODEL_WEIGHT_L = 3
     MODEL_WEIGHT_X = 4
 
-    imageItemBasePath = configUtils.getConfigProperties("file", "compreImgPackPath")
+    dataBasePath = configUtils.getConfigProperties("file", "compreImgPackPath")
 
-    singleImgDetectSource = imageItemBasePath + "SingleImgDetectSource/"
+    singleImgDetectSource = dataBasePath + "SingleImgDetectSource/"
     fileUtils.detectPath(singleImgDetectSource)
-    singleImgDetectOut = imageItemBasePath + "singleImgDetectOut/"
+    singleImgDetectOut = dataBasePath + "singleImgDetectOut/"
     fileUtils.detectPath(singleImgDetectOut)
+
+    videoDetectSource=dataBasePath+"videoDetectSource/"
+    fileUtils.detectPath(videoDetectSource)
+    videoDetectOut=dataBasePath+"videoDetectOut/"
+    fileUtils.detectPath(videoDetectOut)
 
     imageItemPrefix = configUtils.getConfigProperties("file", "imageItemPrefix")+"dsc/imageItem/"
 

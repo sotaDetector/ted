@@ -9,6 +9,7 @@ from managerPlatform.modelsManager.detectModelTrainDispacher import detect_model
 from managerPlatform.modelsManager.dmTrainStatisDispacher import dm_train_statis_blp
 from managerPlatform.serviceCaller.cameraStreamDispacher import nat_camera_blp
 from managerPlatform.serviceCaller.detectServiceDispacher import detect_service_blp
+from managerPlatform.serviceCaller.videoDetectDispacher import video_detect_blp
 from managerPlatform.userManager.userManagerDispacher import user_manager_blp
 from managerPlatform.serviceCaller.imageDetectDispacher import iamge_detect_blp
 from flask_cors import *
@@ -22,6 +23,7 @@ app.register_blueprint(user_manager_blp)
 app.register_blueprint(iamge_detect_blp)
 app.register_blueprint(detect_service_blp)
 app.register_blueprint(dm_train_statis_blp)
+app.register_blueprint(video_detect_blp)
 
 app.config["SECRET_KEY"] = '79537d00f4834892986f09a100aa1edf'
 app.config["SESSION_COOKIE_HTTPONLY"]=False
