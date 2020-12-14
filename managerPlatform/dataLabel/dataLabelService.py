@@ -34,7 +34,7 @@ class dataLabelService:
     def getLabelsBylids(self,dsId):
 
         nameList=[]
-        labelList = dataLabelBean.objects(dsId=dsId)
+        labelList = dataLabelBean.objects(dsId=dsId,state=ConstantUtils.DATA_STATUS_ACTIVE)
         labelMap = {}
         for item in labelList:
             labelMap[item['dlid']] = item['dlName']

@@ -184,13 +184,37 @@ class datasetsService:
             item['ditFilePath'] = ConstantUtils.imageItemPrefix + item['ditFilePath'].replace("/","_")
             if item.keys().__contains__("recLabelList"):
                 recLabelList=item['recLabelList']
-                for item in recLabelList:
-                    item['dlName']=labelMap[item['dlid']]
+                newList=[]
+                for labelItem in recLabelList:
+                    if labelMap.keys().__contains__(labelItem['dlid']):
+                        labelItem['dlName']=labelMap[labelItem['dlid']]
+                        newList.append(labelItem)
+                item['recLabelList']=newList
+
+
 
 
         pageItem.set_numpy_dataList(dataArray)
 
         return resultPackerUtils.packPageResult(pageItem);
+
+
+    def getImageItemDetail(self,queryData):
+        imageItem= dataImageItem.objects(ditId=queryData['ditId'],state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
+        labelMap,nameList=labelService.getLabelsBylids(imageItem['dsId'])
+        imageItem['ditFilePath'] = ConstantUtils.imageItemPrefix + imageItem['ditFilePath'].replace("/", "_")
+
+        obj=json.loads(imageItem.to_json())
+        recLabelList=obj['recLabelList']
+
+        newList = []
+        for labelItem in recLabelList:
+            if labelMap.keys().__contains__(labelItem['dlid']):
+                labelItem['dlName'] = labelMap[labelItem['dlid']]
+                newList.append(labelItem)
+        imageItem['recLabelList'] = newList
+
+        return resultPackerUtils.packDataListResults(imageItem.to_json())
 
 
     def delImageItem(self,ditId):
