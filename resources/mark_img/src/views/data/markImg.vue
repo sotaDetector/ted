@@ -16,10 +16,15 @@
     </div>
     <!-- 添加标签 -->
     <div class="add_label">
-      <Button type="success" size="small" @click="addLabel">新增标签</Button>
+      <Button type="primary" icon="ios-arrow-back" size="small" @click="back" style="margin-right:20px;">返回</Button>
+      <div class="title">
+        <Icon style="font-size:22px;margin-top:3px;margin-right:6px;margin-left:20px;" type="ios-menu" />
+        标签管理
+      </div>
+      <Button icon="ios-add-circle-outline" type="success" size="small" @click="addLabel">新增标签</Button>
       <ul class="add">
         <li class="add_li" v-for="(item, idx) in labelList" :key="idx">
-          <Input v-if="!item.edited" type="text" placeholder="请输入标签名称" size="small" style="width:150px;margin-right:5px;" v-model="item.dlName"></Input>
+          <Input ref="labelInput" v-if="!item.edited" type="text" placeholder="标签名称" size="small" style="width:110px;margin-right:5px;" v-model="item.dlName"></Input>
           <span style="color:#fff;margin-right:18px;" v-if="item.edited">{{ item.dlName }}</span>
           <span v-if="item.edited" class="iconfont icon-bianji label_icon" style="font-size:18px;" @click="editLabel(idx)"></span>
           <Icon v-if="item._id" class="label_icon" type="ios-trash" @click="delLabel(item._id)" />
@@ -29,6 +34,10 @@
     </div>
     <!-- 选择标签 -->
     <div class="choose_label">
+      <div class="title" style="margin-top:10px;">
+        <Icon style="font-size:22px;margin-top:3px;margin-right:6px" type="ios-menu" />
+        标注管理
+      </div>
       <ul>
         <li class="cho_li" v-for="(item, idx) in divList" :key="idx">
           <Select :class="[item.id, 'select']" v-model="item.dlid" size="small" style="width: 150px" @on-change="selectLabel(item)" @on-open-change="openSelect(item, $event)">
@@ -36,28 +45,39 @@
               label.dlName
             }}</Option>
           </Select>
-          <img src="@/assets/img/delete_red.png" alt="" class="delete delete_div" @click="delDiv(item.id)" />
+          <img src="@/assets/img/delete_red.png" alt="" class="delete delete_div" @click="delDiv(item.id, 'delDiv')" />
         </li>
       </ul>
       <Button type="success" size="small" @click="submit" v-if="divList.length" style="width: 150px; margin-top: 20px">提交标注结果</Button>
     </div>
 
     <!-- 图片列表 -->
-    <img-list @chooseImg="chooseImg" ref="imgList"></img-list>
+    <img-list @chooseImg="chooseImg" @back="back" ref="imgList"></img-list>
+
+    <!-- 模态框 -->
+    <Modal class="sys_modal" v-model="modal_delete" class-name="vertical_modal" width="316">
+      <div class="modal_body modal_body_delete">
+        <p><img src="@/assets/img/warn_tip.png" alt="">
+          您确定要删除该标签吗?
+        </p>
+      </div>
+      <div slot="footer">
+        <Button type="primary" class="confirm_btn" ghost @click="deleteMethod(dlid)">确定</Button>
+        <Button type="default" class="clear_btn" @click="cancel()">取消</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 <script>
+
+var s1, s2, s3, s4, s5, s6
+
 
 import ImgList from '@/components/ImgList.vue'
 export default {
   name: "MarkImg",
   components: {
     ImgList
-  },
-  computed: {
-    // myLabelList () {
-    //   return this.labelList.filter((item) => item);
-    // },
   },
   mounted () {
     this.dsId = this.$route.params.id
@@ -69,25 +89,9 @@ export default {
       dsId: '', // 数据集Id
       labelList: [],
       myLabelList: [],
+      dlid: '',
+      modal_delete: false,
       divList: [
-        // {
-        //   h: 59,
-        //   id: "47558337402343754125000305175781",
-        //   label: "eyes",
-        //   w: 112,
-        //   x: 475.5833740234375,
-        //   y: 412.5000305175781,
-        // },
-
-        // {
-        //   h: 54,
-        //   id: "878629",
-        //   label: "mouth",
-        //   w: 137,
-        //   x: 400.5999755859375,
-        //   y: 559.5,
-        // },
-
         {
           h: 0.03202846975088968,
           id: "833434",
@@ -96,23 +100,32 @@ export default {
           w: 0.13345195729537365,
           x: 0.4884341637010676,
           y: 0.4592600830367734
-        },
+        }
       ],
     };
   },
   methods: {
-    chooseImg (imgInfo) {
-      this.$Spin.show()
+    clearTime () {
+      for(var i = 1; i <= 6; i++) {
+        clearTimeout('s' + i)
+      }
+    },
+    chooseImg (imgInfo, isChoose) {
+      if(isChoose) {
+        this.$Spin.show()
+        this.clearTime()
+      }
+      this.imgSrc = imgInfo.ditFilePath
+
       this.ditId = imgInfo._id
       var path = '/markImg/' + this.dsId + '/' + this.ditId
       if(this.$route.path != path) {
         this.$router.push({ path })
       }
       // $('#img').remove()
-      this.imgSrc = imgInfo.ditFilePath
-      setTimeout(() => {
+      s1 = setTimeout(() => {
         this.initPage(imgInfo)
-      }, 30);
+      }, 100);
     },
     initPage (imgInfo) {
       $('.box').remove()
@@ -129,7 +142,7 @@ export default {
       //   ratio = img.width / img.height;
       // };
 
-      setTimeout(() => {
+      s2 = setTimeout(() => {
         // 新增标签相关
         var addBtn = $("#addBtn");
         var editBtn = $("#editBtn");
@@ -204,7 +217,7 @@ export default {
           dragStartX = e.pageX;
           dragStartY = e.pageY;
 
-          setTimeout(() => {
+          s3 = setTimeout(() => {
             $(".box").css("border", "1px dashed rgb(66, 104, 207, 0.5)");
             dragDiv.style.border = "2px solid rgb(94, 207, 66)";
 
@@ -278,14 +291,13 @@ export default {
               item.y = y / height;
               item.id = (x.toString() + y.toString()).replace(/\./g, "");
             }
-            console.log(item);
           });
           dragDiv.id = (x.toString() + y.toString()).replace(/\./g, "");
           $(dragDiv).removeClass("dragging");
           dragDiv = null;
         }
 
-        setTimeout(() => {
+        s4 = setTimeout(() => {
           _this.divList = imgInfo.recLabelList.map(item => {
             return {
               x: item.rec_lt_x,
@@ -391,7 +403,7 @@ export default {
               });
               // console.log(startX,startY,endX,endY)
 
-              setTimeout(() => {
+              s5 = setTimeout(() => {
                 $(".box").css("border", "1px dashed rgb(66, 104, 207, 0.5)");
                 div.style.border = "2px solid rgb(94, 207, 66)";
 
@@ -410,21 +422,19 @@ export default {
             }
           });
 
-          setTimeout(() => {
+          s6 = setTimeout(() => {
             this.$Spin.hide()
-          }, 20);
+          }, 500);
         }, 100);
-
-
       }, 100);
     },
     getLabelList () {
       let params = {
         dsId: this.dsId
       }
-      this.$Spin.show()
+      // this.$Spin.show()
       this.$post('/dataLabel/getAllDataLabelByDsid', params).then(data => {
-        this.$Spin.hide()
+        // this.$Spin.hide()
         if(data.rs === 1) {
           this.myLabelList = [...data.data]
           this.labelList = data.data.map(item => {
@@ -449,17 +459,25 @@ export default {
       })
     },
     addLabel () {
+      if(this.labelList.find(item => !item.dlName)) {
+        this.$Message.error('请先输入当前标签')
+        return false
+      }
       this.labelList.push({
         dlName: '',
         edited: false
       });
+      this.$nextTick(() => {
+        var inputLength = this.labelList.filter(item => item.edited == false).length
+        this.$refs.labelInput[inputLength - 1].focus()
+      })
     },
     editLabel (idx) {
       if(!this.labelList[idx].edited) return false
       this.labelList[idx].edited = false
     },
     changeDivName (id, name) {
-      console.log(this.divList, id)
+      // console.log(this.divList, id)
       this.divList.forEach(item => {
         if(item.dlid == id) {
           $('#' + item.id).html("<span>" + name + "</span>")
@@ -470,7 +488,6 @@ export default {
     saveLabel (item, idx) {
       if(!item.dlName || item.edited) return false
       this.$set(this.labelList[idx], 'edited', true)
-
 
       if(!item._id) { // 新增
         var params = {
@@ -509,14 +526,19 @@ export default {
       })
     },
     delLabel (id) {
-      // this.labelList.splice(idx, 1);
+     this.modal_delete = true
+     this.dlid = id
+    },
+    deleteMethod(id) {
       this.$Spin.show()
       this.$post('/dataLabel/delDataLabel', { dlid: id }).then(data => {
         this.$Spin.hide()
         if(data.rs === 1) {
+          this.modal_delete = false
           this.$Message.success('删除成功')
-          this.delDiv(id)
+          this.delDiv(id, 'delLabel')
           this.getLabelList()
+          this.$refs.imgList.getImgs();
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
@@ -525,6 +547,9 @@ export default {
           }
         }
       })
+    },
+    cancel() {
+      this.modal_delete = false
     },
     // inputAddLabel (idx, e) {
     //   this.$set(this.labelList[idx], 'dlName', e);
@@ -547,26 +572,31 @@ export default {
       item.dlName = dlName
       $("#" + id).html("<span>" + dlName + "</span>");
     },
-    delDiv (id) {
-      this.divList.forEach((item, idx) => {
-        if(item.dlid == id) {
-          this.divList.splice(idx, 1)
-          $('#' + item.id).remove()
-        }
-      })
-
-      // this.divList = this.divList.filter((item) => item.id != id);
-      // $("#" + id).remove();
+    delDiv (id, type) {
+      console.log(id)
+      console.log(this.divList)
+      if(type == 'delLabel') {
+        this.divList.forEach((item, idx) => {
+          if(item.dlid == id) {
+            this.divList.splice(idx, 1)
+            $('#' + item.id).remove()
+          }
+        })
+      } else if(type == 'delDiv') {
+        this.divList = this.divList.filter((item) => item.id != id);
+        $("#" + id).remove();
+      }
     },
     submit () {
       var item = this.divList.find((item) => !item.dlName);
       if(item) {
-        this.$Message.error("请选择标签");
+        this.$Message.error("请为所有标注框选择标签");
         return false;
       }
       console.log(this.divList);
       this.$Spin.show()
       this.$post('/dsc/upImageItemRecLabels', {
+        dsId: this.dsId,
         ditId: this.ditId,
         recLabelList: this.divList.map(item => {
           return {
@@ -582,7 +612,7 @@ export default {
         this.$Spin.hide()
         if(data.rs === 1) {
           this.modal_modify = false
-          this.$Message.success('修改成功!');
+          this.$Message.success('提交成功!');
           this.$refs.imgList.getImgs();
         } else {
           if(data.data && data.data.errorMsg) {
@@ -593,6 +623,9 @@ export default {
         }
       })
     },
+    back () {
+      this.$router.push('/dataManage')
+    }
   },
 };
 </script>
@@ -608,7 +641,7 @@ export default {
   text-align: center;
   background: #333;
   position: relative;
-  padding-bottom: 110px;
+  // padding-bottom: 110px;
   .unselect {
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -662,16 +695,67 @@ export default {
     bottom: 0;
     left: 0;
   }
-  .choose_label {
-    float: right;
-    margin-right: 60px;
-  }
+
   .choose_label,
   .add_label {
-    max-height: 100%;
+    max-height: calc(100% - 110px);
     padding-top: 20px;
     overflow-y: auto;
+    width: 22%;
   }
+
+  .choose_label {
+    float: right;
+    margin-right: 20px;
+  }
+
+  /* 设置滚动条的样式 */
+  .add_label::-webkit-scrollbar,
+  .choose_label::-webkit-scrollbar {
+    width: 12px;
+  }
+  /* 滚动槽 */
+  .add_label::-webkit-scrollbar-track,
+  .choose_label::-webkit-scrollbar-track {
+    // -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    -webkit-box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+  }
+  /* 滚动条滑块 */
+  .add_label::-webkit-scrollbar-thumb,
+  .choose_label::-webkit-scrollbar-thumb {
+    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.1);
+    // -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
+    -webkit-box-shadow: inset 0 0 6px rgba(255, 0, 0, 0.8);
+  }
+  // ::-webkit-scrollbar-thumb:window-inactive {
+  //   background: rgba(255, 0, 0, 0.4);
+  // }
+
+  // /*滚动条样式*/
+  // .choose_label::-webkit-scrollbar,
+  // .add_label::-webkit-scrollbar {
+  //   width: 4px;
+  //   /*height: 4px;*/
+  // }
+  // .choose_label::-webkit-scrollbar-thumb,
+  // .choose_label::-webkit-scrollbar-thumb,
+  // .choose_label::-webkit-scrollbar-track-piece,
+  // .choose_label::-webkit-scrollbar-track-piece
+  // {
+  //   border-radius: 10px;
+  //   // -webkit-box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
+  //   background:blue;
+  // }
+  // .choose_label::-webkit-scrollbar-track,
+  // .add_label::-webkit-scrollbar-track {
+  //   // -webkit-box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
+  //   border-radius: 0;
+  //   background: red;
+  //   // background: rgba(255, 255, 255, 0.1);
+  // }
+
   .delete {
     width: 16px;
     height: 16px;
@@ -687,10 +771,9 @@ export default {
   }
   .add_label {
     float: left;
-    margin-left: 30px;
-
+    // margin-left: 30px;
     .add {
-      margin: 20px 0;
+      margin: 20px 0 20px 20px;
     }
   }
 }
@@ -699,5 +782,16 @@ export default {
   color: #ccc;
   font-size: 20px;
   margin: 0 5px;
+}
+.add_label .title,
+.choose_label .title {
+  // width: 110px;
+  // border-left: 3px solid #2d8cf0;
+  line-height: 20px;
+  margin: 20px 4px;
+  color: #f0faff;
+  font-size: 16px;
+  text-align: left;
+  // background: #f0faff;
 }
 </style>
