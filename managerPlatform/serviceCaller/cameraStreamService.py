@@ -54,7 +54,7 @@ class cameraStreamService:
 
         detectMap[sessionId].stopDetect()
 
-        detectMap[sessionId].join()
+        # detectMap[sessionId].join()
 
         return {"rs": 1}
 
