@@ -7,7 +7,7 @@ from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUti
 from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
 from managerPlatform.common.dataManager.redisSource import redisClient
 from managerPlatform.common.keyGen.keyGenarator import keyGenarator
-from managerPlatform.serviceCaller.detectServiceImpl import detectThreadMap
+from managerPlatform.serviceCaller.detectServiceImpl import detectThreadMap, modelVersionSeervice
 
 detectMap = {}
 
@@ -19,26 +19,35 @@ class cameraStreamService:
 
     def startNativeCameraDetect(self,config):
 
-        #加载模型
-        # modelConfig = {}
-        # modelConfig["weights"] = "weights/yolov5s.pt"
-        # modelConfig["device"]=''
-        # # 创建检测对象
-        # detectThread = detectServiceThread(modelConfig)
-        if not detectThreadMap.keys().__contains__(config['serviceSessionId']):
-            return resultPackerUtils.packErrorMsg(resultPackerUtils.EC_NO_EVALUATE_SESSION)
-        detectThread = detectThreadMap[config['serviceSessionId']]
 
-        #加载检测参数
-        detectConfig=detectConfigUtils.getBasicDetectConfig(str(config['source']),outPath=ConstantUtils.videoDetectOut+config['serviceSessionId'])
+
+        return self.startStreamDetect(config)
+
+
+    def startLiveStreamDetect(self,config):
+
+
+        return self.startStreamDetect(config)
+
+    def startStreamDetect(self,config):
+        # 为每个检测线程分配sessionId
+        sessionId = randomUtils.getRandomStr()
+        # 加载模型
+        dmVersionBean = modelVersionSeervice.getDMVersionBean(config['dmtvid'])[0]
+        modelConfig = {}
+        modelConfig["weights"] = dmVersionBean['ckptModelSavePath']
+        modelConfig["device"] = ''
+        # 创建检测对象
+        detectThread = detectServiceThread(modelConfig)
+
+        # 加载检测参数
+        detectConfig = detectConfigUtils.getBasicDetectConfig(str(config['source']),
+                                                              outPath=ConstantUtils.videoDetectOut + sessionId)
 
         detectThread.setDetectConfig(detectConfig)
 
-        #开始线程
+        # 开始线程
         detectThread.start()
-
-        # 为每个检测线程分配sessionId
-        sessionId = randomUtils.getRandomStr()
 
         detectMap[sessionId] = detectThread
 
@@ -54,7 +63,7 @@ class cameraStreamService:
 
         detectMap[sessionId].stopDetect()
 
-        # detectMap[sessionId].join()
+        detectMap[sessionId].join()
 
         return {"rs": 1}
 

@@ -24,6 +24,17 @@ def startNativeCameraDetect():
     return natCameraService.startNativeCameraDetect(jsonData)
 
 
+@nat_camera_blp.route('/startLiveStreamDetect', methods=['POST'])
+def startLiveStreamDetect():
+
+
+    jsonData = request.get_json()
+
+    print("接收到数据："+str(jsonData))
+
+    return natCameraService.startLiveStreamDetect(jsonData)
+
+
 @nat_camera_blp.route("/video_feed")
 def videoStreamService():
     sessionId=request.args.get("videoPlayId")
