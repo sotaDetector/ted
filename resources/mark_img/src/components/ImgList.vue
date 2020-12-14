@@ -12,26 +12,40 @@
         <li @click="chooseImg()"><img src="@/assets/img/white.jpg" alt="" /></li>
       </ul> -->
       <ul class="list">
-        <li :class="{'actived': idx==activeIdx}" @click="chooseImg(item,idx)" v-for="(item,idx) in imgList" :key="idx">
+        <li :class="{'actived': idx==activeIdx}" @click="chooseImg(item,idx,true)" v-for="(item,idx) in imgList" :key="idx">
           <img :src="item.ditFilePath" alt="" />
-          <Icon type="md-close-circle" class="del" v-if="idx!=activeIdx" @click.stop.prevent="delImg(item._id)" />
+          <Icon type="md-close-circle" class="del" @click.stop.prevent="delImg(item._id)" />
         </li>
       </ul>
     </div>
     <div class="right" @click="clickRight">
       <Icon type="ios-arrow-forward" />
     </div>
+
+    <Page style="margin-top:5px;" size="small" :total="total" :page-size='pagesize' @on-change="handleChange" show-total show-elevator></Page>
+    <!-- 模态框 -->
+    <Modal class="sys_modal" v-model="modal_delete" class-name="vertical_modal" width="316">
+      <div class="modal_body modal_body_delete">
+        <p><img src="@/assets/img/warn_tip.png" alt="">
+          您确定要删除该图片吗?
+        </p>
+      </div>
+      <div slot="footer">
+        <Button type="primary" class="confirm_btn" ghost @click="deleteMethod(ditId)">确定</Button>
+        <Button type="default" class="clear_btn" @click="cancel()">取消</Button>
+      </div>
+    </Modal>
   </div>
 </template>
 
 <script>
 
-
-
 export default {
   data () {
     return {
       // left: '',
+      ditId: '',
+      modal_delete: false,
       activeIdx: 0,
       total: 0,// 初始化信息总条数
       pageNow: 1,
@@ -78,14 +92,15 @@ export default {
         // require("@/assets/img/timg (3).jpg"),
         // require("@/assets/img/white.jpg"),
         // require("@/assets/img/timg (2).jpg"),
-      ]
+      ],
     }
   },
   mounted () {
-    this.getImgs()
+    this.getImgs(true)
   },
   methods: {
-    getImgs () {
+    getImgs (isInit) {
+      // if(!this.hasNextPage) return false
       var id = this.$route.params.id
       let params = {
         pageSize: this.pagesize,
@@ -94,26 +109,44 @@ export default {
       }
       this.$Spin.show()
       this.$post('/dsc/getImageItemList', params).then(data => {
-        this.$Spin.hide()
         if(data.rs === 1) {
-          this.imgList = data.pageData.dataList;
-          this.total = data.pageData.totalPages;//总数
-          this.chosePage = data.pageData.page;//选择页
-          this.pageNow = data.pageData.page;//当前页
+          var pageData = data.pageData
+
+          // 最后一页删除了最后一个数据之后，往回退一页
+          if(pageData.page > pageData.totalPages && !pageData.dataList.length) {
+            this.reset()
+            return false
+          }
+
+          this.imgList = pageData.dataList
+          this.total = pageData.totalCount;//总数
+          this.chosePage = pageData.page;//选择页
+          this.pageNow = pageData.page;//当前页
+
+          console.log(this.total)
+
+
+
+          // var index = 0
+          if(isInit) {
+            var ditId = this.$route.params.ditId
+            if(ditId) {
+              this.activeIdx = this.imgList.findIndex(item => item._id == ditId)
+            }
+          }
+
+          var index = this.imgList[this.activeIdx] ? this.activeIdx : 0
+          this.chooseImg(this.imgList[index], this.activeIdx)
 
           setTimeout(() => {
             $('.list').width($('.list li').length * 80)
             this.listWidth = $('.list').width()
             this.boxWidth = $('.img_list').width()
-            var index = 0
-            var ditId = this.$route.params.ditId
-            if(ditId) {
-              this.activeIdx = index = this.imgList.findIndex(item => item._id == ditId)
-            }
-            var index = this.imgList[this.activeIdx] ? this.activeIdx : 0
-            this.chooseImg(this.imgList[index], this.activeIdx)
+            this.$Spin.hide()
           }, 200);
+
         } else {
+          this.$Spin.hide()
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
           } else {
@@ -122,11 +155,30 @@ export default {
         }
       })
     },
+    //分页
+    handleChange (page) {
+      this.pageNow = page;//赋值当前页
+      this.activeIdx = 0
+      this.getImgs();
+    },
+    reset () {
+      this.pageNow = this.pageNow - 1
+      if(this.pageNow == 0) {
+        this.$emit('back')
+        return false
+      }
+      this.getImgs()
+    },
     delImg (id) {
+      this.modal_delete = true
+      this.ditId = id
+    },
+    deleteMethod () {
       this.$Spin.show()
-      this.$post('/dsc/delImageItem', { ditId: id }).then(data => {
+      this.$post('/dsc/delImageItem', { ditId: this.ditId }).then(data => {
         this.$Spin.hide()
         if(data.rs === 1) {
+          this.modal_delete = false
           this.$Message.success('删除成功')
           this.getImgs()
         } else {
@@ -138,9 +190,9 @@ export default {
         }
       })
     },
-    chooseImg (item, idx) {
+    chooseImg (item, idx, isChoose) {
       this.activeIdx = idx
-      this.$emit('chooseImg', item)
+      this.$emit('chooseImg', item, isChoose)
     },
     clickLeft () {
       var left = $('.list').position().left
@@ -159,7 +211,10 @@ export default {
         return false
       }
       $('.list').animate({ left: left + 'px' })
-    }
+    },
+    cancel () {
+      this.modal_delete = false
+    },
   }
 }
 </script>
@@ -172,7 +227,7 @@ export default {
   position: absolute;
   bottom: 0;
   left: 0;
-  padding: 10px 60px 0;
+  padding: 5px 60px 0;
 }
 .img_list {
   width: calc(100% - 40px);
@@ -223,7 +278,7 @@ export default {
   text-align: center;
   background: rgba(255, 255, 255, 0.3);
   position: absolute;
-  top: 20px;
+  top: 15px;
 }
 .left {
   left: 0;

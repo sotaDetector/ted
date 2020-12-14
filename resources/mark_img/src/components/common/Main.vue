@@ -49,7 +49,8 @@ export default {
 .content {
   width: auto;
   height: calc(100% - 30px);
-  min-width: 1024px;
+  /* min-width: 1024px; */
+  min-width: 1000px;
   padding: 15px 15px 20px;
 }
 </style>

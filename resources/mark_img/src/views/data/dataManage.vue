@@ -25,7 +25,7 @@
           <Table :columns="columns" :data="pageInfo.dataList">
             <template slot-scope="{row, index}" slot="action">
               <div>
-                <span class="action" @click="markDatas(row.dsId,index)">标注</span>
+                <span v-if="row.dsImageCount" class="action" @click="markDatas(row.dsId,index)">标注</span>
                 <span class="action" style="margin:0 4px;" @click="clickImport(row.dsId)">导入</span>
                 <span class="action" @click="delDatas(row.dsId)">删除</span>
               </div>
@@ -38,7 +38,7 @@
       </div>
     </div>
     <!-- 模态框 -->
-    <Modal class="sys_modal" v-model="modal_list" class-name="vertical_modal" width="400">
+    <Modal class="sys_modal" v-model="modal_list" class-name="vertical_modal" width="400" :mask-closable="false">
       <div class="modal_body modal_body_delete">
         <Upload style="display:inline-block;margin:0 4px;" multiple ref="upload" :before-upload="handleBeforeUpload" :action="$baseUrl + '/dsc/upImageData'">
           <Button type="primary" ghost>选择文件</Button>
@@ -54,6 +54,19 @@
         <Button type="success" @click="importDatas" icon="ios-cloud-upload-outline" style="width:115px;">点击上传</Button>
         <!-- <Button type="primary" class="confirm_btn" ghost @click="deleteMethod(channelId)">确定</Button> -->
         <Button type="default" class="clear_btn" @click="cancel()">取消</Button>
+      </div>
+    </Modal>
+    <Modal class="sys_modal" v-model="modal_view" class-name="vertical_modal" width="316" style="max-height:362px;overflow-y:auto;">
+      <div class="modal_body modal_body_delete">
+        <ul>
+          <li v-for="(item,idx) in labelList" :key="idx">
+            {{item}}
+          </li>
+        </ul>
+      </div>
+      <div slot="footer">
+        <Button type="primary" class="confirm_btn" ghost  @click="cancel()">确定</Button>
+        <!-- <Button type="default" class="clear_btn" @click="cancel()">取消</Button> -->
       </div>
     </Modal>
     <Modal class="sys_modal" v-model="modal_delete" class-name="vertical_modal" width="316">
@@ -121,8 +134,10 @@ export default {
       search: {},
       modal_list: false,
       modal_delete: false,
+      modal_view: false,
       modal_add: false,
       modal_modify: false,
+      labelList: [],
       addInfo: {
         dsName: '',
         dsType: 1,
@@ -152,6 +167,11 @@ export default {
           render: (h, params) => {
             return h('span', params.row.dsType == 1 ? '图片' : '其它')
           }
+        },
+        {
+          "title": "数据数量",
+          "align": "center",
+          "key": "dsImageCount",
         }, {
           "title": "标注进度",
           "align": "center",
@@ -160,12 +180,10 @@ export default {
           "title": "标签数量",
           "align": "center",
           "key": "labelCount",
-          "width": 190,
         }, {
           "title": "标签",
           "align": "center",
           "key": "labelList",
-          "width": 190,
           render: (h, params) => {
             return h('div', {
               style: {
@@ -243,7 +261,7 @@ export default {
         this.$Spin.hide()
         if(data.rs === 1) {
           this.pageInfo = data.pageData;
-          this.total = data.pageData.totalPages;//总数
+          this.total = data.pageData.totalCount;//总数
           this.chosePage = data.pageData.page;//选择页
           this.pageNow = data.pageData.page;//当前页
         } else {
@@ -262,7 +280,6 @@ export default {
     },
 
     handleBeforeUpload (e) {
-      console.log(e)
       if(e.type == 'application/x-zip-compressed') {
         this.fileType = 1
         this.files.push(e)
@@ -382,7 +399,8 @@ export default {
       })
     },
     viewLabel (list) {
-      console.log(list)
+      this.labelList = list
+      this.modal_view = true
     },
     markDatas (id, idx) {
       this.$router.push({ path: '/markImg/' + id })
@@ -395,6 +413,11 @@ export default {
     importDatas () {
       // console.log(id)
       // this.dsId = id
+      if(!this.files.length) {
+        this.$Message.error('请选择文件')
+        return false
+      }
+
       var fd = new FormData()
       if(this.fileType == 1) { // 压缩包
         if(this.files.length > 1) {
@@ -433,7 +456,6 @@ export default {
       })
     },
     delDatas (id) {
-      console.log(id)
       this.dsId = id
       this.modal_delete = true
     },
@@ -458,6 +480,7 @@ export default {
       this.modal_add = false
       this.modal_modify = false
       this.modal_delete = false
+      this.modal_view = false
       this.modal_list = false
       if(name) {
         this.$refs[name].resetFields();
