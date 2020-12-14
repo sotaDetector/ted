@@ -31,11 +31,13 @@ class datasetsService:
 
     def getDataSetPages(self, pageItem, dsName):
 
-        totalCount = datasetsBean.objects().count()
+        userSearchDict = {}
+        if dsName != None:
+            userSearchDict['dsName'] = {'$regex': dsName}
 
-        userSearchDict={}
-        if dsName!=None:
-            userSearchDict['dsName']={'$regex': dsName}
+        totalCount = datasetsBean.objects(__raw__=userSearchDict,state=1,userId=session['userId']).count()
+
+
         #获取数据集
 
         datasetList = datasetsBean.objects(__raw__=userSearchDict,state=1,userId=session['userId']).order_by('-create_date').skip(

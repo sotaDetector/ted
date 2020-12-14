@@ -5,8 +5,11 @@ from flask import make_response
 
 class resultPackerUtils:
     EC_NAME_PASS_ERROR = 1001
+
+    EC_NO_EVALUATE_SESSION=3001
     ERRORMAP = {
-        EC_NAME_PASS_ERROR: "用户名或密码错误"
+        EC_NAME_PASS_ERROR: "用户名或密码错误",
+        EC_NO_EVALUATE_SESSION:"未启动校验服务或服务已过期！"
     }
 
     _resultTag = "rs"

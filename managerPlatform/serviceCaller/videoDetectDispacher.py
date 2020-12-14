@@ -17,7 +17,7 @@ def getVideoDetectResult():
 
 @video_detect_blp.route('/getVideoStream', methods=['POST','GET'])
 def getVideoSource():
-    sessionId = request.args.get("sessionId")
-    return Response(videoDetectSer.gen_frames(sessionId), mimetype='multipart/x-mixed-replace; boundary=frame')
+    videoPlayId = request.args.get("videoPlayId")
+    return Response(videoDetectSer.gen_frames(videoPlayId), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 

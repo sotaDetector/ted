@@ -2,6 +2,7 @@ import time
 
 from cv2 import cv2
 
+from managerPlatform.bean.serviceCallerBeans.detectRecord import detectRecord
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
@@ -27,15 +28,24 @@ class videoDetectService:
                                                                   outPath=ConstantUtils.videoDetectOut)
             detectThread.detect(detectConfig)
 
+            detectRecordItem=detectRecord(videoSavedPath=ConstantUtils.videoDetectOut+FileNewName)
+            detectRecordItem.save()
             result = {
-                "videoPath": ConstantUtils.imageItemPrefix + "videoDetectOut_" + FileNewName
+                "videoPlayId": detectRecordItem.dereid
             }
 
             return resultPackerUtils.packCusResult(result)
+        else:
 
-    def gen_frames(self, sessionId):
+            return resultPackerUtils.packErrorMsg(resultPackerUtils.EC_NO_EVALUATE_SESSION)
 
-        cap = cv2.VideoCapture('/Volumes/study/objectDetection/ted/resources/809ce493-8b6f-4bf1-834b-f9d51d9657b8.mp4')
+
+
+    def gen_frames(self, videoPlayId):
+
+        recordItem=detectRecord.objects(dereid=videoPlayId,state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
+
+        cap = cv2.VideoCapture(recordItem['videoSavedPath'])
         fps=cap.get(cv2.CAP_PROP_FPS)
         print("fps:"+str(fps))
         while cap.isOpened():
