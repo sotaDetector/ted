@@ -72,6 +72,12 @@ class detectModelTrainService:
         return resultPackerUtils.packDataItemResults(dataItem.to_json(),"dmtvid")
 
 
+    def getDMVersionBean(self,dmtvid):
+        dataItem=detectModelTrainVersion.objects(dmtvid=dmtvid,state=ConstantUtils.DATA_STATUS_ACTIVE).exclude("state","create_date")
+
+        return dataItem
+
+
 
     def delDMVersion(self,queryData):
         modelVersion = detectModelTrainVersion.objects(dmtvid=queryData['dmtvid'])
