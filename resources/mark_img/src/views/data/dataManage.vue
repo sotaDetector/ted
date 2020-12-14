@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="data_manage">
     <div class="container_title">
       <!-- 面包屑 -->
       <!-- <Breadcrumb>
@@ -56,8 +56,8 @@
         <Button type="default" class="clear_btn" @click="cancel()">取消</Button>
       </div>
     </Modal>
-    <Modal class="sys_modal" v-model="modal_view" class-name="vertical_modal" width="316" style="max-height:362px;overflow-y:auto;">
-      <div class="modal_body modal_body_delete">
+    <Modal class="sys_modal" v-model="modal_view" class-name="vertical_modal" width="316">
+      <div class="modal_body modal_body_view">
         <ul>
           <li v-for="(item,idx) in labelList" :key="idx">
             {{item}}
@@ -65,7 +65,7 @@
         </ul>
       </div>
       <div slot="footer">
-        <Button type="primary" class="confirm_btn" ghost  @click="cancel()">确定</Button>
+        <Button type="primary" class="confirm_btn" ghost @click="cancel()">确定</Button>
         <!-- <Button type="default" class="clear_btn" @click="cancel()">取消</Button> -->
       </div>
     </Modal>
@@ -497,9 +497,18 @@ export default {
 </script>
 
 
-<style lang="scss" scoped>
-.action {
-  color: #2db7f5;
-  cursor: pointer;
+<style lang="scss">
+.data_manage {
+  .action {
+    color: #2db7f5;
+    cursor: pointer;
+  }
+  .container_info .ivu-table-overflowX {
+    overflow: initial;
+  }
 }
+.modal_body.modal_body_view {
+    max-height: 362px;
+    overflow-y: auto;
+  }
 </style>
