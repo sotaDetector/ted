@@ -59,6 +59,7 @@ class trainModelThread(threading.Thread):
         wdir.mkdir(parents=True, exist_ok=True)  # make dir
         last = wdir / 'last.pt'
         best = wdir / 'best.pt'
+        entireModelPath= wdir / 'entireModel.pt'
         results_file = save_dir / 'results.txt'
 
         # Save run settings
@@ -390,6 +391,10 @@ class trainModelThread(threading.Thread):
                     del ckpt
             # end epoch ----------------------------------------------------------------------------------------------------
         # end training
+
+        #保存完整模型
+        torch.save(model,entireModelPath)
+
 
         if rank in [-1, 0]:
             # Strip optimizers

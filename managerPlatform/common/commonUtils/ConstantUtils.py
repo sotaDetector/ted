@@ -28,6 +28,9 @@ class ConstantUtils:
     videoDetectOut=dataBasePath+"videoDetectOut/"
     fileUtils.detectPath(videoDetectOut)
 
+    modelBasePath = configUtils.getConfigProperties("model", "modelSavePath")
+    fileUtils.detectPath(videoDetectOut)
+
     imageItemPrefix = configUtils.getConfigProperties("file", "imageItemPrefix")+"dsc/imageItem/"
 
 

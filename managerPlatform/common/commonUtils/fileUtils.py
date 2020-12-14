@@ -59,5 +59,10 @@ class fileUtils:
         if not os.path.exists(filePath):
             os.mkdir(filePath)
 
+    @classmethod
+    def getModelSavePath(cls,basePath,projectPath):
+        basePath=basePath+projectPath+"/weights"
 
-print(fileUtils.getRandomName("1.jpg"))
+        return basePath+"/best.pt",basePath+"/entireModel.pt"
+
+

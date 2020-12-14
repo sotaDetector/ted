@@ -21,6 +21,13 @@ class detectModelTrainVersion(baseBean):
     # train trainDataset and label
     ds_dl_list = mongoSource.mdb.ListField()
 
+    #check point model saved path
+    ckptModelSavePath=mongoSource.mdb.StringField()
+
+    #完整模型的保存路径
+    entireModelSavePath=mongoSource.mdb.StringField()
+
+
     @staticmethod
     def convertToBean(jsonData):
         return detectModelTrainVersion(
