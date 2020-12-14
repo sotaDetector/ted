@@ -2,10 +2,12 @@ export const menuList = [{
   menuId: 1,
   menuName: '数据管理',
   url: '',
+  ico: 'ios-analytics',
   children: [{
     menuId: 2,
     menuName: '数据集管理',
-    url: 'dataManage'
+    url: 'dataManage',
+    ico: 'ios-crop',
   },
   // {
   //   menuId: 3,
@@ -17,26 +19,32 @@ export const menuList = [{
   menuId: 4,
   menuName: '模型管理',
   url: '',
+  ico: 'ios-cube',
   children: [{
     menuId: 5,
     menuName: '模型管理',
-    url: 'modelManage'
+    url: 'modelManage',
+    ico: 'ios-cube-outline',
   }]
 },{
   menuId: 6,
   menuName: '模型调用',
   url: '',
+  ico: 'ios-hammer',
   children: [{
     menuId: 7,
     menuName: '图片检测',
-    url: 'imgDetect'
+    url: 'imgDetect',
+    ico: 'ios-image-outline',
   },{
     menuId: 8,
     menuName: '视频检测',
-    url: 'videoDetect'
+    url: 'videoDetect',
+    ico: 'ios-film-outline',
   },{
     menuId: 9,
     menuName: '视频流检测',
-    url: 'flowDetect'
+    url: 'flowDetect',
+    ico: 'ios-videocam-outline',
   }]
 }]
