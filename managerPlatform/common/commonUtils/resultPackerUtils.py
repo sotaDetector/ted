@@ -31,15 +31,21 @@ class resultPackerUtils:
         return json.dumps(result)
 
     @classmethod
-    def packDataListResults(cls,dataList):
+    def packDataListResults(cls,dataList=None,idName=None):
+
+        if idName:
+            dataList=dataList.replace("_id", idName)
+
         result = {
             cls._resultTag: cls._success_tag,
-            cls._resultDataTag:json.loads(dataList)
+            cls._resultDataTag: json.loads(dataList)
         }
         return result
 
     @classmethod
-    def packDataItemResults(cls,dataItem):
+    def packDataItemResults(cls,dataItem,idName=None):
+        if idName:
+            dataItem=dataItem.replace("_id",idName)
         result = {
             cls._resultTag: cls._success_tag,
             cls._resultDataTag: json.loads(dataItem)[0]

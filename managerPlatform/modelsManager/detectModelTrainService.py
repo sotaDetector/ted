@@ -57,19 +57,19 @@ class detectModelTrainService:
     def getDMVersionList(self,queryData):
         dataList = detectModelTrainVersion.objects(dmid=queryData['dmid'], state=ConstantUtils.DATA_STATUS_ACTIVE)\
             .exclude("state","create_date").order_by('-create_date')
-        return resultPackerUtils.packDataListResults(dataList.to_json())
+        return resultPackerUtils.packDataListResults(dataList.to_json(),"dmtvid")
 
 
     def getDetectModelVersionNameList(self,queryData):
         dataList=detectModelTrainVersion.objects(dmid=queryData['dmid'],state=ConstantUtils.DATA_STATUS_ACTIVE).only("dmtvid","dmtvName")
-        return resultPackerUtils.packDataListResults(dataList.to_json())
+        return resultPackerUtils.packDataListResults(dataList.to_json(),"dmtvid")
 
 
 
     def getDMVersionDetail(self,queryData):
         dataItem=detectModelTrainVersion.objects(dmtvid=queryData['dmtvid'],state=ConstantUtils.DATA_STATUS_ACTIVE).exclude("state","create_date")
 
-        return resultPackerUtils.packDataItemResults(dataItem.to_json())
+        return resultPackerUtils.packDataItemResults(dataItem.to_json(),"dmtvid")
 
 
 
