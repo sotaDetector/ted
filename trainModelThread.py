@@ -33,6 +33,9 @@ from utils.loss import compute_loss
 from utils.plots import plot_images, plot_labels, plot_results, plot_evolution
 from utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_distributed_zero_first
 
+from managerPlatform.modelsManager.dmTrainStatisService import dmTrainStatisService
+
+
 logger = logging.getLogger(__name__)
 
 try:
@@ -41,7 +44,10 @@ except ImportError:
     wandb = None
     logger.info("Install Weights & Biases for experiment logging via 'pip install wandb' (recommended)")
 
+dmTrainStatisSer = dmTrainStatisService()
+
 class trainModelThread(threading.Thread):
+
 
     def train(self,hyp, opt, device, tb_writer=None, wandb=None,datasetDict=None,valDataDict=None):
         logger.info(f'Hyperparameters {hyp}')
@@ -53,6 +59,7 @@ class trainModelThread(threading.Thread):
         wdir.mkdir(parents=True, exist_ok=True)  # make dir
         last = wdir / 'last.pt'
         best = wdir / 'best.pt'
+        entireModelPath= wdir / 'entireModel.pt'
         results_file = save_dir / 'results.txt'
 
         # Save run settings
@@ -351,11 +358,15 @@ class trainModelThread(threading.Thread):
                         'metrics/precision', 'metrics/recall', 'metrics/mAP_0.5', 'metrics/mAP_0.5:0.95',
                         'val/box_loss', 'val/obj_loss', 'val/cls_loss',  # val loss
                         'x/lr0', 'x/lr1', 'x/lr2']  # params
+                statisMap={"dmtvid":self.modelConfigBean["dmtvid"],"epoch":epoch}
                 for x, tag in zip(list(mloss[:-1]) + list(results) + lr, tags):
+                    statisMap[tag]=x
                     if tb_writer:
                         tb_writer.add_scalar(tag, x, epoch)  # tensorboard
                     if wandb:
                         wandb.log({tag: x})  # W&B
+
+                dmTrainStatisSer.saveModelTrainStatis(statisMap)
 
                 # Update best mAP
                 fi = fitness(np.array(results).reshape(1, -1))  # weighted combination of [P, R, mAP@.5, mAP@.5-.95]
@@ -380,6 +391,10 @@ class trainModelThread(threading.Thread):
                     del ckpt
             # end epoch ----------------------------------------------------------------------------------------------------
         # end training
+
+        #保存完整模型
+        torch.save(model,entireModelPath)
+
 
         if rank in [-1, 0]:
             # Strip optimizers

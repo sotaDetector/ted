@@ -9,11 +9,14 @@ class detectModelTrainStatistics(baseBean):
     #训练版本ID
     dmtvid=mongoSource.mdb.LongField(required=True)
 
+    #轮次ID
+    epoch=mongoSource.mdb.IntField(required=True)
+
     #mAP_0.5
     metrics_mAP_5=mongoSource.mdb.FloatField(required=True)
 
     # mAP_0.5:0.9
-    metrics_mAP_10 = mongoSource.mdb.FloatField(required=True)
+    metrics_mAP = mongoSource.mdb.FloatField(required=True)
 
     #精准率
     metrics_precision=mongoSource.mdb.FloatField(required=True)

@@ -21,7 +21,7 @@ from utils.torch_utils import select_device, load_classifier, time_synchronized
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"
 
 
-class detectCustom(threading.Thread):
+class detectServiceThread(threading.Thread):
 
     # 创建流队列
     def createStreamQueue(self):
@@ -31,12 +31,12 @@ class detectCustom(threading.Thread):
     def getStreamQueue(self):
         return self.q
 
-    #停止检测
+    # 停止检测
     def stopDetect(self):
         self.isDetect = False
 
-    #加载模型
-    def loadModel(self,modelConfig):
+    # 加载模型
+    def loadModel(self, modelConfig):
         print("模型配置：" + str(modelConfig))
         # 设置设备类型
         self.device = select_device(modelConfig["device"])
@@ -49,36 +49,21 @@ class detectCustom(threading.Thread):
         if self.half:
             model.half()  # to FP16
 
-        self.modelConfig=modelConfig
-        self.model=model
-        return model
+        self.model = model
 
-    #加载配置参数
-    def setDetectConfig(self,detectConfig):
+    # 加载配置参数
+    def setDetectConfig(self, detectConfig):
         # 配置检测参数
-        detectConfig['update'] = False  # action='store_true', help='update all models'
-        detectConfig['device'] = ''  # default='', help='cuda device, i.e. 0 or 0,1,2,3 or cpu'
-        detectConfig['imgsz'] = 640
-        detectConfig['save_img'] = False
-        detectConfig['view_img'] = False  # display results
-        detectConfig['save_txt'] = False  # save results to *.txt
-        detectConfig['saveDir'] = "/Volumes/study/objectDetection/ted/runs/detect/test"  #
-        detectConfig['conf_thres'] = 0.25  # default=0.25, help='object confidence threshold'
-        detectConfig['iou_thres'] = 0.45  # type=float, default=0.45, help='IOU threshold for NMS'
-        detectConfig['classes'] = ""  # nargs='+', type=int, help='filter by class: --class 0, or --class 0 2 3'
-        detectConfig['agnostic_nms'] = False  # action='store_true', help='class-agnostic NMS'
-        detectConfig['augment'] = False  # action='store_true', help='augmented inference'
-        detectConfig['save_conf'] = False  # action='store_true', help='save confidences in --save-txt labels'
-        self.detectConfig=detectConfig
+        self.detectConfig = detectConfig
 
-    #创建线程时，运行该函数
+    # 创建线程时，运行该函数
     def run(self):
 
         with torch.no_grad():
-            self.detect(self.model,self.detectConfig)
+            self.detect(self.detectConfig)
 
-    # 初始化一些参数
-    def __init__(self):
+    # 初始化一些参数 并加载模型
+    def __init__(self, modelConfig):
         threading.Thread.__init__(self)
         set_logging()
 
@@ -87,10 +72,19 @@ class detectCustom(threading.Thread):
         # 创建stream队列，用于传输图像信息
         self.createStreamQueue()
 
-    def detect(self, model,detetConfig=None):
+        # 加载模型
+        self.loadModel(modelConfig)
+
+    def detect(self, detetConfig=None):
+
+        detectResult=[]
+
+        print("检测参数：" + str(detetConfig))
+        model = self.model
         save_img = False
-        #初始化若干参数
-        source,view_img,save_txt=detetConfig["source"],detetConfig["view_img"],detetConfig["save_txt"]
+        cap=None
+        # 初始化若干参数
+        source, view_img, save_txt = detetConfig["source"], detetConfig["view_img"], detetConfig["save_txt"]
 
         webcam = source.isnumeric() or source.endswith('.txt') or source.lower().startswith(
             ('rtsp://', 'rtmp://', 'http://'))
@@ -144,7 +138,8 @@ class detectCustom(threading.Thread):
             pred = model(img, augment=detetConfig["augment"])[0]
 
             # Apply NMS
-            pred = non_max_suppression(pred, detetConfig["conf_thres"], detetConfig["iou_thres"], classes=detetConfig["classes"],
+            pred = non_max_suppression(pred, detetConfig["conf_thres"], detetConfig["iou_thres"],
+                                       classes=detetConfig["classes"],
                                        agnostic=detetConfig["agnostic_nms"])
             t2 = time_synchronized()
 
@@ -174,7 +169,9 @@ class detectCustom(threading.Thread):
                         s += '%g %ss, ' % (n, names[int(c)])  # add to string
 
                     # Write results
+                    detectObjectItems=[]
                     for *xyxy, conf, cls in reversed(det):
+
                         if save_txt:  # Write to file
                             xywh = (xyxy2xywh(torch.tensor(xyxy).view(1, 4)) / gn).view(-1).tolist()  # normalized xywh
                             line = (cls, *xywh, conf) if detetConfig["save_conf"] else (cls, *xywh)  # label format
@@ -184,15 +181,26 @@ class detectCustom(threading.Thread):
                         if save_img or view_img:  # Add bbox to image
                             label = '%s %.2f' % (names[int(cls)], conf)
                             plot_one_box(xyxy, im0, label=label, color=colors[int(cls)], line_thickness=3)
+                            detectObjectItems.append({
+                                "x": int(xyxy[0]),
+                                "y": int(xyxy[1]),
+                                "w": int(xyxy[2]),
+                                "h": int(xyxy[3]),
+                                "label":label,
+                                "class":int(cls.int()),
+                                "conf":float(conf.float())
+                            })
+
+                    detectResult.append({
+                        "file":p.name,
+                        "detectObject":detectObjectItems
+                    })
 
                 # Print time (inference + NMS)
                 print('%sDone. (%.3fs)' % (s, t2 - t1))
 
                 # Stream results
                 if view_img:
-                    # cv2.imshow(str(p), im0)
-                    # if cv2.waitKey(1) == ord('q'):  # q to quit
-                    #     raise StopIteration
                     ret, buffer = cv2.imencode('.jpg', im0)
                     frame = buffer.tobytes()
                     self.q.put(frame)
@@ -213,6 +221,10 @@ class detectCustom(threading.Thread):
                             h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
                             vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
                         vid_writer.write(im0)
-        cap.release()
+
+        if cap != None:
+            cap.release()
 
         print("detect finished.......")
+
+        return detectResult

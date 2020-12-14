@@ -1,4 +1,4 @@
-from flask import Blueprint, request, session, send_from_directory
+from flask import Blueprint, request, session, send_from_directory, make_response
 from flask_cors import CORS,cross_origin
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.common.baseBean.pageBean import pageBean
@@ -104,5 +104,4 @@ def initTestData():
 
 @dsm_blp.route('/imageItem/<filePath>', methods=['POST','GET'])
 def imageItem(filePath):
-    print(filePath)
-    return send_from_directory(ConstantUtils.imageItemBasePath,filePath.replace("_","/"))
+    return send_from_directory(ConstantUtils.dataBasePath,filePath.replace("_","/"),conditional=True)

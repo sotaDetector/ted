@@ -54,5 +54,15 @@ class fileUtils:
     def getABSPath(cls,filePath):
         return cls.compreImgPackPath+"/"+filePath
 
+    @classmethod
+    def detectPath(cls,filePath):
+        if not os.path.exists(filePath):
+            os.mkdir(filePath)
 
-print(fileUtils.getRandomName("1.jpg"))
+    @classmethod
+    def getModelSavePath(cls,basePath,projectPath):
+        basePath=basePath+projectPath+"/weights"
+
+        return basePath+"/best.pt",basePath+"/entireModel.pt"
+
+

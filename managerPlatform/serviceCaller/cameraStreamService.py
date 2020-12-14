@@ -1,10 +1,13 @@
-from detectCustom import detectCustom
+from detectServiceThread import detectServiceThread
+from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.commonUtils.ffmpegUtils import ffmpegUtils
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
+from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
 from managerPlatform.common.dataManager.redisSource import redisClient
 from managerPlatform.common.keyGen.keyGenarator import keyGenarator
+from managerPlatform.serviceCaller.detectServiceImpl import detectThreadMap
 
 detectMap = {}
 
@@ -16,20 +19,19 @@ class cameraStreamService:
 
     def startNativeCameraDetect(self,config):
 
-
-        # 创建检测对象
-        detectThread = detectCustom()
-
         #加载模型
-        modelConfig = {}
-        modelConfig["weights"] = "weights/yolov5s.pt"
-        modelConfig["device"]=''
-        detectThread.loadModel(modelConfig)
+        # modelConfig = {}
+        # modelConfig["weights"] = "weights/yolov5s.pt"
+        # modelConfig["device"]=''
+        # # 创建检测对象
+        # detectThread = detectServiceThread(modelConfig)
+        if not detectThreadMap.keys().__contains__(config['serviceSessionId']):
+            return resultPackerUtils.packErrorMsg(resultPackerUtils.EC_NO_EVALUATE_SESSION)
+        detectThread = detectThreadMap[config['serviceSessionId']]
 
         #加载检测参数
-        detectConfig={
-            "source":config['source']
-        }
+        detectConfig=detectConfigUtils.getBasicDetectConfig(str(config['source']),outPath=ConstantUtils.videoDetectOut+config['serviceSessionId'])
+
         detectThread.setDetectConfig(detectConfig)
 
         #开始线程
@@ -41,18 +43,18 @@ class cameraStreamService:
         detectMap[sessionId] = detectThread
 
         result = {
-            "sessionId": sessionId
+            "videoPlayId": sessionId
         }
 
         return result
 
     def stopNativeCameraDetect(self, jsonData):
 
-        sessionId = jsonData['sessionId']
+        sessionId = jsonData['videoPlayId']
 
         detectMap[sessionId].stopDetect()
 
-        detectMap[sessionId].join()
+        # detectMap[sessionId].join()
 
         return {"rs": 1}
 

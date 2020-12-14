@@ -5,8 +5,11 @@ from flask import make_response
 
 class resultPackerUtils:
     EC_NAME_PASS_ERROR = 1001
+
+    EC_NO_EVALUATE_SESSION=3001
     ERRORMAP = {
-        EC_NAME_PASS_ERROR: "用户名或密码错误"
+        EC_NAME_PASS_ERROR: "用户名或密码错误",
+        EC_NO_EVALUATE_SESSION:"未启动校验服务或服务已过期！"
     }
 
     _resultTag = "rs"
@@ -31,15 +34,21 @@ class resultPackerUtils:
         return json.dumps(result)
 
     @classmethod
-    def packDataListResults(cls,dataList):
+    def packDataListResults(cls,dataList=None,idName=None):
+
+        if idName:
+            dataList=dataList.replace("_id", idName)
+
         result = {
             cls._resultTag: cls._success_tag,
-            cls._resultDataTag:json.loads(dataList)
+            cls._resultDataTag: json.loads(dataList)
         }
         return result
 
     @classmethod
-    def packDataItemResults(cls,dataItem):
+    def packDataItemResults(cls,dataItem,idName=None):
+        if idName:
+            dataItem=dataItem.replace("_id",idName)
         result = {
             cls._resultTag: cls._success_tag,
             cls._resultDataTag: json.loads(dataItem)[0]
