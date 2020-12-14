@@ -131,9 +131,7 @@ class datasetsService:
 
         dataImageItem.objects.insert(saveImageItemList, load_bulk=False)
         #更新数据集数量
-        dsItem=datasetsBean.objects(dsId=dsId,state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
-        nowCount=dsItem["dsImageCount"]+imageNameList.__len__()
-        dsItem.update(dsImageCount=nowCount)
+        self.updateDataSetStatisData(dsId['dsId'])
         return resultPackerUtils.save_success()
 
     def saveMultiImages(self, desFolderBasePath, imageslist):
@@ -198,7 +196,23 @@ class datasetsService:
     def delImageItem(self,ditId):
         imageItem = dataImageItem.objects(ditId=ditId)
         imageItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
+
+        #更新数据集图片数量和标注进度
+        self.updateDataStatisData(imageItem.dsId)
+
         return resultPackerUtils.update_success()
+
+    def updateDataSetStatisData(self,dsId):
+
+        dsItem = datasetsBean.objects(dsId=dsId, state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
+
+        #更新总数量
+        totalCount = dataImageItem.objects(dsId=dsId,state=1).count()
+
+        labledCount = dataImageItem.objects(dsId=dsId,isLabeled=1, state=1).count()
+
+        dsItem.update(dsImageCount=totalCount,dsImgTagSP=labledCount)
+
 
 
     """
@@ -223,12 +237,7 @@ class datasetsService:
 
         dataImage.update(recLabelList=recLabelList, labelIdList=labelIdList,isLabeled=1)
 
-        #查询一下该数据集下所有标注过的图片
-        labledCount=dataImageItem.objects(isLabeled=1,state=1).count()
-        #更新数据集更新进度
-        dsItem = datasetsBean.objects(dsId=data["dsId"], state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
-        # dsItem.update(inc__dsImgTagSP=1)
-        dsItem.update(dsImgTagSP=labledCount)
+        self.updateDataSetStatisData(data['dsId'])
         return resultPackerUtils.update_success()
 
     # 根据训练版本勾选的数据集查出数据并组装
