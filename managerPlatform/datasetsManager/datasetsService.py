@@ -104,7 +104,7 @@ class datasetsService:
 
         folderName = str(uuid.uuid4())
 
-        desFolderBasePath = ConstantUtils.imageItemBasePath + folderName
+        desFolderBasePath = ConstantUtils.dataBasePath + folderName
 
         imageNameList,imagePathList=None,None
         if fileType == ConstantUtils.UP_FILE_TYPE_COMPRESSFILE:
