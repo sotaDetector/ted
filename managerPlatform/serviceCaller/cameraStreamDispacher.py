@@ -26,7 +26,7 @@ def startNativeCameraDetect():
 
 @nat_camera_blp.route("/video_feed")
 def videoStreamService():
-    sessionId=request.args.get("sessionId")
+    sessionId=request.args.get("videoPlayId")
     return Response(natCameraService.gen_frames(sessionId), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @nat_camera_blp.route("/stopNativeCameraDetect", methods=['POST'])
