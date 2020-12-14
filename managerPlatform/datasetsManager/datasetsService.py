@@ -198,7 +198,7 @@ class datasetsService:
         imageItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
 
         #更新数据集图片数量和标注进度
-        self.updateDataStatisData(imageItem.dsId)
+        self.updateDataSetStatisData(imageItem.dsId)
 
         return resultPackerUtils.update_success()
 
