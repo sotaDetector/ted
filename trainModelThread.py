@@ -5,6 +5,7 @@ import os
 import random
 import threading
 import time
+from datetime import datetime
 from pathlib import Path
 from warnings import warn
 
@@ -22,6 +23,9 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 import testCustom  # import test.py to get mAP after each epoch
+from managerPlatform.bean.detectModel.detectModelTrainStatistics import detectModelTrainStatistics
+from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
+from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from models.yolo import Model
 from utils.autoanchor import check_anchors
 from utils.datasetsCustom import create_dataloader
@@ -419,7 +423,31 @@ class trainModelThread(threading.Thread):
 
         wandb.run.finish() if wandb and wandb.run else None
         torch.cuda.empty_cache()
+
+        #训练完成后更新模型版本训练状态等
+        self.modelTrainFinish()
+
         return results
+
+    #模型训练完成后 设置系统中相关数据
+    def modelTrainFinish(self):
+        dmtvid=self.modelConfigBean['dmtvid']
+        versionItem=detectModelTrainVersion.objects(dmtvid=dmtvid,state=ConstantUtils.DATA_STATUS_ACTIVE)
+
+        #查询出最后一次训练统计
+        trainStatistics=detectModelTrainStatistics.objects(dmtvid=dmtvid,
+                                                           state=ConstantUtils.DATA_STATUS_ACTIVE).order_by('-create_date')[0]
+
+
+        versionItem.update(trainState=ConstantUtils.model_version_train_state_success,
+                           trainEndDateTime=datetime.now,
+                           metrics_mAP_5=trainStatistics["trainStatistics"],
+                           metrics_precision=trainStatistics["metrics_precision"],
+                           metrics_recall=trainStatistics['trainStatistics'])
+
+
+
+
 
     def __init__(self, trainDataDict, valDataDict, modelConfigBean):
         threading.Thread.__init__(self)

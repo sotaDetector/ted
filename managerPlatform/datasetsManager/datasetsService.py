@@ -284,6 +284,11 @@ class datasetsService:
             else:
                 datImageList = dataImageItem.objects(dsId=dsItem["dsId"], labelIdList__in=dsItem["dlidList"], state=1)
 
+
+            dl_id_index_map={}
+            dlOrderedList=[]
+            dlIndex=0
+
             for imageItem in datImageList:
 
                 reclabelList = imageItem['recLabelList']
@@ -293,13 +298,21 @@ class datasetsService:
                     for item in reclabelList:
                         if (dsItem['isSelectAll'] == ConstantUtils.TRUE_TAG or
                                 (dsItem['isSelectAll'] == ConstantUtils.FALSE_TAG and dsItem["dlidList"].__contains__(item['dlid']))):
-                            itemLabelList.append([item['dlid'], item['rec_yolo_x'], item['rec_yolo_y'], item['rec_w'], item['rec_h']])
+                            if not dl_id_index_map.keys().__contains__(item['dlid']):
+                                dl_id_index_map[item['dlid']]=dlIndex
+                                dlOrderedList.append(item['dlid'])
+                                dlIndex+=1
+
+                            itemLabelList.append([dl_id_index_map[item['dlid']], item['rec_yolo_x'], item['rec_yolo_y'], item['rec_w'], item['rec_h']])
 
                     imagePathList.append(fileUtils.getABSPath(imageItem['ditFilePath']))
                     imageShapeList.append([imageItem['ditWidth'], imageItem['ditHeight']])
                     LabelsList.append(np.array(itemLabelList))
         print("***************dlid_dlIndex_map**************")
+        print(str(dl_id_index_map))
         labelMap, nameList = labelService.getLabelsBylids(dsItem["dsId"])
+        #对nameList进行排序
+        nameList=[labelMap[item] for item in dlOrderedList]
         loggerUtils.info("labelMap:" + str(labelMap))
         index = 0
         for i in range(imagePathList.__len__()):
@@ -329,42 +342,42 @@ class datasetsService:
 
     def initTestData(self):
 
-        # BasePath = "/Volumes/study/objectDetection/coco128/labels/train2017"
-        # imgBasePath = "/Volumes/study/objectDetection/coco128/images/train2017"
-        # allFiles = os.listdir(BasePath)
-        # imageItemList = []
-        # for i in allFiles:
-        #
-        #     f = open(BasePath + "/" + i);  # 打开文件
-        #     imageSize = imageUtils.getImageSize(imgBasePath + "/" + i.replace(".txt", ".jpg"))
-        #
-        #     recLabelList = []
-        #     labelIdList = []
-        #     iter_f = iter(f);  # 创建迭代器
-        #
-        #     for line in iter_f:
-        #         dataItem = line.split(" ")
-        #         labelId = dataItem[0]
-        #         if labelIdList.__contains__(labelId) == False:
-        #             labelIdList.append(labelId)
-        #         recLabelList.append(rectangleLabelBean(
-        #             rec_lt_x=dataItem[1],
-        #             rec_lt_y=dataItem[2],
-        #             rec_w=dataItem[3],
-        #             rec_h=dataItem[4],
-        #             dlid=labelId
-        #         ))
-        #
-        #     imageItemList.append(dataImageItem(
-        #         ditFileName=i.replace(".txt", ".jpg"),
-        #         ditFilePath="train_test/" + i.replace(".txt", ".jpg"),
-        #         ditWidth=imageSize[0],
-        #         ditHeight=imageSize[1],
-        #         dsId=1,
-        #         recLabelList=recLabelList,
-        #         labelIdList=labelIdList
-        #     ))
-        # dataImageItem.objects.insert(imageItemList, load_bulk=False)
+        BasePath = "/Volumes/study/objectDetection/coco128/labels/train2017"
+        imgBasePath = "/Volumes/study/objectDetection/coco128/images/train2017"
+        allFiles = os.listdir(BasePath)
+        imageItemList = []
+        for i in allFiles:
+
+            f = open(BasePath + "/" + i);  # 打开文件
+            imageSize = imageUtils.getImageSize(imgBasePath + "/" + i.replace(".txt", ".jpg"))
+
+            recLabelList = []
+            labelIdList = []
+            iter_f = iter(f);  # 创建迭代器
+
+            for line in iter_f:
+                dataItem = line.split(" ")
+                labelId = dataItem[0]
+                if labelIdList.__contains__(labelId) == False:
+                    labelIdList.append(labelId)
+                recLabelList.append(rectangleLabelBean(
+                    rec_yolo_x=dataItem[1],
+                    rec_yolo_y=dataItem[2],
+                    rec_w=dataItem[3],
+                    rec_h=dataItem[4],
+                    dlid=labelId
+                ))
+
+            imageItemList.append(dataImageItem(
+                ditFileName=i.replace(".txt", ".jpg"),
+                ditFilePath="train_test/" + i.replace(".txt", ".jpg"),
+                ditWidth=imageSize[0],
+                ditHeight=imageSize[1],
+                dsId=1,
+                recLabelList=recLabelList,
+                labelIdList=labelIdList
+            ))
+        dataImageItem.objects.insert(imageItemList, load_bulk=False)
 
         # 初始化了labels
         labelArray = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
@@ -386,7 +399,6 @@ class datasetsService:
         LabelList = []
         for i in range(0, len(labelArray)):
             LabelList.append(dataLabelBean(
-                dlIndex=i,
                 dlName=labelArray[i],
                 dsId=1
             ))
