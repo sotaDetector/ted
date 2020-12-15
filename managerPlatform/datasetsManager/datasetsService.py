@@ -29,6 +29,11 @@ class datasetsService:
 
         return resultPackerUtils.save_success()
 
+    def getAllDSNamesList(self):
+        datasetsList = datasetsBean.objects(state=1, userId=session['userId']).only("dsId","dsName")
+
+        return resultPackerUtils.packDataListResults(datasetsList.to_json(),"dsId")
+
     def getDataSetPages(self, pageItem, dsName):
 
         userSearchDict = {}
@@ -288,7 +293,7 @@ class datasetsService:
                     for item in reclabelList:
                         if (dsItem['isSelectAll'] == ConstantUtils.TRUE_TAG or
                                 (dsItem['isSelectAll'] == ConstantUtils.FALSE_TAG and dsItem["dlidList"].__contains__(item['dlid']))):
-                            itemLabelList.append([item['dlid'], item['rec_lt_x'], item['rec_lt_y'], item['rec_w'], item['rec_h']])
+                            itemLabelList.append([item['dlid'], item['rec_yolo_x'], item['rec_yolo_y'], item['rec_w'], item['rec_h']])
 
                     imagePathList.append(fileUtils.getABSPath(imageItem['ditFilePath']))
                     imageShapeList.append([imageItem['ditWidth'], imageItem['ditHeight']])

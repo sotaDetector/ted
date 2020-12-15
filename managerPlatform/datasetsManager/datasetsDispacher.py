@@ -32,6 +32,12 @@ def getDataSetPages():
     return dsService.getDataSetPages(pageItem,dsName)
 
 
+@dsm_blp.route('/getAllDSNamesList', methods=['POST'])
+def getAllDSNamesList():
+
+    return dsService.getAllDSNamesList()
+
+
 @dsm_blp.route('/getDataSetDetail', methods=['POST'])
 def getDataSetDetail():
     dsId = request.get_json()['dsId']
