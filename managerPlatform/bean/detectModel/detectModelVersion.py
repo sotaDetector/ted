@@ -1,3 +1,4 @@
+from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.dataManager.mongoSource import mongoSource
 from managerPlatform.common.baseBean.baseBean import baseBean
 
@@ -26,6 +27,9 @@ class detectModelTrainVersion(baseBean):
 
     #完整模型的保存路径
     entireModelSavePath=mongoSource.mdb.StringField()
+
+    #训练状态
+    trainState=mongoSource.mdb.IntField(required=True,default=ConstantUtils.model_version_train_state_training)
 
 
     @staticmethod
