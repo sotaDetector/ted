@@ -4,6 +4,7 @@ import uuid
 import numpy as np
 from flask import session
 
+from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
 from managerPlatform.bean.trainDataset.dataImageItem import dataImageItem
 from managerPlatform.bean.trainDataset.dataLabelBean import dataLabelBean
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
@@ -13,7 +14,6 @@ from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.imageUtils import imageUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
-from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.dataLabel.dataLabelService import dataLabelService
 
 
@@ -271,23 +271,21 @@ class datasetsService:
         return resultPackerUtils.update_success()
 
     # 根据训练版本勾选的数据集查出数据并组装
-    def loadTrainData(self, ds_dl_list):
+    def loadTrainData(self,dmtvid,ds_dl_list):
 
         imagePathList = []
         LabelsList = []
         imageShapeList = []
 
+        dl_id_index_map = {}
+        dlOrderedList = []
+        dlIndex = 0
 
         for dsItem in ds_dl_list:
             if dsItem['isSelectAll'] == ConstantUtils.TRUE_TAG:
                 datImageList = dataImageItem.objects(dsId=dsItem["dsId"], state=1)
             else:
                 datImageList = dataImageItem.objects(dsId=dsItem["dsId"], labelIdList__in=dsItem["dlidList"], state=1)
-
-
-            dl_id_index_map={}
-            dlOrderedList=[]
-            dlIndex=0
 
             for imageItem in datImageList:
 
@@ -310,6 +308,8 @@ class datasetsService:
                     LabelsList.append(np.array(itemLabelList))
         print("***************dlid_dlIndex_map**************")
         print(str(dl_id_index_map))
+        #将dlid和index的关系保存到trainVersion中
+        detectModelTrainVersion.objects(dmtvid=dmtvid,state=ConstantUtils.DATA_STATUS_ACTIVE).update(dl_id_index_map=dl_id_index_map)
         labelMap, nameList = labelService.getLabelsBylids(dsItem["dsId"])
         #对nameList进行排序
         nameList=[labelMap[item] for item in dlOrderedList]

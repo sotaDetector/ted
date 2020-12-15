@@ -42,6 +42,8 @@ class detectModelTrainVersion(baseBean):
     # 召回率
     metrics_recall = mongoSource.mdb.FloatField()
 
+    dl_id_index_map=mongoSource.mdb.DictField()
+
     @staticmethod
     def convertToBean(jsonData):
         return detectModelTrainVersion(

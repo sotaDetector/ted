@@ -31,7 +31,7 @@ class detectModelTrainService:
         detectModelItem.update(latestVersionId=modelTrainVersion.dmtvid)
         # 2.训练
         # 2.1. 准备数据
-        trainDataDict,valDataDict = datasetService.loadTrainData(modelTrainVersion['ds_dl_list'])
+        trainDataDict,valDataDict = datasetService.loadTrainData(modelTrainVersion.dmtvid,modelTrainVersion['ds_dl_list'])
         # 2.2 组装，保存 训练参数
         trainConfig=jsonData["advancedSet"]
         isUsePreTraindModel=trainConfig["isUsePreTraindModel"]
