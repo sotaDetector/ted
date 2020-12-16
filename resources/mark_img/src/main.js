@@ -6,10 +6,13 @@ import store from './store'
 import '@/assets/css/reset.css'
 
 import ViewUI from 'view-design';
-import 'view-design/dist/styles/iview.css'
+// import 'view-design/dist/styles/iview.css'
+import '@/assets/css/iview-theme.less'
 
 // 引入iconfont
 import '@/assets/font_icon/iconfont.css'
+
+// 引入自定义主题
 
 // md5加密
 import md5 from 'js-md5'

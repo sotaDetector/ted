@@ -6,16 +6,16 @@
         <div v-for="info in menuList" :key="info.menuId">
           <Submenu v-if="info.children && info.children.length>0" :name="info.menuId">
             <template slot="title">
-              <Icon class="menu_icon" :type="info.ico" :size="20" :key="'ico' + info.menuName" style="color:#2db7f5" />
+              <Icon class="menu_icon" :type="info.ico" :size="20" :key="'ico' + info.menuName" style="color:#8c0776" />
               <!-- <img class="menuicon" :src="info.ico" alt=""> -->
               {{info.menuName}}
             </template>
             <MenuItem :name="item.url" :to="{ path: '/' +item.url}" v-for="item in info.children" :key="item.menuId" ref="menu_item">
-            <Icon class="menu_icon" :type="item.ico" :size="20" :key="'ico' + item.menuName" style="color:#2db7f5" />{{item.menuName}}</MenuItem>
+            <Icon class="menu_icon" :type="item.ico" :size="20" :key="'ico' + item.menuName" style="color:#8c0776" />{{item.menuName}}</MenuItem>
           </Submenu>
           <MenuItem v-else active-name="$route.path" :name="info.url" :to="{ path: '/' + info.url }" ref="menu_item">
           <!-- <img class="menuicon" :src="info.ico" /> -->
-          <Icon class="menu_icon" :type="info.ico" :size="10" :key="'ico' + info.menuName" style="color:#2db7f5" />
+          <Icon class="menu_icon" :type="info.ico" :size="10" :key="'ico' + info.menuName" style="color:#8c0776" />
           {{info.menuName}}
           </MenuItem>
         </div>

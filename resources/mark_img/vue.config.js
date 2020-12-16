@@ -1,5 +1,15 @@
 const webpack = require('webpack')
+
+const path = require('path');
+
 module.exports = {
+  css: {
+    loaderOptions: {
+      less: {
+        javascriptEnabled: true
+      }
+    }
+  },
   configureWebpack: {
     plugins: [
       new webpack.ProvidePlugin({
@@ -16,7 +26,7 @@ module.exports = {
     proxy: {
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       '/api': {
-        target: `http://192.168.1.23:8100/`,
+        target: `http://192.168.1.67:8100/`,
         // target: `http://192.168.1.86:8100/`, // 家伟
         changeOrigin: true,
         pathRewrite: {
