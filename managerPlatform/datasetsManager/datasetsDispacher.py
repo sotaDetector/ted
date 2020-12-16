@@ -32,6 +32,12 @@ def getDataSetPages():
     return dsService.getDataSetPages(pageItem,dsName)
 
 
+@dsm_blp.route('/getAllDSNamesList', methods=['POST'])
+def getAllDSNamesList():
+
+    return dsService.getAllDSNamesList()
+
+
 @dsm_blp.route('/getDataSetDetail', methods=['POST'])
 def getDataSetDetail():
     dsId = request.get_json()['dsId']
@@ -82,6 +88,13 @@ def delImageItem():
     return dsService.delImageItem(ditId)
 
 
+
+@dsm_blp.route('/getImageItemDetail', methods=['POST'])
+def getImageItemDetail():
+    queryData = request.get_json()
+    return dsService.getImageItemDetail(queryData)
+
+
 """
 上传图片标注数据
 """
@@ -92,14 +105,6 @@ def upImageItemRecLabels():
     return dsService.upImageItemRecLabels(data)
 
 
-
-"""
-上传图片标注数据
-"""
-@dsm_blp.route('/initTestData', methods=['POST'])
-def initTestData():
-
-    return dsService.initTestData()
 
 
 @dsm_blp.route('/imageItem/<filePath>', methods=['POST','GET'])

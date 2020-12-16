@@ -1,5 +1,6 @@
 import threading
 
+from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
 from managerPlatform.bean.detectModel.detectModelTrainConfig import detectModelTrainConfig
 from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
@@ -25,9 +26,12 @@ class detectModelTrainService:
         modelTrainVersion = detectModelTrainVersion.convertToBean(jsonData)
         modelTrainVersion.save()
 
+        # 更新该模型最新版本
+        detectModelItem = detectModelBean.objects(dmId=jsonData['dmid'], state=ConstantUtils.DATA_STATUS_ACTIVE)
+        detectModelItem.update(latestVersionId=modelTrainVersion.dmtvid)
         # 2.训练
         # 2.1. 准备数据
-        trainDataDict,valDataDict = datasetService.loadTrainData(modelTrainVersion['ds_dl_list'])
+        trainDataDict,valDataDict = datasetService.loadTrainData(modelTrainVersion.dmtvid,modelTrainVersion['ds_dl_list'])
         # 2.2 组装，保存 训练参数
         trainConfig=jsonData["advancedSet"]
         isUsePreTraindModel=trainConfig["isUsePreTraindModel"]
@@ -49,6 +53,8 @@ class detectModelTrainService:
         #3.更新模型路径
         ckptModel,entireModel=fileUtils.getModelSavePath(ConstantUtils.modelBasePath,modelDir)
         modelTrainVersion.update(ckptModelSavePath=ckptModel,entireModelSavePath=entireModel)
+
+
 
         loggerUtils.info("start detect detectModel train thread [end]")
         return resultPackerUtils.save_success()

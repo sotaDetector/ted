@@ -4,6 +4,7 @@ import uuid
 import numpy as np
 from flask import session
 
+from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
 from managerPlatform.bean.trainDataset.dataImageItem import dataImageItem
 from managerPlatform.bean.trainDataset.dataLabelBean import dataLabelBean
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
@@ -13,7 +14,6 @@ from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.imageUtils import imageUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
-from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.dataLabel.dataLabelService import dataLabelService
 
 
@@ -28,6 +28,11 @@ class datasetsService:
         dsName.save()
 
         return resultPackerUtils.save_success()
+
+    def getAllDSNamesList(self):
+        datasetsList = datasetsBean.objects(state=1, userId=session['userId']).only("dsId","dsName")
+
+        return resultPackerUtils.packDataListResults(datasetsList.to_json(),"dsId")
 
     def getDataSetPages(self, pageItem, dsName):
 
@@ -131,9 +136,7 @@ class datasetsService:
 
         dataImageItem.objects.insert(saveImageItemList, load_bulk=False)
         #更新数据集数量
-        dsItem=datasetsBean.objects(dsId=dsId,state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
-        nowCount=dsItem["dsImageCount"]+imageNameList.__len__()
-        dsItem.update(dsImageCount=nowCount)
+        self.updateDataSetStatisData(dsId['dsId'])
         return resultPackerUtils.save_success()
 
     def saveMultiImages(self, desFolderBasePath, imageslist):
@@ -186,8 +189,14 @@ class datasetsService:
             item['ditFilePath'] = ConstantUtils.imageItemPrefix + item['ditFilePath'].replace("/","_")
             if item.keys().__contains__("recLabelList"):
                 recLabelList=item['recLabelList']
-                for item in recLabelList:
-                    item['dlName']=labelMap[item['dlid']]
+                newList=[]
+                for labelItem in recLabelList:
+                    if labelMap.keys().__contains__(labelItem['dlid']):
+                        labelItem['dlName']=labelMap[labelItem['dlid']]
+                        newList.append(labelItem)
+                item['recLabelList']=newList
+
+
 
 
         pageItem.set_numpy_dataList(dataArray)
@@ -195,10 +204,45 @@ class datasetsService:
         return resultPackerUtils.packPageResult(pageItem);
 
 
+    def getImageItemDetail(self,queryData):
+        imageItem= dataImageItem.objects(ditId=queryData['ditId'],state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
+        labelMap,nameList=labelService.getLabelsBylids(imageItem['dsId'])
+        imageItem['ditFilePath'] = ConstantUtils.imageItemPrefix + imageItem['ditFilePath'].replace("/", "_")
+
+        obj=json.loads(imageItem.to_json())
+        recLabelList=obj['recLabelList']
+
+        newList = []
+        for labelItem in recLabelList:
+            if labelMap.keys().__contains__(labelItem['dlid']):
+                labelItem['dlName'] = labelMap[labelItem['dlid']]
+                newList.append(labelItem)
+        imageItem['recLabelList'] = newList
+
+        return resultPackerUtils.packDataListResults(imageItem.to_json())
+
+
     def delImageItem(self,ditId):
         imageItem = dataImageItem.objects(ditId=ditId)
         imageItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
+
+        #更新数据集图片数量和标注进度
+        print(imageItem[0]["dsId"])
+        self.updateDataSetStatisData(imageItem[0]["dsId"])
+
         return resultPackerUtils.update_success()
+
+    def updateDataSetStatisData(self,dsId):
+
+        dsItem = datasetsBean.objects(dsId=dsId, state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
+
+        #更新总数量
+        totalCount = dataImageItem.objects(dsId=dsId,state=1).count()
+
+        labledCount = dataImageItem.objects(dsId=dsId,isLabeled=1, state=1).count()
+
+        dsItem.update(dsImageCount=totalCount,dsImgTagSP=labledCount)
+
 
 
     """
@@ -223,21 +267,19 @@ class datasetsService:
 
         dataImage.update(recLabelList=recLabelList, labelIdList=labelIdList,isLabeled=1)
 
-        #查询一下该数据集下所有标注过的图片
-        labledCount=dataImageItem.objects(isLabeled=1,state=1).count()
-        #更新数据集更新进度
-        dsItem = datasetsBean.objects(dsId=data["dsId"], state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
-        # dsItem.update(inc__dsImgTagSP=1)
-        dsItem.update(dsImgTagSP=labledCount)
+        self.updateDataSetStatisData(data['dsId'])
         return resultPackerUtils.update_success()
 
     # 根据训练版本勾选的数据集查出数据并组装
-    def loadTrainData(self, ds_dl_list):
+    def loadTrainData(self,dmtvid,ds_dl_list):
 
         imagePathList = []
         LabelsList = []
         imageShapeList = []
 
+        dl_id_index_map = {}
+        dlOrderedList = []
+        dlIndex = 0
 
         for dsItem in ds_dl_list:
             if dsItem['isSelectAll'] == ConstantUtils.TRUE_TAG:
@@ -254,13 +296,23 @@ class datasetsService:
                     for item in reclabelList:
                         if (dsItem['isSelectAll'] == ConstantUtils.TRUE_TAG or
                                 (dsItem['isSelectAll'] == ConstantUtils.FALSE_TAG and dsItem["dlidList"].__contains__(item['dlid']))):
-                            itemLabelList.append([item['dlid'], item['rec_lt_x'], item['rec_lt_y'], item['rec_w'], item['rec_h']])
+                            if not dl_id_index_map.keys().__contains__(item['dlid']):
+                                dl_id_index_map[item['dlid']]=dlIndex
+                                dlOrderedList.append(item['dlid'])
+                                dlIndex+=1
+
+                            itemLabelList.append([dl_id_index_map[item['dlid']], item['rec_yolo_x'], item['rec_yolo_y'], item['rec_w'], item['rec_h']])
 
                     imagePathList.append(fileUtils.getABSPath(imageItem['ditFilePath']))
                     imageShapeList.append([imageItem['ditWidth'], imageItem['ditHeight']])
                     LabelsList.append(np.array(itemLabelList))
         print("***************dlid_dlIndex_map**************")
+        print(str(dl_id_index_map))
+        #将dlid和index的关系保存到trainVersion中
+        detectModelTrainVersion.objects(dmtvid=dmtvid,state=ConstantUtils.DATA_STATUS_ACTIVE).update(dl_id_index_map=str(dl_id_index_map))
         labelMap, nameList = labelService.getLabelsBylids(dsItem["dsId"])
+        #对nameList进行排序
+        newnameList=[labelMap[item] for item in dlOrderedList]
         loggerUtils.info("labelMap:" + str(labelMap))
         index = 0
         for i in range(imagePathList.__len__()):
@@ -274,84 +326,16 @@ class datasetsService:
             "imagePathList": imagePathList,
             "LabelsList": np.array(LabelsList),
             "imageShapeList": np.array(imageShapeList),
-            "nc": nameList.__len__(),
-            "names": nameList
+            "nc": newnameList.__len__(),
+            "names": newnameList
         }
 
         valDataDict = {
             "imagePathList": imagePathList,
             "LabelsList": np.array(LabelsList),
             "imageShapeList": np.array(imageShapeList),
-            "nc": nameList.__len__(),
-            "names": nameList
+            "nc": newnameList.__len__(),
+            "names": newnameList
         }
 
         return trainDataDict, valDataDict
-
-    def initTestData(self):
-
-        # BasePath = "/Volumes/study/objectDetection/coco128/labels/train2017"
-        # imgBasePath = "/Volumes/study/objectDetection/coco128/images/train2017"
-        # allFiles = os.listdir(BasePath)
-        # imageItemList = []
-        # for i in allFiles:
-        #
-        #     f = open(BasePath + "/" + i);  # 打开文件
-        #     imageSize = imageUtils.getImageSize(imgBasePath + "/" + i.replace(".txt", ".jpg"))
-        #
-        #     recLabelList = []
-        #     labelIdList = []
-        #     iter_f = iter(f);  # 创建迭代器
-        #
-        #     for line in iter_f:
-        #         dataItem = line.split(" ")
-        #         labelId = dataItem[0]
-        #         if labelIdList.__contains__(labelId) == False:
-        #             labelIdList.append(labelId)
-        #         recLabelList.append(rectangleLabelBean(
-        #             rec_lt_x=dataItem[1],
-        #             rec_lt_y=dataItem[2],
-        #             rec_w=dataItem[3],
-        #             rec_h=dataItem[4],
-        #             dlid=labelId
-        #         ))
-        #
-        #     imageItemList.append(dataImageItem(
-        #         ditFileName=i.replace(".txt", ".jpg"),
-        #         ditFilePath="train_test/" + i.replace(".txt", ".jpg"),
-        #         ditWidth=imageSize[0],
-        #         ditHeight=imageSize[1],
-        #         dsId=1,
-        #         recLabelList=recLabelList,
-        #         labelIdList=labelIdList
-        #     ))
-        # dataImageItem.objects.insert(imageItemList, load_bulk=False)
-
-        # 初始化了labels
-        labelArray = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus', 'train', 'truck', 'boat',
-                      'traffic light',
-                      'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep',
-                      'cow',
-                      'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase',
-                      'frisbee',
-                      'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard',
-                      'surfboard',
-                      'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana',
-                      'apple',
-                      'sandwich', 'orange', 'broccoli', 'carrot', 'hot dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-                      'potted plant', 'bed', 'dining table', 'toilet', 'tv', 'laptop', 'mouse', 'remote', 'keyboard',
-                      'cell phone',
-                      'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors',
-                      'teddy bear',
-                      'hair drier', 'toothbrush']
-        LabelList = []
-        for i in range(0, len(labelArray)):
-            LabelList.append(dataLabelBean(
-                dlIndex=i,
-                dlName=labelArray[i],
-                dsId=1
-            ))
-
-        dataLabelBean.objects.insert(LabelList, load_bulk=False)
-
-        return {"rs": 1}

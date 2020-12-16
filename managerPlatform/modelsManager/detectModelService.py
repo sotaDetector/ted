@@ -1,53 +1,94 @@
+import json
+
 from flask import session
 
+from managerPlatform.bean.detectModel import detectModelVersion
 from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
+from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
+from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 
 
 class detectModelService:
 
-    def addDetectModel(self,dataLabelIns):
+    def addDetectModel(self, dataLabelIns):
 
         dataLabelIns.save()
 
         return resultPackerUtils.save_success()
 
+    def getDetectModelsPages(self, pageItem, dmName):
 
-    def getDetectModelsPages(self,pageItem,dmName):
+        selfQuery = {}
+        if dmName != None:
+            selfQuery['dmName'] = {'$regex': dmName}
 
-        totalCount=detectModelBean.objects().count()
 
-        selfQuery={}
-        if dmName!=None:
-            selfQuery['dmName']={'$regex':dmName}
+        totalCount = detectModelBean.objects(__raw__=selfQuery, state=ConstantUtils.DATA_STATUS_ACTIVE,
+                                            userId=session['userId']).count()
 
-        dataList=detectModelBean.objects(__raw__=selfQuery,state=1,userId=session['userId']).order_by('-create_date').skip(pageItem.skipIndex).limit(pageItem.pageSize)
+        modelList = detectModelBean.objects(__raw__=selfQuery, state=ConstantUtils.DATA_STATUS_ACTIVE,
+                                            userId=session['userId']) \
+            .order_by('-create_date').exclude("create_date","state").skip(pageItem.skipIndex).limit(pageItem.pageSize)
+
+        modelJsonList=json.loads(modelList.to_json().replace("_id","dmId"))
+
+
+        # 查询模型的最新版本
+        modelIdList = []
+        for item in modelList: modelIdList.append(item['latestVersionId'])
+
+        trainVersionList = detectModelTrainVersion.objects(dmtvid__in=modelIdList,
+                                                           state=ConstantUtils.DATA_STATUS_ACTIVE).exclude("create_date","state")
+        modelVersionJsonList=json.loads(trainVersionList.to_json().replace("_id","dmtvid"))
+
+        #找出所有的数据集id
+        allDataSetId=[]
+        for versionItem in modelVersionJsonList:
+            for item in versionItem['ds_dl_list']:
+                if not allDataSetId.__contains__(item['dsId']):
+                    allDataSetId.append(item['dsId'])
+
+        datasetIdNames=datasetsBean.objects(dsId__in=allDataSetId,state=ConstantUtils.DATA_STATUS_ACTIVE).only("dsId","dsName")
+        datasetMap={}
+        for item in datasetIdNames:
+            datasetMap[item['dsId']]=item['dsName']
+
+
+        for modelItem in modelJsonList:
+            for versionItem in modelVersionJsonList:
+                if modelItem['latestVersionId'] == versionItem['dmtvid']:
+                    versionItem['trainState']=ConstantUtils.getModelVersionTrainState(versionItem['trainState'])
+                    versionItem['inferencePlatformValue']=ConstantUtils.getModelPlatform(versionItem['inferencePlatform'])
+                    versionItem['dmPrecisionValue']=ConstantUtils.getModelPrisision(versionItem['dmPrecision'])
+                    datasetNames=[]
+                    for item in versionItem['ds_dl_list']:
+                        datasetNames.append(datasetMap[item['dsId']])
+                    versionItem['datasetNames']=datasetNames
+                    modelItem["latestVersionItem"] = [versionItem]
+                    break
 
         pageItem.set_totalCount(totalCount)
 
-        pageItem.set_dataList(dataList)
+        pageItem.set_numpy_dataList(modelJsonList)
 
         return resultPackerUtils.packPageResult(pageItem);
 
+    def updateDetectModel(self, data):
 
-    def updateDetectModel(self,data):
-
-        detecModeltIns=detectModelBean.objects(dmId=data['dmId'])
+        detecModeltIns = detectModelBean.objects(dmId=data['dmId'])
 
         print(data['updateClolumn'])
         detecModeltIns.update(**data['updateClolumn'])
 
         return resultPackerUtils.update_success()
 
-
-    def getDetectModelDetail(self,dmId):
-        result=detectModelBean.objects(dmId=dmId, state=1).exclude("state", "userId").to_json()
+    def getDetectModelDetail(self, dmId):
+        result = detectModelBean.objects(dmId=dmId, state=1).exclude("state", "userId").to_json()
         return resultPackerUtils.packDataItemResults(result)
 
-    def delDetectModelDetail(self,dmId):
-        detectModelItem=detectModelBean.objects(dmId=dmId)
+    def delDetectModelDetail(self, dmId):
+        detectModelItem = detectModelBean.objects(dmId=dmId)
         detectModelItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
         return resultPackerUtils.update_success()
-
-
