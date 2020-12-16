@@ -40,6 +40,28 @@
             </div>
           </div>
           <Table :columns="columns" :data="table.latestVersionItem">
+            <template slot-scope="{row, index}" slot="metrics">
+              <div>mAp： {{row.metrics_mAP | percent}}
+                <Tooltip placement="right-start" max-width="250" :transfer="true" theme="light">
+                  <Icon type="ios-help-circle-outline" color="#8c0776" style="cursor:pointer" />
+                  <div slot="content">
+                    mAP(mean average precision)是物体检测(Object Detection)算法中衡量算法效果的指标。对于物体检测任务，每一类object都可以计算出其精确率(Precision)和召回率(Recall)，在不同阈值下多次计算/试验，每个类都可以得到一条P-R曲线，曲线下的面积就是average precision(AP)的值。“mean”的意思是对每个类的AP再求平均，得到的就是mAP的值。mAP在[0,1]区间，越接近1模型效果越好。
+                  </div>
+                </Tooltip>
+              </div>
+              <div>精确率： {{row.metrics_precision | percent}}
+                <Tooltip placement="right-start" max-width="250" :transfer="true" theme="light">
+                  <Icon type="ios-help-circle-outline" color="#8c0776" style="cursor:pointer" />
+                  <div slot="content">「某类样本正确预测为该类的样本数」占「预测为该类的总样本数」的比率，此处为各类别精确率的平均数。</div>
+                </Tooltip>
+              </div>
+              <div>召回率： {{row.metrics_recall | percent}}
+                <Tooltip placement="right-start" max-width="250" :transfer="true" theme="light">
+                  <Icon type="ios-help-circle-outline" color="#8c0776" style="cursor:pointer" />
+                  <div slot="content">「某类样本正确预测为该类的样本数」占「标注为该类的总样本数」的比率，此处为各类别召回率的平均数。</div>
+                </Tooltip>
+              </div>
+            </template>
             <template slot-scope="{row, index}" slot="action">
               <div>
                 <span class="action" @click="viewOptions(row.dmtvid)">查看版本配置</span>
@@ -137,16 +159,24 @@
         <Button type="default" class="clear_btn" @click="cancelTrainData('trainDataInfo')">取消</Button>
       </div>
     </Modal>
-    <!-- 查看弹窗 -->
-    <Modal class="sys_modal" v-model="modal_option" class-name="vertical_modal" width="600">
+    <!-- 查看训练模型版本配置 -->
+    <Modal class="sys_modal" v-model="modal_option" class-name="vertical_modal" width="600" :mask-closable="false">
       <div class="modal_body modal_body_option">
         <div class="basic">
           <p class="title">基础信息</p>
-          <div>训练完成时间：</div>
+          <div>版本名称：{{optionInfo.dmtvName}}</div>
+          <div>模型推断平台：{{optionInfo.inferencePlatform == 1 ? '服务器' : '移动端'}}</div>
           <div>算法精度：{{optionInfo.dmPrecision == 1 ? '小' : optionInfo.dmPrecision == 2 ? '中' : optionInfo.dmPrecision == 3 ? '大' : '特大'}}</div>
+          <div>数据增强策略：{{optionInfo.dataEnhanceType == 1 ? '默认配置' : '手动配置'}}</div>
+          <div>训练次数：{{optionInfo.epochs}}</div>
+          <div>批大小：{{optionInfo.batch_size}}</div>
+          <div>是否使用预训练模型：{{optionInfo.isUsePreTraindModel == 'true' ? '是' : '否'}}</div>
+          <div>训练完成时间：{{optionInfo.trainEndDateTime && optionInfo.trainEndDateTime.$date | dateFormat}}</div>
         </div>
         <p class="title">训练数据集</p>
-        <Table :columns="columns2" :data="optionInfo.ds_dl_list"></Table>
+        <div class="modal_body modal_body_train">
+          <Table :columns="columns3" :data="optionInfo.ds_dl_list"></Table>
+        </div>
       </div>
       <div slot="footer">
         <Button type="primary" class="confirm_btn" ghost @click="cancel()">确定</Button>
@@ -165,7 +195,7 @@
         <Button type="default" class="clear_btn" @click="cancel()">取消</Button>
       </div>
     </Modal>
-    <Modal class="sys_modal" v-model="modal_add" width="450" title="新增模型">
+    <Modal class="sys_modal" v-model="modal_add" width="450" title="新增模型" :mask-closable="false">
       <div class="modal_body">
         <Form ref="addInfo" label-position="left" :model="addInfo" :rules="ruleValidate" :label-width="110">
           <FormItem label="模型名称" prop="dmName">
@@ -181,7 +211,7 @@
         <Button type="default" class="clear_btn" @click="cancel('addInfo')">取消</Button>
       </div>
     </Modal>
-    <Modal class="sys_modal" v-model="modal_modify" width="450" title="修改模型">
+    <Modal class="sys_modal" v-model="modal_modify" width="450" title="修改模型" :mask-closable="false">
       <div class="modal_body">
         <Form ref="modifyInfo" label-position="left" :model="modifyInfo" :rules="ruleValidate" :label-width="110">
           <FormItem label="模型名称" prop="dmName">
@@ -288,7 +318,8 @@ export default {
         }, {
           "title": "模型效果",
           "align": "center",
-          "key": "labelList",
+          "slot": 'metrics',
+          'width': 210
         }, {
           'title': '操作',
           'align': 'center',
@@ -339,23 +370,17 @@ export default {
           }
         }
       ],
-      columns2: [
+      columns3: [
         {
-          "title": "No.",
-          "align": "center",
-          render: (h,params) => {
-            return h('span', params.index)
-          }
-        },
-        {
-          "title": "数据集名称",
+          "title": "数据集",
           "align": "center",
           "key": "dsName"
         }, {
-          "title": "训练效果",
+          "title": "标签",
           "align": "center",
-          // "className": 'label_cell',
-          "width": 210,
+          // "key": "dlidList",
+          "className": 'label_cell',
+          "width": 220,
           "key": "dlNameList",
           render: (h, params) => {
             var title = ''
@@ -368,25 +393,45 @@ export default {
               },
             }, params.row.dlNameList.join('、'))
           }
+        }
+      ],
+      columns2: [
+        {
+          "title": "No.",
+          "align": "center",
+          render: (h, params) => {
+            return h('span', params.index + 1)
+          }
         },
         {
-          "title": "操作",
+          "title": "数据集名称",
           "align": "center",
-          "key": "dsImageCount",
-          render: (h, params) => {
-            return h('span', {
-              style: {
-                color: '#8c0776',
-                cursor: 'pointer'
-              },
-              on: {
-                click: () => {
-                  this.clearDataItem(params.index)
-                }
-              }
-            }, '清空')
-          }
-        }
+          "key": "dsName"
+        }, {
+          "title": "训练效果",
+          "align": "center",
+          // "className": 'label_cell',
+          "slot": 'metrics',
+          'width': 210
+        },
+        // {
+        //   "title": "操作",
+        //   "align": "center",
+        //   "key": "dsImageCount",
+        //   render: (h, params) => {
+        //     return h('span', {
+        //       style: {
+        //         color: '#8c0776',
+        //         cursor: 'pointer'
+        //       },
+        //       on: {
+        //         click: () => {
+        //           this.clearDataItem(params.index)
+        //         }
+        //       }
+        //     }, '清空')
+        //   }
+        // }
       ],
       pageInfo: {},
       files: []
@@ -705,12 +750,14 @@ export default {
     },
     viewOptions (dmtvid, idx) {
       this.dmtvid = dmtvid
-      this.modal_option = true
+      this.$Spin.show()
       this.$post('/detectModelTrain/getDMVersionDetail', {
         dmtvid: dmtvid
       }).then(data => {
         if(data.rs === 1) {
+          this.$Spin.hide()
           this.optionInfo = data.data
+          this.modal_option = true
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
