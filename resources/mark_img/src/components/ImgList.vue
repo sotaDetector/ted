@@ -123,11 +123,6 @@ export default {
           this.chosePage = pageData.page;//选择页
           this.pageNow = pageData.page;//当前页
 
-          console.log(this.total)
-
-
-
-          // var index = 0
           if(isInit) {
             var ditId = this.$route.params.ditId
             if(ditId) {

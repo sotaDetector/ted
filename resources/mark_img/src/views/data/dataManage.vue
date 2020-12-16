@@ -2,9 +2,9 @@
   <div class="data_manage">
     <div class="container_title">
       <!-- 面包屑 -->
-      <!-- <Breadcrumb>
-        <BreadcrumbItem>企业管理</BreadcrumbItem>
-      </Breadcrumb> -->
+      <Breadcrumb>
+        <BreadcrumbItem>数据集管理</BreadcrumbItem>
+      </Breadcrumb>
       <!-- 操作按钮 -->
       <div class="ops_btn">
         <Button type="primary" ghost size='small' @click="addModal">新增</Button>
@@ -16,7 +16,7 @@
         <div class="query_option">
           <Input style="width: 200px;" v-model="search.dsName" placeholder="请输入数据集名称"></Input>
           <span class="query_btn">
-            <Button type="info" @click="queryPageInfo">查询</Button>
+            <Button type="primary" @click="queryPageInfo">查询</Button>
             <Button @click="clearSearch">重置</Button>
           </span>
         </div>
@@ -27,6 +27,7 @@
               <div>
                 <span v-if="row.dsImageCount" class="action" @click="markDatas(row.dsId,index)">标注</span>
                 <span class="action" style="margin:0 4px;" @click="clickImport(row.dsId)">导入</span>
+                <span class="action" style="margin-right:4px;" @click="modifyModal(row.dsId)">编辑</span>
                 <span class="action" @click="delDatas(row.dsId)">删除</span>
               </div>
             </template>
@@ -81,7 +82,7 @@
         <Button type="default" class="clear_btn" @click="cancel()">取消</Button>
       </div>
     </Modal>
-    <Modal class="sys_modal" v-model="modal_add" width="450" title="新增企业">
+    <Modal class="sys_modal" v-model="modal_add" width="450" title="新增数据集">
       <div class="modal_body">
         <Form ref="addInfo" label-position="left" :model="addInfo" :rules="ruleValidate" :label-width="110">
           <FormItem label="数据集名称" prop="dsName">
@@ -100,17 +101,18 @@
         <Button type="default" class="clear_btn" @click="cancel('addInfo')">取消</Button>
       </div>
     </Modal>
-    <Modal class="sys_modal" v-model="modal_modify" width="450" title="修改企业">
+    <Modal class="sys_modal" v-model="modal_modify" width="450" title="修改数据集">
       <div class="modal_body">
         <Form ref="modifyInfo" label-position="left" :model="modifyInfo" :rules="ruleValidate" :label-width="110">
           <FormItem label="数据集名称" prop="dsName">
             <Input v-model="modifyInfo.dsName"></Input>
           </FormItem>
           <FormItem label="数据集类型" prop="dsType">
-            <Select v-model="modifyInfo.dsType">
+            <span v-if="modifyInfo.dsType == 1">图片</span>
+            <span v-else>其它</span>
+            <!-- <Select v-model="modifyInfo.dsType">
               <Option :value=1>图片</Option>
-              <!-- <Option :value=1>开启</Option> -->
-            </Select>
+            </Select> -->
           </FormItem>
         </Form>
       </div>
@@ -144,10 +146,10 @@ export default {
       },
       ruleValidate: {
         dsName: [
-          { required: true, message: '请输入企业名称', trigger: 'blur' },
+          { required: true, message: '请输入数据集名称', trigger: 'blur' },
         ],
         dsType: [
-          { required: true, message: '请输入登录用户名', trigger: 'blur', type: 'number' }
+          { required: true, message: '请选择类型', trigger: 'blur', type: 'number' }
         ],
       },
 
@@ -187,7 +189,7 @@ export default {
           render: (h, params) => {
             return h('div', {
               style: {
-                color: '#2db7f5',
+                color: '#8c0776',
                 cursor: 'pointer'
               },
               on: {
@@ -206,7 +208,7 @@ export default {
           //   return h('div', [
           //     h('span', {
           //       style: {
-          //         color: '#2db7f5',
+          //         color: '#8c0776',
           //         cursor: 'pointer'
           //       },
           //       on: {
@@ -218,7 +220,7 @@ export default {
           //     }, '标注'),
           //     h('span', {
           //       style: {
-          //         color: '#2db7f5',
+          //         color: '#8c0776',
           //         cursor: 'pointer',
           //         margin: '0 4px'
           //       },
@@ -231,7 +233,7 @@ export default {
           //     }, '导入'),
           //     h('span', {
           //       style: {
-          //         color: '#2db7f5',
+          //         color: '#8c0776',
           //         cursor: 'pointer'
           //       },
           //       on: {
@@ -355,13 +357,14 @@ export default {
       })
     },
     // 编辑弹框
-    modifyModal (enterpriseId) {
+    modifyModal (dsId) {
+      this.dsId = dsId
       this.modal_modify = true
-      this.$post('/enterprise/queryDetails', {
-        enterpriseId: enterpriseId
+      this.$post('/dsc/getDataSetDetail', {
+        dsId: dsId
       }).then(data => {
         if(data.rs === 1) {
-          this.modifyInfo = data.enterpriseInfo
+          this.modifyInfo = data.data
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
@@ -376,10 +379,13 @@ export default {
       this.$refs[name].validate((valid) => {
         if(valid) {
           this.$Spin.show()
-          this.$post('/enterprise/updateEnterpriseInfo.json', {
-            dsName: this.modifyInfo.dsName,
-            dsType: this.modifyInfo.dsType,
-          }).then(data => {
+          var params = {
+            dsId: this.dsId,
+            updateClolumn: {
+              dsName: this.modifyInfo.dsName
+            }
+          }
+          this.$post('/dsc/updateDataSet', params).then(data => {
             this.$Spin.hide()
             if(data.rs === 1) {
               this.modal_modify = false
@@ -500,7 +506,7 @@ export default {
 <style lang="scss">
 .data_manage {
   .action {
-    color: #2db7f5;
+    color: #8c0776;
     cursor: pointer;
   }
   .container_info .ivu-table-overflowX {
@@ -508,7 +514,7 @@ export default {
   }
 }
 .modal_body.modal_body_view {
-    max-height: 362px;
-    overflow-y: auto;
-  }
+  max-height: 362px;
+  overflow-y: auto;
+}
 </style>

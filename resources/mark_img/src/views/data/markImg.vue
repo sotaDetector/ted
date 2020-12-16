@@ -1,27 +1,17 @@
 <template>
   <div class="container">
     <div class="img_box unselect" ondragstart="return false">
-      <!-- <img id="img" src="@/assets/img/timg (3).jpg" alt="" ondragstart="return false" class="unselect"> -->
-      <!-- <img
-        id="img"
-        src="@/assets/img/timg (1).jpg"
-        alt=""
-        ondragstart="return false"
-        class="unselect"
-      /> -->
-      <!-- <img id="img" src="@/assets/img/timg (2).jpg" alt="" ondragstart="return false" class="unselect"> -->
-      <!-- <img id="img" src="@/assets/img/美女.jpg" alt="" ondragstart="return false" class="unselect" /> -->
       <img id="img" :src="imgSrc" alt="" ondragstart="return false" class="unselect" />
-      <!-- <img id="img" src="@/assets/img/white.jpg" alt="" ondragstart="return false" class="unselect"> -->
     </div>
     <!-- 添加标签 -->
     <div class="add_label">
       <Button type="primary" icon="ios-arrow-back" size="small" @click="back" style="margin-right:40%;">返回</Button>
       <div class="title">
         <Icon style="font-size:22px;margin-top:3px;margin-right:6px;margin-left:20px;" type="ios-menu" />
-        标签管理
+        <span style="margin-right:25px;">标签管理</span>
+        <!-- <Button icon="ios-add-circle-outline" type="success" size="small" @click="addLabel">新增标签</Button> -->
+        <Button type="success" size="small" @click="addLabel">新增</Button>
       </div>
-      <Button icon="ios-add-circle-outline" type="success" size="small" @click="addLabel">新增标签</Button>
       <ul class="add">
         <li class="add_li" v-for="(item, idx) in labelList" :key="idx">
           <Input ref="labelInput" v-if="!item.edited" type="text" placeholder="标签名称" size="small" style="width:110px;margin-right:5px;" v-model="item.dlName"></Input>
@@ -38,7 +28,7 @@
         <Icon style="font-size:22px;margin-top:3px;margin-right:6px" type="ios-menu" />
         标注管理
       </div>
-      <ul>
+      <ul class="choose">
         <li class="cho_li" v-for="(item, idx) in divList" :key="idx">
           <Select :class="[item.id, 'select']" v-model="item.dlid" size="small" style="width: 150px" @on-change="selectLabel(item)" @on-open-change="openSelect(item, $event)">
             <Option v-for="(label, i) in myLabelList" :value="label._id" :key="i">{{
@@ -105,16 +95,11 @@ export default {
     };
   },
   methods: {
-    clearTime () {
-      for(var i = 1; i <= 6; i++) {
-        clearTimeout('s' + i)
-      }
-    },
     chooseImg (imgInfo, isChoose) {
       if(isChoose) {
         this.$Spin.show()
-        this.clearTime()
       }
+      this.clearTime()
       this.imgSrc = imgInfo.ditFilePath
 
       this.ditId = imgInfo._id
@@ -123,14 +108,20 @@ export default {
         this.$router.push({ path })
       }
       // $('#img').remove()
-      s1 = setTimeout(() => {
-        this.initPage(imgInfo)
-      }, 100);
+      // s1 = setTimeout(() => {
+      this.initPage(imgInfo)
+      // }, 100);
     },
     initPage (imgInfo) {
-      $('.box').remove()
+      $('.content-box').scrollLeft(0)
+      // 移除上一张图的标注
+      if($('.box').length) {
+        $('.box').remove()
+      }
+      // 解绑上一张图绑定的事件
       $('.img_box').unbind()
       $('#img').unbind()
+      // 清空标注
       this.divList = []
 
       var _this = this;
@@ -143,23 +134,13 @@ export default {
       // };
 
       s2 = setTimeout(() => {
-        // 新增标签相关
-        var addBtn = $("#addBtn");
-        var editBtn = $("#editBtn");
-        var confirmBtn = $("#confirmBtn");
-
-        // 给截取div选择标签相关
-
         // 图片标注相关
-        var container = $(".container");
         var imgBox = $(".img_box");
         var boxWidth = imgBox.width();
         var boxHeight = imgBox.height();
         var img = $("#img");
-
+        // 设置图片宽高以适配屏幕
         if(ratio > 1) {
-          // img.css('width', '100%')
-          // img.css('height', img.width() / ratio)
           img.width("100%");
           img.height(img.width() / ratio);
 
@@ -168,8 +149,6 @@ export default {
             img.width(img.height() * ratio);
           }
         } else {
-          // img.css('height', '100%')
-          // img.css('width', img.height() * ratio)
           img.height("100%");
           img.width(img.height() * ratio);
 
@@ -180,17 +159,12 @@ export default {
         }
 
         var height = img.height();
-        // document.getElementById('img').style.width = ratio * height
         var width = img.width();
-        var iTop, iLeft;
-        // iTop = img.offset().top - img.position().top
-        // iLeft = img.offset().left - img.position().left
-        iTop = img.offset().top;
-        iLeft = img.offset().left;
-
+        var iTop = img.offset().top;
+        var iLeft = img.offset().left;
         var bTop = imgBox.offset().top;
         var bLeft = imgBox.offset().left;
-        // console.log(iTop, iLeft)
+        console.log(iTop, iLeft)
         // console.log(ratio, width, height)
 
         var startX, startY, endX, endY;
@@ -264,6 +238,7 @@ export default {
 
               dragDiv.style.top = dTop + "px";
               dragDiv.style.left = dLeft + "px";
+              // dragDiv.style.left = (dLeft - $('.content-box').scrollLeft()) + "px";
 
               dragStartX = e.pageX;
               dragStartY = e.pageY;
@@ -338,6 +313,9 @@ export default {
             div.className = "active";
             div.style.top = startY - bTop + "px";
             div.style.left = startX - bLeft + "px";
+            // div.style.left = (startX - bLeft + $('.content-box').scrollLeft()) + "px";
+
+            // console.log($('.content-box').scrollLeft())
             // console.log(startX, iLeft)
             img.after(div);
           });
@@ -426,7 +404,7 @@ export default {
             this.$Spin.hide()
           }, 500);
         }, 100);
-      }, 100);
+      }, 200);
     },
     getLabelList () {
       let params = {
@@ -526,10 +504,10 @@ export default {
       })
     },
     delLabel (id) {
-     this.modal_delete = true
-     this.dlid = id
+      this.modal_delete = true
+      this.dlid = id
     },
-    deleteMethod(id) {
+    deleteMethod (id) {
       this.$Spin.show()
       this.$post('/dataLabel/delDataLabel', { dlid: id }).then(data => {
         this.$Spin.hide()
@@ -548,7 +526,7 @@ export default {
         }
       })
     },
-    cancel() {
+    cancel () {
       this.modal_delete = false
     },
     // inputAddLabel (idx, e) {
@@ -622,6 +600,13 @@ export default {
           }
         }
       })
+    },
+    clearTime () {
+      for(var i = 1; i <= 6; i++) {
+        if('s' + i) {
+          clearTimeout('s' + i)
+        }
+      }
     },
     back () {
       this.$router.push('/dataManage')
@@ -698,32 +683,41 @@ export default {
 
   .choose_label,
   .add_label {
-    max-height: calc(100% - 110px);
+    // max-height: calc(100% - 110px);
+    // overflow-y: auto;
     padding-top: 20px;
-    overflow-y: auto;
     width: 22%;
+    height: 100%;
   }
 
   .choose_label {
     float: right;
     margin-right: 20px;
   }
+  .add {
+    max-height: calc(100% - 265px);
+    overflow-y: auto;
+  }
+  .choose {
+    max-height: calc(100% - 165px);
+    overflow-y: auto;
+  }
 
   /* 设置滚动条的样式 */
-  .add_label::-webkit-scrollbar,
-  .choose_label::-webkit-scrollbar {
+  .add::-webkit-scrollbar,
+  .choose::-webkit-scrollbar {
     width: 12px;
   }
   /* 滚动槽 */
-  .add_label::-webkit-scrollbar-track,
-  .choose_label::-webkit-scrollbar-track {
+  .add::-webkit-scrollbar-track,
+  .choose::-webkit-scrollbar-track {
     // -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
     -webkit-box-shadow: inset 0 0 6px rgba(255, 255, 255, 0.2);
     border-radius: 10px;
   }
   /* 滚动条滑块 */
-  .add_label::-webkit-scrollbar-thumb,
-  .choose_label::-webkit-scrollbar-thumb {
+  .add::-webkit-scrollbar-thumb,
+  .choose::-webkit-scrollbar-thumb {
     border-radius: 10px;
     background: rgba(0, 0, 0, 0.1);
     // -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
