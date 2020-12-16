@@ -106,14 +106,6 @@ def upImageItemRecLabels():
 
 
 
-"""
-上传图片标注数据
-"""
-@dsm_blp.route('/initTestData', methods=['POST'])
-def initTestData():
-
-    return dsService.initTestData()
-
 
 @dsm_blp.route('/imageItem/<filePath>', methods=['POST','GET'])
 def imageItem(filePath):
