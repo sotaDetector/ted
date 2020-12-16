@@ -17,6 +17,17 @@ import '@/assets/font_icon/iconfont.css'
 // md5加密
 import md5 from 'js-md5'
 
+// 引入时间插件
+import moment from 'moment'
+//定义时间格式全局过滤器
+Vue.filter("dateFormat", function (daraStr, pattern = "YYYY-MM-DD HH:mm:ss") {
+  return moment(daraStr).format(pattern)
+})
+// 百分比处理
+Vue.filter("percent", function (number) {
+  return ((number * 100).toFixed(2) + '%')
+})
+
 // 全局基本路径
 import {
   baseUrl

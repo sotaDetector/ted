@@ -155,6 +155,9 @@ export default {
       this.pageNow = page;//赋值当前页
       this.activeIdx = 0
       this.getImgs();
+      setTimeout(() => {
+        $('.list').css({left: 0})
+      }, 200);
     },
     reset () {
       this.pageNow = this.pageNow - 1
