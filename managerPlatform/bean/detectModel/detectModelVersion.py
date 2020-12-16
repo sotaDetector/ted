@@ -36,7 +36,7 @@ class detectModelTrainVersion(baseBean):
     trainStartDateTime=mongoSource.mdb.DateTimeField(default=datetime.now)
     trainEndDateTime = mongoSource.mdb.DateTimeField()
 
-    metrics_mAP_5=mongoSource.mdb.FloatField()
+    metrics_mAP=mongoSource.mdb.FloatField()
     # 精准率
     metrics_precision = mongoSource.mdb.FloatField()
     # 召回率
