@@ -309,10 +309,10 @@ class datasetsService:
         print("***************dlid_dlIndex_map**************")
         print(str(dl_id_index_map))
         #将dlid和index的关系保存到trainVersion中
-        detectModelTrainVersion.objects(dmtvid=dmtvid,state=ConstantUtils.DATA_STATUS_ACTIVE).update(dl_id_index_map=dl_id_index_map)
+        detectModelTrainVersion.objects(dmtvid=dmtvid,state=ConstantUtils.DATA_STATUS_ACTIVE).update(dl_id_index_map=str(dl_id_index_map))
         labelMap, nameList = labelService.getLabelsBylids(dsItem["dsId"])
         #对nameList进行排序
-        nameList=[labelMap[item] for item in dlOrderedList]
+        newnameList=[labelMap[item] for item in dlOrderedList]
         loggerUtils.info("labelMap:" + str(labelMap))
         index = 0
         for i in range(imagePathList.__len__()):
@@ -326,16 +326,16 @@ class datasetsService:
             "imagePathList": imagePathList,
             "LabelsList": np.array(LabelsList),
             "imageShapeList": np.array(imageShapeList),
-            "nc": nameList.__len__(),
-            "names": nameList
+            "nc": newnameList.__len__(),
+            "names": newnameList
         }
 
         valDataDict = {
             "imagePathList": imagePathList,
             "LabelsList": np.array(LabelsList),
             "imageShapeList": np.array(imageShapeList),
-            "nc": nameList.__len__(),
-            "names": nameList
+            "nc": newnameList.__len__(),
+            "names": newnameList
         }
 
         return trainDataDict, valDataDict
