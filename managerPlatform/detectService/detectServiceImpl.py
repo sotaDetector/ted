@@ -123,3 +123,13 @@ class detectServiceImpl:
         return resultPackerUtils.packDataItemResults(detectService.to_json(),"dtsid")
 
 
+    def changeDtsSwitch(self,jsonData):
+
+        detectServiceIns = detectServiceBean.objects(dtsid=jsonData['dtsid'])
+
+        #更改数据库状态
+        detectServiceIns.update(dtsSwitch=jsonData['dtsSwitch'])
+
+        return resultPackerUtils.update_success()
+
+
