@@ -27,20 +27,87 @@ class dmTrainStatisService:
             x_lr1.append(item['x_lr1'])
             x_lr2.append(item['x_lr2'])
 
+        statisList=[]
+
+        statisList.append({
+            "statisGroup":"metrics",
+            "statisName":"metrics_mAP_5",
+            "statisValue":metrics_mAP_5
+        })
+
+        statisList.append({
+            "statisGroup": "metrics",
+            "statisName": "metrics_mAP",
+            "statisValue": metrics_mAP
+        })
+
+        statisList.append({
+            "statisGroup": "metrics",
+            "statisName": "metrics_precision",
+            "statisValue": metrics_precision
+        })
+
+        statisList.append({
+            "statisGroup": "metrics",
+            "statisName": "metrics_recall",
+            "statisValue": metrics_recall
+        })
+
+        statisList.append({
+            "statisGroup": "train",
+            "statisName": "train_box_loss",
+            "statisValue": train_box_loss
+        })
+
+        statisList.append({
+            "statisGroup": "train",
+            "statisName": "train_cls_loss",
+            "statisValue": train_cls_loss
+        })
+
+        statisList.append({
+            "statisGroup": "train",
+            "statisName": "train_obj_loss",
+            "statisValue": train_obj_loss
+        })
+
+        statisList.append({
+            "statisGroup": "val",
+            "statisName": "val_box_loss",
+            "statisValue": val_box_loss
+        })
+
+        statisList.append({
+            "statisGroup": "val",
+            "statisName": "val_cls_loss",
+            "statisValue": val_cls_loss
+        })
+
+        statisList.append({
+            "statisGroup": "val",
+            "statisName": "val_obj_loss",
+            "statisValue": val_obj_loss
+        })
+
+        statisList.append({
+            "statisGroup": "x",
+            "statisName": "x_lr0",
+            "statisValue": x_lr0
+        })
+
+        statisList.append({
+            "statisGroup": "x",
+            "statisName": "x_lr1",
+            "statisValue": x_lr1
+        })
+        statisList.append({
+            "statisGroup": "x",
+            "statisName": "x_lr2",
+            "statisValue": x_lr2
+        })
+
         resultMap={
-            "metrics_mAP_5":metrics_mAP_5,
-            "metrics_mAP":metrics_mAP,
-            "metrics_precision":metrics_precision,
-            "metrics_recall":metrics_recall,
-            "train_box_loss":train_box_loss,
-            "train_cls_loss":train_cls_loss,
-            "train_obj_loss":train_obj_loss,
-            "val_box_loss":val_box_loss,
-            "val_cls_loss":val_cls_loss,
-            "val_obj_loss":val_obj_loss,
-            "x_lr0":x_lr0,
-            "x_lr1":x_lr1,
-            "x_lr2":x_lr2
+            "dataList":statisList
         }
 
         return resultPackerUtils.packCusResult(resultMap)

@@ -136,7 +136,7 @@ class datasetsService:
 
         dataImageItem.objects.insert(saveImageItemList, load_bulk=False)
         #更新数据集数量
-        self.updateDataSetStatisData(dsId['dsId'])
+        self.updateDataSetStatisData(dsId)
         return resultPackerUtils.save_success()
 
     def saveMultiImages(self, desFolderBasePath, imageslist):

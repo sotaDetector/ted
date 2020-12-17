@@ -17,9 +17,9 @@ class pageBean:
             self.totalPages = (self.totalCount // self.pageSize)+1
 
 
-    def set_dataList(self,dataList):
+    def set_dataList(self,dataList,idName=None):
 
-        self.dataList=json.loads(dataList.to_json())
+        self.dataList=json.loads(dataList.to_json().replace("_id",idName))
 
     def set_numpy_dataList(self, dataList):
 
