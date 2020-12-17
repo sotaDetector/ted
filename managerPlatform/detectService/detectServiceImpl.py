@@ -23,6 +23,20 @@ class detectServiceImpl:
 
         return resultPackerUtils.save_success()
 
+    def updateDetectService(self,jsonData):
+
+        detectServiceIns = detectServiceBean.objects(dtsid=jsonData['dtsid'], state=ConstantUtils.DATA_STATUS_ACTIVE)
+        updateMap=jsonData['updateClolumn']
+
+        updateMap["dmBean"] = detectModelBean.objects(dmId=jsonData["updateClolumn"]['dmId'], state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
+
+        updateMap['dmtvBean'] =detectModelTrainVersion.objects(dmtvid=jsonData["updateClolumn"]["dmtvId"], state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
+
+        detectServiceIns.update(**jsonData['updateClolumn'])
+
+        return resultPackerUtils.update_success()
+
+
 
     def getDetectServicePageList(self,pageItem):
 
@@ -68,7 +82,10 @@ class detectServiceImpl:
                             "create_date":1,
                             'task_docs.dmName':1,
                             'task_docs.dmType':1,
-                            'version.dmtvName':1
+                            'version.dmtvName':1,
+                            'dmId': 1,
+                            'dmtvId':1
+
                         },
                  },
                  {
@@ -91,4 +108,18 @@ class detectServiceImpl:
         pageItem.set_numpy_dataList(list(resultList))
 
         return resultPackerUtils.packPageResult(pageItem)
+
+    def delDetectService(self,jsonData):
+
+        detectServiceIns = detectServiceBean.objects(dtsid=jsonData['dtsid'])
+        detectServiceIns.update(state=ConstantUtils.DATA_STATUS_DELETED)
+        return resultPackerUtils.update_success()
+
+
+    def getDetectServiceDetail(self,jsonData):
+
+        detectService=detectServiceBean.objects(dtsid=jsonData['dtsid'],state=ConstantUtils.DATA_STATUS_ACTIVE).exclude("create_date","state")
+
+        return resultPackerUtils.packDataItemResults(detectService.to_json(),"dtsid")
+
 
