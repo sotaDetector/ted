@@ -1,4 +1,6 @@
+from managerPlatform.bean.detectModel import detectModelVersion
 from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
+from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
 from managerPlatform.common.baseBean.baseBean import baseBean
 from managerPlatform.common.dataManager.mongoSource import mongoSource
 
@@ -17,6 +19,8 @@ class detectServiceBean(baseBean):
     #模型版本ID
     dmtvId = mongoSource.mdb.LongField(required=True)
 
+    dmtvBean=mongoSource.mdb.ReferenceField(detectModelTrainVersion)
+
     #服务开关
     dtsSwitch=mongoSource.mdb.IntField(required=True)
 
@@ -32,5 +36,6 @@ class detectServiceBean(baseBean):
             dmtvId=jsonData["dmtvId"],
             dtsSwitch=jsonData["dtsSwitch"],
             dtsSecretKey=jsonData["dtsSecretKey"],
-            userId=session.get("userId")
+            userId=session.get("userId"),
+            dmtvBean=jsonData['dmtvBean']
         )
