@@ -268,8 +268,10 @@ export default {
       this.$post_('/videoDetect/getVideoDetectResult', fd).then(data => {
         this.$Spin.hide()
         if(data.rs === 1) {
-          // this.queryPageInfo()
           this.mediaSrc = data.videoPlayUrl
+          setTimeout(() => {
+            $('.media').attr('src', data.videoPlayUrl)
+          }, 300);
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
