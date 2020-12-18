@@ -441,9 +441,9 @@ class trainModelThread(threading.Thread):
 
         versionItem.update(trainState=ConstantUtils.model_version_train_state_success,
                            trainEndDateTime=datetime.now,
-                           metrics_mAP_5=trainStatistics["trainStatistics"],
+                           metrics_mAP=trainStatistics["metrics_mAP"],
                            metrics_precision=trainStatistics["metrics_precision"],
-                           metrics_recall=trainStatistics['trainStatistics'])
+                           metrics_recall=trainStatistics['metrics_recall'])
 
 
 

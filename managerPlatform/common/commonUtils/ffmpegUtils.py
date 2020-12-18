@@ -48,6 +48,7 @@ class ffmpegUtils:
             cameraIndex=item.replace("/dev/video","")
             getDetailInfoIns = "udevadm info --query=all --name="+item
             detailInfoResult = subprocess.getstatusoutput(getDetailInfoIns)
+            deviceName,deviceUID=None,None
             for item in detailInfoResult[1].split("\n"):
                 if item.__contains__("ID_MODEL="):
                     deviceName=item.split("=")[1]

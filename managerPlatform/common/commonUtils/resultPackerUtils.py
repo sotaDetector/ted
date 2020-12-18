@@ -1,6 +1,6 @@
+import datetime
 import json
-from bson import json_util
-from flask import make_response
+
 
 
 class resultPackerUtils:
@@ -70,7 +70,7 @@ class resultPackerUtils:
             cls._resultTag: cls._success_tag,
             "pageData":data.__dict__
         }
-        return json.dumps(result)
+        return json.dumps(result,cls=DateEncoder)
 
     @classmethod
     def packErrorMsg(cls,errorCode):
@@ -86,6 +86,12 @@ class resultPackerUtils:
         resultMap[cls._resultTag]=cls._success_tag
         return json.dumps(resultMap)
 
+class DateEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj,datetime.datetime):
+            return obj.strftime("%Y-%m-%d %H:%M:%S")
+        else:
+            return json.JSONEncoder.default(self,obj)
 
 
 

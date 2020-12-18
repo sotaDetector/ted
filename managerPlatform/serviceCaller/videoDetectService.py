@@ -7,7 +7,7 @@ from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
-from managerPlatform.serviceCaller.detectServiceImpl import detectThreadMap
+from managerPlatform.serviceCaller.detValServiceImpl import detectThreadMap
 
 
 class videoDetectService:

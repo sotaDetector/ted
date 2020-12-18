@@ -7,7 +7,7 @@ detectThreadMap={}
 
 modelVersionSeervice=detectModelTrainService()
 
-class detectServiceImpl:
+class detValServiceImpl:
 
     #加载模型
     def launchDetectService(self,data):

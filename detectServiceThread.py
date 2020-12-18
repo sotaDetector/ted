@@ -11,6 +11,7 @@ import torch.backends.cudnn as cudnn
 from numpy import random
 
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
+from managerPlatform.common.commonUtils.videoRecordUtils import videoRecordUtils
 from models.experimental import attempt_load
 from utils.datasets import LoadStreams, LoadImages
 from utils.general import check_img_size, non_max_suppression, apply_classifier, scale_coords, xyxy2xywh, \
@@ -77,12 +78,13 @@ class detectServiceThread(threading.Thread):
 
     def detect(self, detetConfig=None):
 
-        detectResult=[]
+        detectResult = []
 
         print("检测参数：" + str(detetConfig))
         model = self.model
         save_img = False
-        cap=None
+        cap = None
+        vw = None
         # 初始化若干参数
         source, view_img, save_txt = detetConfig["source"], detetConfig["view_img"], detetConfig["save_txt"]
 
@@ -111,6 +113,7 @@ class detectServiceThread(threading.Thread):
             cudnn.benchmark = True  # set True to speed up constant image size inference
             dataset = LoadStreams(source, img_size=imgsz)
             cap = dataset.getCap()
+            vw = videoRecordUtils.createVideoWriter(cap)
         else:
             save_img = True
             dataset = LoadImages(source, img_size=imgsz)
@@ -169,7 +172,7 @@ class detectServiceThread(threading.Thread):
                         s += '%g %ss, ' % (n, names[int(c)])  # add to string
 
                     # Write results
-                    detectObjectItems=[]
+                    detectObjectItems = []
                     for *xyxy, conf, cls in reversed(det):
 
                         if save_txt:  # Write to file
@@ -186,14 +189,14 @@ class detectServiceThread(threading.Thread):
                                 "y": int(xyxy[1]),
                                 "w": int(xyxy[2]),
                                 "h": int(xyxy[3]),
-                                "label":label,
-                                "class":int(cls.int()),
-                                "conf":float(conf.float())
+                                "label": label,
+                                "class": int(cls.int()),
+                                "conf": float(conf.float())
                             })
 
                     detectResult.append({
-                        "file":p.name,
-                        "detectObject":detectObjectItems
+                        "file": p.name,
+                        "detectObject": detectObjectItems
                     })
 
                 # Print time (inference + NMS)
@@ -203,6 +206,9 @@ class detectServiceThread(threading.Thread):
                 if view_img:
                     ret, buffer = cv2.imencode('.jpg', im0)
                     frame = buffer.tobytes()
+                    # record video
+                    print("record video....")
+                    vw.write(im0)
                     self.q.put(frame)
 
                 # Save results (image with detections)
@@ -222,6 +228,9 @@ class detectServiceThread(threading.Thread):
                             vid_writer = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*fourcc), fps, (w, h))
                         vid_writer.write(im0)
 
+        if vw != None:
+
+            videoRecordUtils.closeVideoWrite(vw)
         if cap != None:
             cap.release()
 
