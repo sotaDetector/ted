@@ -393,6 +393,7 @@ export default {
     width: 60%;
     height: 435px;
     background: #f7f7f7;
+    position: relative;
     .ivu-upload-drag {
       height: 100%;
     }
