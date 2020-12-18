@@ -37,7 +37,7 @@ export function request(config) {
   }
   const instance = new axios.create({
     // baseURL: baseUrl,
-    timeout: 60 * 1000,
+    timeout: 5 * 60 * 1000,
     headers: {
       'Content-Type': 'application/json',
       // 'Authorization': document.cookie

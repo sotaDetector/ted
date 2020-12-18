@@ -24,11 +24,12 @@
         <div class="container_table" v-for="(table,index) in pageInfo.dataList" :key="index">
           <div class="table_head">
             {{table.dmName}}
+            <span style="margin-left:20px">模型ID：{{table.dmId}}</span>
             <div class="model_action">
               <span class="action" @click="trainModel(table.dmId)">
                 <Icon type="ios-book-outline" /> 训练
               </span>
-              <span class="action" style="margin:0 20px" @click="goHistory(table.dmId)">
+              <span class="action" style="margin:0 20px" @click="goHistory(table)">
                 <Icon type="ios-clock-outline" /> 历史版本
               </span>
               <span class="action" style="margin-right:20px" @click="modifyModal(table.dmId)">
@@ -65,8 +66,8 @@
             <template slot-scope="{row, index}" slot="action">
               <div>
                 <span class="action" @click="viewOptions(row.dmtvid)">查看版本配置</span>
-                <span class="action" style="margin:0 4px;" @click="clickImport(row.dmtvid)">校验</span>
-                <span class="action" style="margin-right:4px;" @click="modifyModal(row.dmtvid)">训练统计</span>
+                <span class="action" style="margin:0 6px;" @click="validateModal(table.dmName,row.dmtvid,row.dmtvName)">校验</span>
+                <span class="action" style="margin-right:6px;" @click="viewStatistics(table.dmName,row.dmtvid,row.dmtvName)">训练统计</span>
                 <!-- <span class="action" @click="delDatas(row.dmId)">删除</span> -->
               </div>
             </template>
@@ -140,7 +141,7 @@
     <!-- 添加训练数据 -->
     <Modal class="sys_modal" v-model="modal_trainData" width="750" title="添加训练数据" :mask-closable="false">
       <div class="modal_body">
-        <Form ref="trainDataInfo" label-position="left" :model="trainDataInfo" :rules="ruleValidate1" :label-width="110">
+        <Form ref="trainDataInfo" label-position="left" :model="trainDataInfo" :label-width="110">
           <FormItem label="数据集" prop="dsId">
             <Select v-model="trainDataInfo.dsId" style="width:300px;" @on-change="onSelectData">
               <Option :value="item.dsId" v-for="(item,idx) in dataList" :key="idx">{{item.dsName}}</Option>
@@ -160,20 +161,24 @@
       </div>
     </Modal>
     <!-- 查看训练模型版本配置 -->
-    <Modal class="sys_modal" v-model="modal_option" class-name="vertical_modal" width="600" :mask-closable="false">
+    <Modal class="sys_modal" v-model="modal_option" class-name="vertical_modal" title="版本配置" width="600" :mask-closable="false">
       <div class="modal_body modal_body_option">
-        <div class="basic">
+        <div class="basic clear-fix">
           <p class="title">基础信息</p>
-          <div>版本名称：{{optionInfo.dmtvName}}</div>
-          <div>模型推断平台：{{optionInfo.inferencePlatform == 1 ? '服务器' : '移动端'}}</div>
-          <div>算法精度：{{optionInfo.dmPrecision == 1 ? '小' : optionInfo.dmPrecision == 2 ? '中' : optionInfo.dmPrecision == 3 ? '大' : '特大'}}</div>
-          <div>数据增强策略：{{optionInfo.dataEnhanceType == 1 ? '默认配置' : '手动配置'}}</div>
-          <div>训练次数：{{optionInfo.epochs}}</div>
-          <div>批大小：{{optionInfo.batch_size}}</div>
-          <div>是否使用预训练模型：{{optionInfo.isUsePreTraindModel == 'true' ? '是' : '否'}}</div>
-          <div>训练完成时间：{{optionInfo.trainEndDateTime && optionInfo.trainEndDateTime.$date | dateFormat}}</div>
+          <div class="left">
+            <div>版本名称：{{optionInfo.dmtvName}}</div>
+            <div>模型推断平台：{{optionInfo.inferencePlatform == 1 ? '服务器' : '移动端'}}</div>
+            <div>算法精度：{{optionInfo.dmPrecision == 1 ? '小' : optionInfo.dmPrecision == 2 ? '中' : optionInfo.dmPrecision == 3 ? '大' : '特大'}}</div>
+            <div>数据增强策略：{{optionInfo.dataEnhanceType == 1 ? '默认配置' : '手动配置'}}</div>
+          </div>
+          <div class="right">
+            <div>训练次数：{{optionInfo.epochs}}</div>
+            <div>批大小：{{optionInfo.batch_size}}</div>
+            <div>是否使用预训练模型：{{optionInfo.isUsePreTraindModel == 'true' ? '是' : '否'}}</div>
+            <div>训练完成时间：{{optionInfo.trainEndDateTime && optionInfo.trainEndDateTime.$date | dateFormat}}</div>
+          </div>
         </div>
-        <p class="title">训练数据集</p>
+        <p class="title" style="margin-top:10px">训练数据集</p>
         <div class="modal_body modal_body_train">
           <Table :columns="columns3" :data="optionInfo.ds_dl_list"></Table>
         </div>
@@ -230,7 +235,6 @@
   </div>
 </template>
 <script>
-import { formatDate } from '@/utils/date.js'
 export default {
   mounted () {
     this.queryPageInfo()
@@ -242,9 +246,7 @@ export default {
       pageNow: 1,
       pagesize: 20,// 每页显示多少条
       search: {},
-      modal_list: false,
       modal_delete: false,
-      modal_view: false,
       modal_add: false,
       modal_modify: false,
       modal_train: false, // 新增模型
@@ -266,7 +268,6 @@ export default {
         dlidList: [],
       },
       checkAll: false,
-
       ruleValidate: {
         dmName: [
           { required: true, message: '请输入模型名称', trigger: 'blur' },
@@ -279,9 +280,6 @@ export default {
         dmtvName: [
           { required: true, message: '请输入版本名称', trigger: 'blur' }
         ]
-      },
-      ruleValidate1: {
-
       },
       modifyInfo: {},
       optionInfo: {},
@@ -307,6 +305,7 @@ export default {
         }, {
           "title": "数据集",
           "align": "center",
+          "className": 'label_cell',
           "key": "datasetNames",
           'width': 190,
           render: (h, params) => {
@@ -319,7 +318,7 @@ export default {
           "title": "模型效果",
           "align": "center",
           "slot": 'metrics',
-          'width': 210
+          'width': 190
         }, {
           'title': '操作',
           'align': 'center',
@@ -335,7 +334,6 @@ export default {
         }, {
           "title": "标签",
           "align": "center",
-          // "key": "dlidList",
           "className": 'label_cell',
           "width": 210,
           "key": "dlNameList",
@@ -434,7 +432,6 @@ export default {
         // }
       ],
       pageInfo: {},
-      files: []
     }
   },
   methods: {
@@ -532,8 +529,8 @@ export default {
       this.dmId = dmId
       this.getDatas()
     },
-    goHistory (dmId) {
-      this.$router.push({ path: '/modelHistory/' + dmId })
+    goHistory (table) {
+      this.$router.push({ path: '/modelHistory/' + table.dmId, query: { dmName: table.dmName } })
     },
     chooseData () {
       this.trainDataInfo = {
@@ -570,6 +567,10 @@ export default {
     },
     addTrainDataInfo () {
       // console.log(this.trainDataInfo, this.trainData)
+      if(!(this.trainDataInfo.dlidList && this.trainDataInfo.dlidList.length)) {
+        this.$Message.error('请选择标签')
+        return false
+      }
       var index = this.trainData.findIndex(item => item.dsId == this.trainDataInfo.dsId)
       if(index >= 0) {
         this.trainData.splice(index, 1)
@@ -632,31 +633,6 @@ export default {
           })
         } else {
           this.$Message.error('新增失败!');
-        }
-      })
-    },
-    // 删除弹框
-    deleteModal (channelId) {
-      this.channelId = channelId
-      this.modal_delete = true
-    },
-    // 确认删除
-    deleteMethod (channelId) {
-      this.$Spin.show()
-      this.$post('/channel/deleteChannel', {
-        channelId: channelId
-      }).then(data => {
-        if(data.rs === 1) {
-          this.$Spin.hide()
-          this.modal_delete = false
-          this.$Message.success('删除成功!');
-          this.queryPageInfo();
-        } else {
-          if(data.data && data.data.errorMsg) {
-            this.$Message.error(data.data.errorMsg);
-          } else {
-            this.$Message.error(data.errorMsg);
-          }
         }
       })
     },
@@ -744,10 +720,6 @@ export default {
         }
       })
     },
-    viewLabel (list) {
-      this.labelList = list
-      this.modal_view = true
-    },
     viewOptions (dmtvid, idx) {
       this.dmtvid = dmtvid
       this.$Spin.show()
@@ -767,10 +739,11 @@ export default {
         }
       })
     },
-    clickImport (id) {
-      this.dmId = id
-      this.files = []
-      this.modal_list = true
+    validateModal () {
+
+    },
+    viewStatistics (dmName, dmtvid, dmtvName) {
+      this.$router.push({ path: '/trainStatistics/' + dmtvid, query: { dmName, dmtvName } })
     },
     delDatas (id) {
       this.dmId = id
@@ -803,8 +776,6 @@ export default {
       this.modal_add = false
       this.modal_modify = false
       this.modal_delete = false
-      this.modal_view = false
-      this.modal_list = false
       this.modal_train = false
       this.modal_option = false
       if(name) {
@@ -868,5 +839,13 @@ export default {
 .modal_body_train {
   max-height: 450px;
   overflow-y: auto;
+}
+.basic .left {
+  float: left;
+  margin: 0;
+}
+.basic .right {
+  float: right;
+  margin: 0;
 }
 </style>

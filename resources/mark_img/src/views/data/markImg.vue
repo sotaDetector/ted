@@ -5,7 +5,7 @@
     </div>
     <!-- 添加标签 -->
     <div class="add_label">
-      <Button type="primary" icon="ios-arrow-back" size="small" @click="back" style="margin-right:40%;">返回</Button>
+      <Button type="primary" icon="ios-arrow-back" size="small" @click="back" style="margin-right:40%;">返 回</Button>
       <div class="title">
         <Icon style="font-size:22px;margin-top:3px;margin-right:6px;margin-left:20px;" type="ios-menu" />
         <span style="margin-right:25px;">标签管理</span>

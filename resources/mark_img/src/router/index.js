@@ -52,6 +52,16 @@ const routes = [{
         name: 'ModelHistory',
         component: () => import('@/views/model/modelHistory.vue')
       },
+      {
+        path: '/trainStatistics/:id',
+        name: 'TrainStatistics',
+        component: () => import('@/views/model/trainStatistics.vue')
+      },
+      {
+        path: '/modelValidate/:id',
+        name: 'ModelValidate',
+        component: () => import('@/views/model/modelValidate.vue')
+      },
     ]
   },
 ]
