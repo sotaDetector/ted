@@ -99,6 +99,7 @@
             <div class="validate_content clear-fix">
               <div class="left">
                 <img v-if="mediaSrc" class="media" :src="mediaSrc">
+                <!-- <img src="http://47.111.130.154:8200/videoDetect/getVideoStream?videoPlayId=12" alt="" class="media"> -->
               </div>
               <div class="right">
                 <div class="threshold">
@@ -148,6 +149,8 @@ export default {
   },
   mounted () {
     this.dmtvid = parseInt(this.$route.params.id)
+
+
   },
   destroyed () {
     if(this.videoPlayId) {
@@ -246,7 +249,6 @@ export default {
       this.$post_('/imageDetect/getSingleImageDetectResult', fd).then(data => {
         this.$Spin.hide()
         if(data.rs === 1) {
-          // this.queryPageInfo()
           this.mediaSrc = data.imagePath
           this.resultList = data.detectResult.length && data.detectResult[0].detectObject
         } else {
@@ -269,9 +271,9 @@ export default {
         this.$Spin.hide()
         if(data.rs === 1) {
           this.mediaSrc = data.videoPlayUrl
-          setTimeout(() => {
-            $('.media').attr('src', data.videoPlayUrl)
-          }, 300);
+          // setTimeout(() => {
+          //   $('.media').attr('src', data.videoPlayUrl)
+          // }, 300);
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
@@ -289,10 +291,10 @@ export default {
     startDetect () {
       var str = this.tabName == 2 ? '直播地址不能为空' : '请选择摄像设备'
       var url = this.tabName == 2 ? '/natCamera/startLiveStreamDetect' : '/natCamera/startNativeCameraDetect'
-      if(!this.source) {
-        this.$Message.error(str)
-        return false
-      }
+      // if(!this.source) {
+      //   this.$Message.error(str)
+      //   return false
+      // }
       this.waiting = true
 
       this.$Spin.show()
@@ -305,11 +307,12 @@ export default {
       this.$post(url, params).then(data => {
         this.$Spin.hide()
         this.waiting = false
-        if(data.rs === 1) {
-          this.mediaSrc = data.videoPlayUrl
-          setTimeout(() => {
-            $('.media').attr('src', data.videoPlayUrl)
-          }, 300);
+        if(data.rs == 1) {
+          this.mediaSrc = 'http://47.111.130.154:8200/videoDetect/getVideoStream?videoPlayId=12'
+          // this.mediaSrc = data.videoPlayUrl
+          // setTimeout(() => {
+          //   this.mediaSrc = 'http://47.111.130.154:8200/videoDetect/getVideoStream?videoPlayId=12'
+          // }, 250);
           if(this.tabName == 3) { // 摄像头检测
             this.videoPlayId = data.videoPlayId
             this.setTimer()
