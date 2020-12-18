@@ -17,7 +17,7 @@
           <span style="margin-right:30px;">模型名称：{{$route.query.dmName}}</span>
           <span>模型版本：{{$route.query.dmtvName}}</span>
         </div>
-        <div class="open" v-show="isOpenShow">
+        <div class="open" v-if="isOpenShow">
           <Button type="primary" size="small" :loading="opening" @click="openValidate">{{openText}}</Button>
         </div>
 
@@ -27,7 +27,7 @@
               <div class="left">
                 <Upload type="drag" action="//jsonplaceholder.typicode.com/posts/" :show-upload-list="false" class="drag" accept=".png, .jpg, .jpeg, .bmp, .tif, .tiff, .dng" :before-upload="handleUpload">
                   <div class="innner" style="height:100%;position:relative;background:#f7f7f7;display:flex;justify-content:center;align-items:center;flex-direction:column">
-                    <img v-show="mediaSrc" class="media" :src="mediaSrc">
+                    <img v-if="mediaSrc" class="media" :src="mediaSrc">
                     <Icon type="ios-image-outline" size="52" style="color:#8c0776"></Icon>
                     <p class="tip">点击 <span class="font">添加图片</span> 或 <span class="font">拖曳图片</span> 至此处</p>
                     <p class="tip">图片类型为jpg, png, bmp, jpeg, tif, tiff, dng，图片大小限制在<span class="font">4M</span>内。</p>
@@ -58,8 +58,8 @@
               <div class="left">
                 <Upload type="drag" action="//jsonplaceholder.typicode.com/posts/" :show-upload-list="false" class="drag" accept=".mov, .avi, .mp4, .mpg, .mpeg, .m4v, .wmv, .mkv" :before-upload="handleUpload">
                   <div class="innner" style="height:100%;position:relative;background:#f7f7f7;display:flex;justify-content:center;align-items:center;flex-direction:column">
-                    <!-- <img v-show="mediaSrc" class="media" :src="mediaSrc"> -->
-                    <img v-show="mediaSrc" class="media" :src="mediaSrc">
+                    <!-- <img v-if="mediaSrc" class="media" :src="mediaSrc"> -->
+                    <img v-if="mediaSrc" class="media" :src="mediaSrc">
                     <Icon type="ios-film-outline" size="52" style="color:#8c0776"></Icon>
                     <p class="tip">点击 <span class="font">添加视频</span> 或 <span class="font">拖曳视频</span></p>
                     <p class="tip">图片类型为mov, avi, mp4, mpg, mpeg, m4v, wmv, mkv，视频大小限制在<span class="font">30M</span>内。</p>
@@ -78,7 +78,7 @@
           <TabPane label="直播流检测" icon="ios-videocam-outline">
             <div class="validate_content clear-fix">
               <div class="left">
-                <img v-show="mediaSrc" class="media" :src="mediaSrc">
+                <img v-if="mediaSrc" class="media" :src="mediaSrc">
               </div>
               <div class="right">
                 <div class="threshold">
@@ -98,7 +98,7 @@
           <TabPane label="摄像头检测" icon="ios-locate-outline">
             <div class="validate_content clear-fix">
               <div class="left">
-                <img v-show="mediaSrc" class="media" :src="mediaSrc">
+                <img v-if="mediaSrc" class="media" :src="mediaSrc">
               </div>
               <div class="right">
                 <div class="threshold">
