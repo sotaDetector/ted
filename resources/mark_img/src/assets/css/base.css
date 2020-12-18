@@ -234,58 +234,7 @@ em {
   flex-direction: column; /*垂直排列*/
   align-items: flex-end; /*右对齐*/
 }
-/* 角色权限 */
-.role_left{
-  width: 200px;
-  height: 100%;
-}
-.role_right{
-  height: 100%;
-  width: calc(100% - 200px);
-  border-left: 1px solid #dde7f0;
-}
-.roleList{
-  padding:10px 0;
-}
-.role_left p{
-  height: 46px;
-	line-height: 46px;
-	color: #4c4d4d;
-	font-size: 14px;
-  font-weight: bold;
-  display: flex;
-  justify-content: space-between;
-  padding-right: 4px;
-  padding-left: 10px;
-}
-.role_left .active{
-  background: #f8f8f8;
-}
-.role_left p:hover{
-  background: #f8f8f8;
-	color: #4c4d4d;
-}
-.role_left p:hover .role_btn{
-	display: inline-block;
-}
-.text_ellipsis{
-	display: inline-block;
-	width: 70%;
-	word-break: keep-all;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.role_btn{
-  display: none;
-}
-.role_btn .icon-bianji{
-  margin-right: 4px;
-  cursor: pointer;
-}
-.role_btn .ivu-icon-ios-trash{
-  cursor: pointer;
-}
+
 /* 菜单权限控制 */
 .menuItem{
   padding: 10px;
@@ -607,5 +556,8 @@ em {
   width: 74px;
   height: 74px;
   vertical-align: middle;
+}
+.ivu-tabs-nav .ivu-tabs-tab:hover {
+  color: #8c0776!important;
 }
 

@@ -1,6 +1,6 @@
 <template>
   <div class="leftlogo">
-    <!-- <img src="~/assets/images/leftlogo.png" alt=""> -->
+    <img src="@/assets/img/logo.png" alt="">
   </div>
 </template>
 <script>
@@ -14,13 +14,14 @@ export default {
 </script>
 <style scoped>
 .leftlogo {
-  width: 200px;
+  width: 199px;
   /* background: #515a6e; */
   height: 80px;
   position: absolute;
   left: 0;
   top: 0;
-  border-bottom: 1px solid #515a6e;
+  /* border-bottom: 1px solid #515a6e; */
+  background: #fff;
 }
 .leftlogo img {
   width: 166px;

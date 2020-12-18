@@ -1,6 +1,5 @@
 <template>
   <div>
-    <!-- 面包屑 -->
     <div class="container_title">
       <!-- 面包屑 -->
       <Breadcrumb>
@@ -58,7 +57,6 @@ var echarts = require('echarts')
 export default {
   data () {
     return {
-      // value1: ['1','2','3','4'],
       value1: ['1', '2', '3', '4'],
       charts: {},
       init: true,
@@ -68,7 +66,7 @@ export default {
     }
   },
   mounted () {
-    this.dmtvid = this.$route.params.id
+    this.dmtvid = parseInt(this.$route.params.id)
     // this.dmtvName = this.$route.dmtvName
     // this.dmName = this.$route.dmName
     this.getStatistics()

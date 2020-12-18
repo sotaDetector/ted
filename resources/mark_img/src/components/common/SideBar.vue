@@ -98,7 +98,7 @@ export default {
 .sidebar {
   position: absolute;
   left: 0;
-  top: 80px;
+  top: 110px;
   bottom: 0;
   z-index: 9;
   height: 100%;

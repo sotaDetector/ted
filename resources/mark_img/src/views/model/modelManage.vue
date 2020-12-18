@@ -739,8 +739,8 @@ export default {
         }
       })
     },
-    validateModal () {
-
+    validateModal (dmName, dmtvid, dmtvName) {
+      this.$router.push({ path: '/modelValidate/' + dmtvid, query: { dmName, dmtvName } })
     },
     viewStatistics (dmName, dmtvid, dmtvName) {
       this.$router.push({ path: '/trainStatistics/' + dmtvid, query: { dmName, dmtvName } })

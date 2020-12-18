@@ -66,7 +66,7 @@
             <template slot-scope="{row, index}" slot="action">
               <div>
                 <span class="action" @click="viewOptions(row.dmtvid)">查看版本配置</span>
-                <span class="action" style="margin:0 4px;" @click="clickImport(row.dmtvid)">校验</span>
+                <span class="action" style="margin:0 4px;" @click="validateModal(dmName,row.dmtvid,row.dmtvName)">校验</span>
                 <span class="action" style="margin-right:4px;" @click="viewStatistics(dmName,row.dmtvid,row.dmtvName)">训练统计</span>
                 <span class="action" @click="delDatas(row.dmtvid)">删除</span>
               </div>
@@ -124,7 +124,7 @@
 <script>
 export default {
   mounted () {
-    this.dmid = this.$route.params.id
+    this.dmid = parseInt(this.$route.params.id)
     this.dmName = this.$route.query.dmName
     this.queryPageInfo()
   },
@@ -294,6 +294,9 @@ export default {
           }
         }
       })
+    },
+    validateModal (dmName, dmtvid, dmtvName) {
+      this.$router.push({ path: '/modelValidate/' + dmtvid, query: { dmName, dmtvName } })
     },
     viewStatistics (dmName, dmtvid, dmtvName) {
       this.$router.push({ path: '/trainStatistics/' + dmtvid, query: { dmName, dmtvName } })

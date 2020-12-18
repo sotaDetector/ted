@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper">
     <v-head></v-head>
-    <!-- <v-leftlogo></v-leftlogo> -->
+    <v-leftlogo></v-leftlogo>
     <v-sidebar></v-sidebar>
     <div class="content-box">
       <div class="content">

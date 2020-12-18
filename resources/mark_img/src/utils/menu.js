@@ -31,20 +31,33 @@ export const menuList = [{
   menuName: '模型调用',
   url: '',
   ico: 'ios-hammer',
-  children: [{
-    menuId: 7,
-    menuName: '图片检测',
-    url: 'imgDetect',
-    ico: 'ios-image-outline',
-  },{
-    menuId: 8,
-    menuName: '视频检测',
-    url: 'videoDetect',
-    ico: 'ios-film-outline',
-  },{
-    menuId: 9,
-    menuName: '视频流检测',
-    url: 'flowDetect',
-    ico: 'ios-videocam-outline',
-  }]
+  children: [
+    {
+      menuId: 7,
+      menuName: '检测服务',
+      url: 'detectService',
+      ico: 'ios-image-outline',
+    },{
+      menuId: 8,
+      menuName: '检测任务',
+      url: 'detectTask',
+      ico: 'ios-videocam-outline',
+    },
+  //   {
+  //   menuId: 7,
+  //   menuName: '图片检测',
+  //   url: 'imgDetect',
+  //   ico: 'ios-image-outline',
+  // },{
+  //   menuId: 8,
+  //   menuName: '视频检测',
+  //   url: 'videoDetect',
+  //   ico: 'ios-film-outline',
+  // },{
+  //   menuId: 9,
+  //   menuName: '视频流检测',
+  //   url: 'flowDetect',
+  //   ico: 'ios-videocam-outline',
+  // }
+]
 }]

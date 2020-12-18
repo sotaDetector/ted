@@ -52,12 +52,12 @@ export function request(config) {
   // 请求拦截器
   instance.interceptors.request.use(config => {
     //拦截后需要将拦截下来的请求数据返回发送
-    let token = localStorage.getItem('token');
-    if (token) { // 每次发送请求之前判断是否存在token，如果存在，则统一在http请求的header都加上token，不用每次请求都手动添加了
-      //  config.headers['token'] = token;
-      // 每个请求接口都需要往formData上，加_token_iben
-      config.data._token_iben = token
-    }
+    // let token = localStorage.getItem('token');
+    // if (token) { // 每次发送请求之前判断是否存在token，如果存在，则统一在http请求的header都加上token，不用每次请求都手动添加了
+    //   //  config.headers['token'] = token;
+    //   // 每个请求接口都需要往formData上，加_token_iben
+    //   config.data._token_iben = token
+    // }
     return config;
   }, err => {
     console.log(err)
