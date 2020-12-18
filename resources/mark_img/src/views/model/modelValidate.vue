@@ -185,7 +185,7 @@ export default {
       this.threshold = 0.3
       this.file = ''
       this.mediaSrc = ''
-      this.source = ''
+      this.source = '' // 直播流地址或摄像头设备
       this.resultList = []
 
       if(!this.deviceList.length && e == 3) {

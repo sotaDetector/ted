@@ -80,7 +80,7 @@
     </div>
     <!-- 模态框 -->
     <!-- 训练弹窗 -->
-    <Modal class="sys_modal" v-model="modal_train" width="750" title="新增训练模型" :mask-closable="false">
+    <Modal class="sys_modal" v-model="modal_train" width="750" title="新增训练版本" :mask-closable="false">
       <div class="modal_body modal_body_train">
         <Form ref="trainInfo" label-position="left" :model="trainInfo" :label-width="110" :rules="rules">
           <FormItem label="版本名称" prop="dmtvName">
@@ -387,9 +387,9 @@ export default {
             // })
             return h('div', {
               attrs: {
-                title: params.row.dlNameList.join('、')
+                title: params.row.dlNameList && params.row.dlNameList.join('、')
               },
-            }, params.row.dlNameList.join('、'))
+            }, params.row.dlNameList && params.row.dlNameList.join('、'))
           }
         }
       ],
@@ -827,7 +827,7 @@ export default {
   margin: 10px;
 }
 .modal_body.modal_body_option {
-  max-height: 362px;
+  max-height: 378px;
   overflow-y: auto;
 }
 .label_cell .ivu-table-cell div {

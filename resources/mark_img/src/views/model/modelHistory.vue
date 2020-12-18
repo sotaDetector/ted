@@ -386,7 +386,7 @@ export default {
   margin: 10px;
 }
 .modal_body.modal_body_option {
-  max-height: 362px;
+  max-height: 378px;
   overflow-y: auto;
 }
 .label_cell .ivu-table-cell div {
