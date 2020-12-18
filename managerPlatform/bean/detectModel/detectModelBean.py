@@ -15,7 +15,7 @@ class detectModelBean(baseBean):
     dmRemark=mongoSource.mdb.StringField()
 
     #最新版本ID
-    latestVersionId=mongoSource.mdb.LongField(required=True,default='')
+    latestVersionId=mongoSource.mdb.LongField()
 
     latestVersionItem=mongoSource.mdb.ReferenceField(detectModelTrainVersion)
 

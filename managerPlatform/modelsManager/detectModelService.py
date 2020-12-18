@@ -36,38 +36,42 @@ class detectModelService:
 
 
         # 查询模型的最新版本
-        modelIdList = []
-        for item in modelList: modelIdList.append(item['latestVersionId'])
+        modelVersonIdList = []
+        for item in modelList:
+            if item['latestVersionId'] is not None:
+                modelVersonIdList.append(item['latestVersionId'])
 
-        trainVersionList = detectModelTrainVersion.objects(dmtvid__in=modelIdList,
+        if len(modelVersonIdList)>0:
+            trainVersionList = detectModelTrainVersion.objects(dmtvid__in=modelVersonIdList,
                                                            state=ConstantUtils.DATA_STATUS_ACTIVE).exclude("create_date","state")
-        modelVersionJsonList=json.loads(trainVersionList.to_json().replace("_id","dmtvid"))
 
-        #找出所有的数据集id
-        allDataSetId=[]
-        for versionItem in modelVersionJsonList:
-            for item in versionItem['ds_dl_list']:
-                if not allDataSetId.__contains__(item['dsId']):
-                    allDataSetId.append(item['dsId'])
+            modelVersionJsonList=json.loads(trainVersionList.to_json().replace("_id","dmtvid"))
 
-        datasetIdNames=datasetsBean.objects(dsId__in=allDataSetId,state=ConstantUtils.DATA_STATUS_ACTIVE).only("dsId","dsName")
-        datasetMap={}
-        for item in datasetIdNames:
-            datasetMap[item['dsId']]=item['dsName']
-
-
-        for modelItem in modelJsonList:
+            #找出所有的数据集id
+            allDataSetId=[]
             for versionItem in modelVersionJsonList:
-                if modelItem['latestVersionId'] == versionItem['dmtvid']:
-                    versionItem['trainState']=ConstantUtils.getModelVersionTrainState(versionItem['trainState'])
-                    versionItem['inferencePlatformValue']=ConstantUtils.getModelPlatform(versionItem['inferencePlatform'])
-                    versionItem['dmPrecisionValue']=ConstantUtils.getModelPrisision(versionItem['dmPrecision'])
-                    datasetNames=[]
-                    for item in versionItem['ds_dl_list']:
-                        datasetNames.append(datasetMap[item['dsId']])
-                    versionItem['datasetNames']=datasetNames
-                    modelItem["latestVersionItem"] = [versionItem]
-                    break
+                for item in versionItem['ds_dl_list']:
+                    if not allDataSetId.__contains__(item['dsId']):
+                        allDataSetId.append(item['dsId'])
+
+            datasetIdNames=datasetsBean.objects(dsId__in=allDataSetId,state=ConstantUtils.DATA_STATUS_ACTIVE).only("dsId","dsName")
+            datasetMap={}
+            for item in datasetIdNames:
+                datasetMap[item['dsId']]=item['dsName']
+
+
+            for modelItem in modelJsonList:
+                for versionItem in modelVersionJsonList:
+                    if modelItem['latestVersionId'] == versionItem['dmtvid']:
+                        versionItem['trainState']=ConstantUtils.getModelVersionTrainState(versionItem['trainState'])
+                        versionItem['inferencePlatformValue']=ConstantUtils.getModelPlatform(versionItem['inferencePlatform'])
+                        versionItem['dmPrecisionValue']=ConstantUtils.getModelPrisision(versionItem['dmPrecision'])
+                        datasetNames=[]
+                        for item in versionItem['ds_dl_list']:
+                            datasetNames.append(datasetMap[item['dsId']])
+                        versionItem['datasetNames']=datasetNames
+                        modelItem["latestVersionItem"] = [versionItem]
+                        break
 
         pageItem.set_totalCount(totalCount)
 

@@ -13,9 +13,9 @@ class mongoSource:
         app.config['MONGODB_SETTINGS'] = {
             'db': 'admin',
             'host': configUtils.getConfigProperties("mongo","mongo_host"),
-            'port': int(configUtils.getConfigProperties("mongo","mongo_port")),
-            'username':configUtils.getConfigProperties("mongo","mongo_user"),
-            'password':configUtils.getConfigProperties("mongo","mongo_pwd")
+            'port': int(configUtils.getConfigProperties("mongo","mongo_port"))
+            # 'username':configUtils.getConfigProperties("mongo","mongo_user"),
+            # 'password':configUtils.getConfigProperties("mongo","mongo_pwd")
         }
         cls.mdb.init_app(app)
 
