@@ -17,6 +17,8 @@ class imageDetectService:
         #保存图片
         imgData.save(savedPath)
 
+        print(serviceSessionId)
+        print(detectThreadMap.keys())
         #获取当前的模型
         if detectThreadMap.keys().__contains__(serviceSessionId):
             print("找到相关检测模型...")
@@ -30,6 +32,8 @@ class imageDetectService:
             }
 
             return resultPackerUtils.packCusResult(result)
+        else:
+            return resultPackerUtils.packErrorMsg(resultPackerUtils.EC_NO_EVALUATE_SESSION)
 
 
 

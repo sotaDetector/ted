@@ -9,10 +9,10 @@ videoDetectSer=videoDetectService()
 @video_detect_blp.route('/getVideoDetectResult', methods=['POST'])
 def getVideoDetectResult():
     serviceSessionId=request.form.get("serviceSessionId")
-    detectVedio = request.files["detectVedio"]
+    detectVideo = request.files["detectVideo"]
     threshold = request.form.get('threshold')
 
-    return videoDetectSer.getVideoDetectResult(serviceSessionId,threshold,detectVedio)
+    return videoDetectSer.getVideoDetectResult(serviceSessionId,threshold,detectVideo)
 
 
 @video_detect_blp.route('/getVideoStream', methods=['POST','GET'])

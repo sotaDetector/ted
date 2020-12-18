@@ -11,8 +11,10 @@ import json
 class detectServiceImpl:
 
     def addDetectService(self,jsonData):
-        serviceSecretId=randomUtils.getRandomStr()
-        jsonData["dtsSecretKey"]=serviceSecretId
+        dtsServiceKey=randomUtils.getRandomStr()
+        serviceSecret=randomUtils.getRandomStr()
+        jsonData["dtsServiceKey"]=dtsServiceKey
+        jsonData["dtsSecret"]=serviceSecret
         jsonData["dmBean"]=detectModelBean.objects(dmId=jsonData["dmId"],state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
 
         jsonData['dmtvBean']=detectModelTrainVersion.objects(dmtvid=jsonData["dmtvId"],state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
@@ -53,7 +55,7 @@ class detectServiceImpl:
                             "from": "detect_model_bean",
                             "localField": "dmBean",
                             "foreignField": "_id",
-                            "as": "task_docs"
+                            "as": "model"
                         },
                 },{
                     '$lookup':
@@ -61,7 +63,7 @@ class detectServiceImpl:
                             "from": "detect_model_train_version",
                             "localField": "dmtvBean",
                             "foreignField": "_id",
-                            "as": "version"
+                            "as": "modelVersion"
                         },
                 },
                 {
@@ -80,11 +82,13 @@ class detectServiceImpl:
                             'dtsSwitch':1,
                             "dtsSecretKey":1,
                             "create_date":1,
-                            'task_docs.dmName':1,
-                            'task_docs.dmType':1,
-                            'version.dmtvName':1,
+                            'model.dmName':1,
+                            'model.dmType':1,
+                            'modelVersion.dmtvName':1,
                             'dmId': 1,
-                            'dmtvId':1
+                            'dmtvId':1,
+                            "dtsServiceKey":1,
+                            "dtsSecret":1
 
                         },
                  },

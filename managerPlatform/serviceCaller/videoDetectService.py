@@ -6,19 +6,22 @@ from managerPlatform.bean.serviceCallerBeans.detectRecord import detectRecord
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
+from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
 from managerPlatform.serviceCaller.detValServiceImpl import detectThreadMap
+
+videoPlayPrefix=configUtils.getConfigProperties("video", "videoPlayPrefix")
 
 
 class videoDetectService:
 
-    def getVideoDetectResult(self, serviceSessionId, threshold, imgData):
+    def getVideoDetectResult(self, serviceSessionId, threshold, detectVideo):
 
-        FileNewName = fileUtils.getRandomName(imgData.filename)
+        FileNewName = fileUtils.getRandomName(detectVideo.filename)
         savedPath = ConstantUtils.videoDetectSource + FileNewName
         print("视频保存路径：" + savedPath)
         # 保存图片
-        imgData.save(savedPath)
+        detectVideo.save(savedPath)
 
         # 获取当前的模型
         if detectThreadMap.keys().__contains__(serviceSessionId):
@@ -30,8 +33,9 @@ class videoDetectService:
 
             detectRecordItem=detectRecord(videoSavedPath=ConstantUtils.videoDetectOut+FileNewName)
             detectRecordItem.save()
+
             result = {
-                "videoPlayId": detectRecordItem.dereid
+                "videoPlayUrl":videoPlayPrefix+str(detectRecordItem.dereid)
             }
 
             return resultPackerUtils.packCusResult(result)
