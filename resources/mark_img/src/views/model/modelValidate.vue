@@ -307,6 +307,9 @@ export default {
         this.waiting = false
         if(data.rs === 1) {
           this.mediaSrc = data.videoPlayUrl
+          setTimeout(() => {
+            $('.media').attr('src', data.videoPlayUrl)
+          }, 300);
           if(this.tabName == 3) { // 摄像头检测
             this.videoPlayId = data.videoPlayId
             this.setTimer()
