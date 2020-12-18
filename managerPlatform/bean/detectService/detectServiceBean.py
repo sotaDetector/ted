@@ -25,7 +25,8 @@ class detectServiceBean(baseBean):
     dtsSwitch=mongoSource.mdb.IntField(required=True)
 
     #服务密钥
-    dtsSecretKey=mongoSource.mdb.StringField(required=True)
+    dtsServiceKey=mongoSource.mdb.StringField(required=True)
+    dtsSecret=mongoSource.mdb.StringField(required=True)
 
     @staticmethod
     def convertToBean(jsonData, session):
@@ -35,7 +36,8 @@ class detectServiceBean(baseBean):
             dmBean=jsonData['dmBean'],
             dmtvId=jsonData["dmtvId"],
             dtsSwitch=jsonData["dtsSwitch"],
-            dtsSecretKey=jsonData["dtsSecretKey"],
+            dtsServiceKey=jsonData["dtsServiceKey"],
+            dtsSecret=jsonData["dtsSecret"],
             userId=session.get("userId"),
             dmtvBean=jsonData['dmtvBean']
         )
