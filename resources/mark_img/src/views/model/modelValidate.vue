@@ -291,10 +291,10 @@ export default {
     startDetect () {
       var str = this.tabName == 2 ? '直播地址不能为空' : '请选择摄像设备'
       var url = this.tabName == 2 ? '/natCamera/startLiveStreamDetect' : '/natCamera/startNativeCameraDetect'
-      // if(!this.source) {
-      //   this.$Message.error(str)
-      //   return false
-      // }
+      if(!this.source) {
+        this.$Message.error(str)
+        return false
+      }
       this.waiting = true
 
       this.$Spin.show()
@@ -308,8 +308,9 @@ export default {
         this.$Spin.hide()
         this.waiting = false
         if(data.rs == 1) {
-          this.mediaSrc = 'http://47.111.130.154:8200/videoDetect/getVideoStream?videoPlayId=12'
-          // this.mediaSrc = data.videoPlayUrl
+          // this.mediaSrc = 'http://47.111.130.154:8200/videoDetect/getVideoStream?videoPlayId=12'
+          console.log(typeof data.videoPlayUrl)
+          this.mediaSrc = data.videoPlayUrl
           // setTimeout(() => {
           //   this.mediaSrc = 'http://47.111.130.154:8200/videoDetect/getVideoStream?videoPlayId=12'
           // }, 250);
