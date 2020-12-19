@@ -6,6 +6,7 @@ from managerPlatform.common.watcherMangaer.detectThreadWatcher import detectThre
 from managerPlatform.dataLabel.dataLabelDispacher import dataLabel_blp
 from managerPlatform.datasetsManager.datasetsDispacher import *
 from managerPlatform.datasetsManager.testDataInitDispacher import test_data_init_blp
+from managerPlatform.detectService.detectServiceCallerDispacher import dts_caller_blp
 from managerPlatform.detectService.detectServiceManagerDiapacher import dts_blp
 from managerPlatform.detectModelManager.detectModelDispacher import *
 from managerPlatform.detectModelManager.detectModelTrainDispacher import detect_model_train_blp
@@ -31,6 +32,7 @@ app.register_blueprint(dm_train_statis_blp)
 app.register_blueprint(video_detect_blp)
 app.register_blueprint(dts_blp)
 app.register_blueprint(media_Player_blp)
+app.register_blueprint(dts_caller_blp)
 
 app.config["SECRET_KEY"] = '79537d00f4834892986f09a100aa1edf'
 app.config["SESSION_COOKIE_HTTPONLY"]=False

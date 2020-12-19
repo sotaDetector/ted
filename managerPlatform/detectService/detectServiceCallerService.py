@@ -2,6 +2,9 @@ from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
+from managerPlatform.yoloService.yoloDetectService import yoloDetectService
+
+yoloDetectServiceImpl=yoloDetectService()
 
 
 class detectServiceCallerService:
@@ -15,12 +18,12 @@ class detectServiceCallerService:
         imgData.save(savedPath)
 
         # 获取当前的模型
-        if detectThreadMap.keys().__contains__(dtsServiceKey):
+        detectIns=yoloDetectServiceImpl.getDetectServiceInstance(dtsServiceKey)
+        if detectIns is not None:
             print("找到相关检测模型...")
-            detectThread = detectThreadMap[dtsServiceKey]
             detectConfig = detectConfigUtils.getBasicDetectConfig(source=savedPath,
                                                                   outPath=ConstantUtils.singleImgDetectOut)
-            detectResult = detectThread.detect(detectConfig)
+            detectResult = detectIns.detect(detectConfig)
 
             result = {
                 "imagePath": ConstantUtils.imageItemPrefix + "singleImgDetectOut_" + FileNewName,
@@ -28,5 +31,9 @@ class detectServiceCallerService:
             }
 
             return resultPackerUtils.packCusResult(result)
+        else:
+            return resultPackerUtils.packErrorMsg(resultPackerUtils.EC_NO_EVALUATE_SESSION)
+
+
 
 

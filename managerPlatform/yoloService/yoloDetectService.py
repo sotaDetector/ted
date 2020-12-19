@@ -52,6 +52,7 @@ class yoloDetectService:
     def releaseYoloDetectService(self, serviceSessionId):
         if yoloDetectThreadMap.keys().__contains__(serviceSessionId):
             yoloDetectThreadMap.pop(serviceSessionId)
+            sessionDmtvMap.pop(serviceSessionId)
 
             loggerUtils.info("release model:" + str(serviceSessionId))
             loggerUtils.info("sessions of detectThreadMap:" + str(yoloDetectThreadMap.keys()))

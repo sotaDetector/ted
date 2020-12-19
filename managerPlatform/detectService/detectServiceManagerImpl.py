@@ -127,7 +127,7 @@ class detectServiceImpl:
         detectServiceIns = detectServiceBean.objects(dtsid=jsonData['dtsid'])
 
         #释放模型资源
-        yoloDetectServiceImpl.modelRelease(detectServiceIns["dtsServiceKey"])
+        yoloDetectServiceImpl.releaseYoloDetectService(detectServiceIns["dtsServiceKey"])
 
 
         detectServiceIns.update(state=ConstantUtils.DATA_STATUS_DELETED)
@@ -144,13 +144,13 @@ class detectServiceImpl:
 
     def changeDtsSwitch(self,jsonData):
 
-        detectServiceIns = detectServiceBean.objects(dtsid=jsonData['dtsid'])
+        detectServiceIns = detectServiceBean.objects(dtsid=jsonData['dtsid'],state=ConstantUtils.DATA_STATUS_ACTIVE)[0]
 
         if jsonData['dtsSwitch']==ConstantUtils.SERVICE_SWITCH_ON:
             yoloDetectServiceImpl.launchYoloDetectService(sessionId=detectServiceIns["dtsServiceKey"],
                                                           dmtvid=detectServiceIns["dmtvId"])
         else:
-            yoloDetectServiceImpl.modelRelease(detectServiceIns["dtsServiceKey"])
+            yoloDetectServiceImpl.releaseYoloDetectService(detectServiceIns["dtsServiceKey"])
         #更改数据库状态
         detectServiceIns.update(dtsSwitch=jsonData['dtsSwitch'])
 
