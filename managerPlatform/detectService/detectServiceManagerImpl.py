@@ -4,10 +4,12 @@ from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
 from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
 from managerPlatform.bean.detectService.detectServiceBean import detectServiceBean
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
+from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
-import json
+from managerPlatform.yoloService.yoloDetectService import yoloDetectService
 
+yoloDetectServiceImpl=yoloDetectService()
 class detectServiceImpl:
 
     def addDetectService(self,jsonData):
@@ -25,7 +27,7 @@ class detectServiceImpl:
 
         #开启服务
         if jsonData['dtsSwitch']==ConstantUtils.SERVICE_SWITCH_ON:
-            pass
+            yoloDetectServiceImpl.launchYoloDetectService(sessionId=dtsServiceKey,dmtvid=jsonData["dmtvId"])
 
         return resultPackerUtils.save_success()
 
@@ -40,6 +42,9 @@ class detectServiceImpl:
 
         detectServiceIns.update(**jsonData['updateClolumn'])
 
+        #加载或关闭模型
+        self.changeDtsSwitch(jsonData)
+
         return resultPackerUtils.update_success()
 
 
@@ -47,7 +52,6 @@ class detectServiceImpl:
     def getDetectServicePageList(self,pageItem):
 
         totalCount=detectServiceBean.objects(userId=session.get("userId"),state=ConstantUtils.DATA_STATUS_ACTIVE).count()
-
         #select_related()
 
         collection=detectServiceBean._get_collection()
@@ -117,10 +121,17 @@ class detectServiceImpl:
 
         return resultPackerUtils.packPageResult(pageItem)
 
+
     def delDetectService(self,jsonData):
 
         detectServiceIns = detectServiceBean.objects(dtsid=jsonData['dtsid'])
+
+        #释放模型资源
+        yoloDetectServiceImpl.modelRelease(detectServiceIns["dtsServiceKey"])
+
+
         detectServiceIns.update(state=ConstantUtils.DATA_STATUS_DELETED)
+
         return resultPackerUtils.update_success()
 
 
@@ -135,9 +146,30 @@ class detectServiceImpl:
 
         detectServiceIns = detectServiceBean.objects(dtsid=jsonData['dtsid'])
 
+        if jsonData['dtsSwitch']==ConstantUtils.SERVICE_SWITCH_ON:
+            yoloDetectServiceImpl.launchYoloDetectService(sessionId=detectServiceIns["dtsServiceKey"],
+                                                          dmtvid=detectServiceIns["dmtvId"])
+        else:
+            yoloDetectServiceImpl.modelRelease(detectServiceIns["dtsServiceKey"])
         #更改数据库状态
         detectServiceIns.update(dtsSwitch=jsonData['dtsSwitch'])
 
         return resultPackerUtils.update_success()
+
+
+    # 服务重启的时候 从数据哭批量加载服务
+    def batchInitYoloModel(self):
+        
+        loggerUtils.info("init detect model start...")
+
+        detectServiceList = detectServiceBean.objects(dtsSwitch=ConstantUtils.SERVICE_SWITCH_ON,
+                                                     state=ConstantUtils.DATA_STATUS_ACTIVE)
+
+        for item in detectServiceList:
+            yoloDetectServiceImpl.launchYoloDetectService(sessionId=item['dtsServiceKey'],
+                                                          dmtvid=item['dmtvId'])
+
+        loggerUtils.info("init detect model finish***")
+
 
 

@@ -2,28 +2,31 @@ import threading
 import time
 
 from managerPlatform.common.commonUtils.dateUtils import dateUtils
+from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.dataManager import redisSource
 from managerPlatform.common.keyGen.keyGenarator import keyGenarator
-from managerPlatform.detectModelValidation.cameraStreamService import detectMap
+from managerPlatform.yoloService.yoloDetectService import yoloDetectThreadMap
 
 
 class detectThreadWatcher(threading.Thread):
 
     def __init__(self):
         threading.Thread.__init__(self)
-        print("检测线程开启....")
+        loggerUtils.info("检测资源监控线程开启....")
 
     def run(self):
         while(True):
-            time.sleep(5)
+            time.sleep(10)
             sessMap=redisSource.redisClient.hgetall(keyGenarator.getDetectWatchKey())
             nowTimeStamp=dateUtils.getTimeStamp()
+            loggerUtils.info("now sessions:"+str(sessMap))
             for i in sessMap:
                 if nowTimeStamp-(10*1000)>int(sessMap[i]):
-                    print(i)
-                    if not detectMap.keys().__contains__(str(i,'utf-8')):
+                    if not yoloDetectThreadMap.keys().__contains__(str(i,'utf-8')):
+                        print("delete session id"+str(i))
                         redisSource.redisClient.hdel(keyGenarator.getDetectWatchKey(),i)
                     else:
-                        detectMap[str(i,'utf-8')].stopDetect()
+                        print("stop session :" + str(i))
+                        yoloDetectThreadMap[str(i,'utf-8')].stopDetect()
 
 

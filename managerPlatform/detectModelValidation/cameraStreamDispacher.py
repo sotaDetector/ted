@@ -9,13 +9,11 @@ natCameraService=cameraStreamService()
 @nat_camera_blp.route('/getCameraDeviceList', methods=['POST'])
 def getCameraDeviceList():
 
-
     return natCameraService.getCameraDeviceList()
 
 
 @nat_camera_blp.route('/startNativeCameraDetect', methods=['POST'])
 def startNativeCameraDetect():
-
 
     jsonData = request.get_json()
 
@@ -35,19 +33,9 @@ def startLiveStreamDetect():
     return natCameraService.startLiveStreamDetect(jsonData)
 
 
-@nat_camera_blp.route("/video_feed")
-def videoStreamService():
-    sessionId=request.args.get("videoPlayId")
-    return Response(natCameraService.gen_frames(sessionId), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 @nat_camera_blp.route("/stopNativeCameraDetect", methods=['POST'])
 def stopNativeCameraDetect():
     jsonData = request.get_json()
     return natCameraService.stopNativeCameraDetect(jsonData)
 
-
-
-@nat_camera_blp.route("/sendDetectHeartbeat", methods=['POST'])
-def sendDetectHeartbeat():
-    jsonData = request.get_json()
-    return natCameraService.sendDetectHeartbeat(jsonData)

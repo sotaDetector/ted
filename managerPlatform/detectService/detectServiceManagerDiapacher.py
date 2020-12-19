@@ -2,7 +2,7 @@ from flask import Blueprint, request, session
 
 from managerPlatform.bean.detectService.detectServiceBean import detectServiceBean
 from managerPlatform.common.baseBean.pageBean import pageBean
-from managerPlatform.detectService.detectServiceImpl import detectServiceImpl
+from managerPlatform.detectService.detectServiceManagerImpl import detectServiceImpl
 
 dts_blp = Blueprint("detectServiceDispacher", __name__, url_prefix="/dts")
 
