@@ -104,6 +104,8 @@ class yoloDetectService:
     #释放检测线程
     def releaseYoloDetectThread(self,sessionId):
 
+        loggerUtils.info("stop session :" + str(sessionId))
+
         yoloDetectThreadMap[sessionId].stopDetect()
 
         yoloDetectThreadMap[sessionId].join()

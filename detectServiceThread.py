@@ -229,10 +229,13 @@ class detectServiceThread(threading.Thread):
                         vid_writer.write(im0)
 
         if vw != None:
-
+            pass
             videoRecordUtils.closeVideoWrite(vw)
         if cap != None:
-            cap.release()
+            try:
+                cap.release()
+            except Exception as e:
+                print("关闭异常。。。"+e)
 
         print("detect finished.......")
 

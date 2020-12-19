@@ -5,8 +5,9 @@ from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.dataManager import redisSource
 from managerPlatform.common.keyGen.keyGenarator import keyGenarator
-from managerPlatform.yoloService.yoloDetectService import yoloDetectThreadMap
+from managerPlatform.yoloService.yoloDetectService import yoloDetectThreadMap,yoloDetectService
 
+yoloDetectService=yoloDetectService()
 
 class detectThreadWatcher(threading.Thread):
 
@@ -26,7 +27,6 @@ class detectThreadWatcher(threading.Thread):
                         print("delete session id"+str(i))
                         redisSource.redisClient.hdel(keyGenarator.getDetectWatchKey(),i)
                     else:
-                        print("stop session :" + str(i))
-                        yoloDetectThreadMap[str(i,'utf-8')].stopDetect()
+                        yoloDetectService.releaseYoloDetectThread(str(i,'utf-8'))
 
 
