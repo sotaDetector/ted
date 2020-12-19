@@ -34,7 +34,7 @@ def startLiveStreamDetect():
 
 
 
-@nat_camera_blp.route("/stopNativeCameraDetect", methods=['POST'])
+@nat_camera_blp.route("/stopDetectService", methods=['POST'])
 def stopNativeCameraDetect():
     jsonData = request.get_json()
     return natCameraService.stopNativeCameraDetect(jsonData)

@@ -1,3 +1,4 @@
+from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.ffmpegUtils import ffmpegUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.yoloService.yoloDetectService import yoloDetectService
@@ -23,7 +24,7 @@ class cameraStreamService:
 
     def stopNativeCameraDetect(self, jsonData):
 
-        sessionId = jsonData['videoPlayId']
+        sessionId = jsonData[ConstantUtils.serviceSessionId]
 
         yoloDetect.releaseYoloDetectThread(sessionId)
 
