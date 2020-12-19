@@ -16,7 +16,7 @@ sessionDmtvMap={}
 class yoloDetectService:
 
     # 加载yolo模型
-    def launchYoloDetectService(self,sessionId=None,dmtvid=None):
+    def launchYoloDetectService(self,sessionId=None,dmtvid=None,isWatch=False):
         #如果模型版本为空 直接返回
         if dmtvid is None:
             return None
@@ -39,6 +39,10 @@ class yoloDetectService:
         yoloDetectThreadMap[sessionId] = detectSerIns
         sessionDmtvMap[sessionId]=dmtvid
 
+        # 把sessionId放入到redis中供监控线程监控
+        if isWatch:
+            redisClient.hset(keyGenarator.getDetectWatchKey(), sessionId, str(dateUtils.getTimeStamp()))
+
         loggerUtils.info("模型启动完毕...." + sessionId)
         loggerUtils.info("sessions of detectThreadMap:" + str(yoloDetectThreadMap.keys()))
 
@@ -48,16 +52,6 @@ class yoloDetectService:
 
         return resultMap
 
-    # 释放yolo模型
-    def releaseYoloDetectService(self, serviceSessionId):
-        if yoloDetectThreadMap.keys().__contains__(serviceSessionId):
-            yoloDetectThreadMap.pop(serviceSessionId)
-            sessionDmtvMap.pop(serviceSessionId)
-
-            loggerUtils.info("release model:" + str(serviceSessionId))
-            loggerUtils.info("sessions of detectThreadMap:" + str(yoloDetectThreadMap.keys()))
-        else:
-            loggerUtils.info("sessions not in detectThreadMap:" + str(serviceSessionId))
 
     def createYoloDetectThread(self,config):
 
@@ -103,13 +97,34 @@ class yoloDetectService:
 
 
     #释放检测线程
-    def releaseYoloDetectThread(self,sessionId):
+    def releaseYoloDetectThread(self,serviceSessionId):
 
-        loggerUtils.info("stop session :" + str(sessionId))
+        loggerUtils.info("stop session :" + str(serviceSessionId))
 
-        yoloDetectThreadMap[sessionId].stopDetect()
+        if yoloDetectThreadMap.keys().__contains__(serviceSessionId):
 
-        yoloDetectThreadMap[sessionId].join()
+            #先关闭线程
+            yoloDetectThreadMap[serviceSessionId].stopDetect()
+
+            #如果线程启动了，才执行join方法
+            if yoloDetectThreadMap[serviceSessionId].is_alive():
+                yoloDetectThreadMap[serviceSessionId].join()
+
+            #destroy the object
+            del yoloDetectThreadMap[serviceSessionId]
+            # remove from map
+            # yoloDetectThreadMap.pop(serviceSessionId)
+            if sessionDmtvMap.keys().__contains__(serviceSessionId):
+                sessionDmtvMap.pop(serviceSessionId)
+
+            loggerUtils.info("release model:" + str(serviceSessionId))
+            loggerUtils.info("sessions of detectThreadMap:" + str(yoloDetectThreadMap.keys()))
+        else:
+            loggerUtils.info("sessions not in detectThreadMap:" + str(serviceSessionId))
+
+
+
+
 
 
 

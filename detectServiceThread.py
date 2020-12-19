@@ -63,10 +63,17 @@ class detectServiceThread(threading.Thread):
         with torch.no_grad():
             self.detect(self.detectConfig)
 
+
+    def startBroardcast(self):
+        self.Broardcast=True
+
     # 初始化一些参数 并加载模型
     def __init__(self, modelConfig):
         threading.Thread.__init__(self)
         set_logging()
+
+        #默认开启直播
+        self.Broardcast=False
 
         # 是否继续检测 检测任务关闭时把该值设为false
         self.isDetect = True
@@ -209,7 +216,12 @@ class detectServiceThread(threading.Thread):
                     # record video
                     print("record video....")
                     vw.write(im0)
-                    self.q.put(frame)
+                    if self.Broardcast:
+                        #为节省内存资源 如果队列数量超过 30则清空
+                        if self.q.qsize()>30:
+                            self.q.queue.clear()
+                        print("queue size:"+str(self.q.qsize()))
+                        self.q.put(frame)
 
                 # Save results (image with detections)
                 if save_img:

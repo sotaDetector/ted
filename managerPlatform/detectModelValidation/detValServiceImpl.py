@@ -6,4 +6,4 @@ class detValServiceImpl:
 
     def launchDetectService(self,jsonData):
 
-        return yoloDetectService.launchYoloDetectService(dmtvid=jsonData['dmtvid'])
+        return yoloDetectService.launchYoloDetectService(dmtvid=jsonData['dmtvid'],isWatch=True)

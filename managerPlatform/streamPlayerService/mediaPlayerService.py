@@ -4,12 +4,15 @@ import cv2
 
 from managerPlatform.bean.serviceCallerBeans.detectRecord import detectRecord
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
+from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.yoloService.yoloDetectService import yoloDetectThreadMap
 
 
 class mediaPlayerService:
 
     def genFramesFromLiveStream(self, sessionId):
+        loggerUtils.info("开启直播...."+sessionId)
+        yoloDetectThreadMap[sessionId].startBroardcast()
         while True:
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + yoloDetectThreadMap[sessionId].getStreamQueue().get() + b'\r\n')
