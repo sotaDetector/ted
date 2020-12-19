@@ -1,6 +1,6 @@
 from flask import Blueprint, request, Response
 
-from managerPlatform.serviceCaller.cameraStreamService import cameraStreamService
+from managerPlatform.detectModelValidation.cameraStreamService import cameraStreamService
 
 nat_camera_blp = Blueprint("nativeCameraDispacher", __name__, url_prefix="/natCamera")
 

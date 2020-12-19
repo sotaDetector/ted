@@ -4,7 +4,7 @@ import time
 from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.dataManager import redisSource
 from managerPlatform.common.keyGen.keyGenarator import keyGenarator
-from managerPlatform.serviceCaller.cameraStreamService import detectMap
+from managerPlatform.detectModelValidation.cameraStreamService import detectMap
 
 
 class detectThreadWatcher(threading.Thread):

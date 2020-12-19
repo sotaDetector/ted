@@ -8,7 +8,7 @@ from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
-from managerPlatform.serviceCaller.detValServiceImpl import detectThreadMap
+from managerPlatform.detectModelValidation.detValServiceImpl import detectThreadMap
 
 videoPlayPrefix=configUtils.getConfigProperties("video", "videoPlayPrefix")
 

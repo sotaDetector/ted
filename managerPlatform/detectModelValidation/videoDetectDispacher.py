@@ -1,6 +1,6 @@
 from flask import Blueprint, request, Response
 
-from managerPlatform.serviceCaller.videoDetectService import videoDetectService
+from managerPlatform.detectModelValidation.videoDetectService import videoDetectService
 
 video_detect_blp = Blueprint("vedioDetectDispacher", __name__, url_prefix="/videoDetect")
 

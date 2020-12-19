@@ -1,8 +1,7 @@
 from detectServiceThread import detectServiceThread
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
-from managerPlatform.modelsManager.detectModelTrainService import detectModelTrainService
-
+from managerPlatform.detectModelManager.detectModelTrainService import detectModelTrainService
 
 modelVersionSeervice=detectModelTrainService()
 

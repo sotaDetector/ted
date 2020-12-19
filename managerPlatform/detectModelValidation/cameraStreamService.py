@@ -7,7 +7,7 @@ from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUti
 from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
 from managerPlatform.common.dataManager.redisSource import redisClient
 from managerPlatform.common.keyGen.keyGenarator import keyGenarator
-from managerPlatform.serviceCaller.detValServiceImpl import detectThreadMap, modelVersionSeervice
+from managerPlatform.detectModelValidation.detValServiceImpl import modelVersionSeervice
 
 detectMap = {}
 

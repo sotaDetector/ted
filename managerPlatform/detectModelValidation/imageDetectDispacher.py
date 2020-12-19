@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from managerPlatform.serviceCaller.imageDetectService import imageDetectService
+from managerPlatform.detectModelValidation.imageDetectService import imageDetectService
 
 iamge_detect_blp = Blueprint("imageDetectDispacher", __name__, url_prefix="/imageDetect")
 

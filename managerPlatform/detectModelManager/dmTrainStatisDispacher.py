@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from managerPlatform.detectModelsManager.dmTrainStatisService import dmTrainStatisService
+from managerPlatform.detectModelManager.dmTrainStatisService import dmTrainStatisService
 
 dm_train_statis_blp = Blueprint("dmTrainStatisDispacher", __name__, url_prefix="/dmTrainStatis")
 
