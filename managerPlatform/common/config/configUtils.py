@@ -13,7 +13,7 @@ class configUtils:
     def _readConfig(cls):
         # 实例化ConfigParser
         cls.cf = configparser.ConfigParser()
-        cls.cf.read(os.path.dirname(__file__)+'/config.ini')
+        cls.cf.read(os.path.abspath('.')+'/config.ini')
 
     # 读取配置文件
     @classmethod
