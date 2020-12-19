@@ -1,6 +1,6 @@
 from flask import Blueprint,request
 
-from managerPlatform.modelsManager.detectModelTrainService import detectModelTrainService
+from managerPlatform.detectModelsManager.detectModelTrainService import detectModelTrainService
 
 detect_model_train_blp = Blueprint("detectModelTrainDispacher", __name__, url_prefix="/detectModelTrain")
 
