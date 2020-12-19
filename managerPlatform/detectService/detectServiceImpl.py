@@ -23,6 +23,10 @@ class detectServiceImpl:
 
         detectService.save()
 
+        #开启服务
+        if jsonData['dtsSwitch']==ConstantUtils.SERVICE_SWITCH_ON:
+            pass
+
         return resultPackerUtils.save_success()
 
     def updateDetectService(self,jsonData):
