@@ -45,9 +45,9 @@ mongoSource.initMongoDBSource(app)
 
 #app全局资源初始化
 appResource.resourceInit()
-# #启动监控线程
-# detectThread=detectThreadWatcher()
-# detectThread.start()
+#启动监控线程
+detectThread=detectThreadWatcher()
+detectThread.start()
 
 @app.before_request
 def appInterceptor():
