@@ -35,6 +35,7 @@ class detectServiceThread(threading.Thread):
     # 停止检测
     def stopDetect(self):
         self.isDetect = False
+        self.dataset.stopGrabStreamData()
 
     # 加载模型
     def loadModel(self, modelConfig):
@@ -90,7 +91,6 @@ class detectServiceThread(threading.Thread):
         print("检测参数：" + str(detetConfig))
         model = self.model
         save_img = False
-        cap = None
         vw = None
         # 初始化若干参数
         source, view_img, save_txt = detetConfig["source"], detetConfig["view_img"], detetConfig["save_txt"]
@@ -118,12 +118,12 @@ class detectServiceThread(threading.Thread):
         if webcam:
             view_img = True
             cudnn.benchmark = True  # set True to speed up constant image size inference
-            dataset = LoadStreams(source, img_size=imgsz)
-            cap = dataset.getCap()
-            vw = videoRecordUtils.createVideoWriter(cap)
+            self.dataset = LoadStreams(source, img_size=imgsz)
+            self.cap = self.dataset.getCap()
+            vw = videoRecordUtils.createVideoWriter(self.cap)
         else:
             save_img = True
-            dataset = LoadImages(source, img_size=imgsz)
+            self.dataset = LoadImages(source, img_size=imgsz)
 
         # Get names and colors
         names = model.module.names if hasattr(model, 'module') else model.names
@@ -134,7 +134,7 @@ class detectServiceThread(threading.Thread):
         img = torch.zeros((1, 3, imgsz, imgsz), device=device)  # init img
         _ = model(img.half() if half else img) if device.type != 'cpu' else None  # run once
 
-        for path, img, im0s, vid_cap in dataset:
+        for path, img, im0s, vid_cap in self.dataset:
             if self.isDetect == False:
                 break
             img = torch.from_numpy(img).to(device)
@@ -166,7 +166,7 @@ class detectServiceThread(threading.Thread):
 
                 save_path = str(save_dir / p.name)
                 txt_path = str(save_dir / 'labels' / p.stem) + (
-                    '_%g' % dataset.frame if dataset.mode == 'video' else '')
+                    '_%g' % self.dataset.frame if self.dataset.mode == 'video' else '')
                 s += '%gx%g ' % img.shape[2:]  # print string
                 gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
                 if len(det):
@@ -225,7 +225,7 @@ class detectServiceThread(threading.Thread):
 
                 # Save results (image with detections)
                 if save_img:
-                    if dataset.mode == 'images':
+                    if self.dataset.mode == 'images':
                         cv2.imwrite(save_path, im0)
                     else:
                         if vid_path != save_path:  # new video
@@ -243,11 +243,7 @@ class detectServiceThread(threading.Thread):
         if vw != None:
             pass
             videoRecordUtils.closeVideoWrite(vw)
-        if cap != None:
-            try:
-                cap.release()
-            except Exception as e:
-                print("关闭异常。。。"+e)
+
 
         print("detect finished.......")
 
