@@ -35,7 +35,8 @@ class detectServiceThread(threading.Thread):
     # 停止检测
     def stopDetect(self):
         self.isDetect = False
-        self.dataset.stopGrabStreamData()
+        if self.isStream:
+            self.dataset.stopGrabStreamData()
 
     # 加载模型
     def loadModel(self, modelConfig):
@@ -120,9 +121,11 @@ class detectServiceThread(threading.Thread):
             cudnn.benchmark = True  # set True to speed up constant image size inference
             self.dataset = LoadStreams(source, img_size=imgsz)
             self.cap = self.dataset.getCap()
+            self.isStream=True
             vw = videoRecordUtils.createVideoWriter(self.cap)
         else:
             save_img = True
+            self.isStream = False
             self.dataset = LoadImages(source, img_size=imgsz)
 
         # Get names and colors
@@ -198,7 +201,8 @@ class detectServiceThread(threading.Thread):
                                 "h": int(xyxy[3]),
                                 "label": label,
                                 "class": int(cls.int()),
-                                "conf": float(conf.float())
+                                "conf": float(conf.float()),
+                                "color":colors[int(cls)]
                             })
 
                     detectResult.append({
