@@ -220,7 +220,6 @@ class detectServiceThread(threading.Thread):
                         #为节省内存资源 如果队列数量超过 30则清空
                         if self.q.qsize()>30:
                             self.q.queue.clear()
-                        print("queue size:"+str(self.q.qsize()))
                         self.q.put(frame)
 
                 # Save results (image with detections)

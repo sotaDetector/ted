@@ -21,6 +21,13 @@ class cameraStreamService:
 
         return yoloDetect.createYoloDetectThread(config)
 
+    def getSampleStreamUrl(self):
+
+        sampStreamUrl=["rtmp://r.ossrs.net/live/avatar"]
+
+        return resultPackerUtils.packJsonListResults(sampStreamUrl)
+
+
 
     def stopNativeCameraDetect(self, jsonData):
 

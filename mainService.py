@@ -11,7 +11,7 @@ from managerPlatform.detectService.detectServiceManagerDiapacher import dts_blp
 from managerPlatform.detectModelManager.detectModelDispacher import *
 from managerPlatform.detectModelManager.detectModelTrainDispacher import detect_model_train_blp
 from managerPlatform.detectModelManager.dmTrainStatisDispacher import dm_train_statis_blp
-from managerPlatform.detectModelValidation.cameraStreamDispacher import nat_camera_blp
+from managerPlatform.detectModelValidation.cameraStreamDispacher import camera_stream_val_blp
 from managerPlatform.detectModelValidation.detValServiceDispacher import detect_service_blp
 from managerPlatform.detectModelValidation.videoDetectDispacher import video_detect_blp
 from managerPlatform.streamPlayerService.mediaPlayerDispacher import media_Player_blp
@@ -24,7 +24,7 @@ app.register_blueprint(dsm_blp)
 app.register_blueprint(detect_model_blp)
 app.register_blueprint(dataLabel_blp)
 app.register_blueprint(detect_model_train_blp)
-app.register_blueprint(nat_camera_blp)
+app.register_blueprint(camera_stream_val_blp)
 app.register_blueprint(user_manager_blp)
 app.register_blueprint(iamge_detect_blp)
 app.register_blueprint(detect_service_blp)
@@ -45,9 +45,9 @@ mongoSource.initMongoDBSource(app)
 
 #app全局资源初始化
 appResource.resourceInit()
-#启动监控线程
-detectThread=detectThreadWatcher()
-detectThread.start()
+# #启动监控线程
+# detectThread=detectThreadWatcher()
+# detectThread.start()
 
 @app.before_request
 def appInterceptor():

@@ -2,17 +2,17 @@ from flask import Blueprint, request, Response
 
 from managerPlatform.detectModelValidation.cameraStreamService import cameraStreamService
 
-nat_camera_blp = Blueprint("nativeCameraDispacher", __name__, url_prefix="/natCamera")
+camera_stream_val_blp = Blueprint("cameraStreamValDispacher", __name__, url_prefix="/cameraStreamVal")
 
 natCameraService=cameraStreamService()
 
-@nat_camera_blp.route('/getCameraDeviceList', methods=['POST'])
+@camera_stream_val_blp.route('/getCameraDeviceList', methods=['POST'])
 def getCameraDeviceList():
 
     return natCameraService.getCameraDeviceList()
 
 
-@nat_camera_blp.route('/startNativeCameraDetect', methods=['POST'])
+@camera_stream_val_blp.route('/startNativeCameraDetect', methods=['POST'])
 def startNativeCameraDetect():
 
     jsonData = request.get_json()
@@ -22,7 +22,7 @@ def startNativeCameraDetect():
     return natCameraService.startNativeCameraDetect(jsonData)
 
 
-@nat_camera_blp.route('/startLiveStreamDetect', methods=['POST'])
+@camera_stream_val_blp.route('/startLiveStreamDetect', methods=['POST'])
 def startLiveStreamDetect():
 
 
@@ -33,8 +33,16 @@ def startLiveStreamDetect():
     return natCameraService.startLiveStreamDetect(jsonData)
 
 
+@camera_stream_val_blp.route('/getSampleStreamUrl', methods=['POST'])
+def getSampleStreamUrl():
 
-@nat_camera_blp.route("/stopDetectService", methods=['POST'])
+
+
+    return natCameraService.getSampleStreamUrl()
+
+
+
+@camera_stream_val_blp.route("/stopDetectService", methods=['POST'])
 def stopNativeCameraDetect():
     jsonData = request.get_json()
     return natCameraService.stopNativeCameraDetect(jsonData)
