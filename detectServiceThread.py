@@ -74,6 +74,8 @@ class detectServiceThread(threading.Thread):
         threading.Thread.__init__(self)
         set_logging()
 
+        self.isStream = False
+
         #默认开启直播
         self.Broardcast=False
 

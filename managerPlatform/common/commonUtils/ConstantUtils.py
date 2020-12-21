@@ -1,5 +1,6 @@
 from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.commonUtils.fileUtils import fileUtils
+from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.config.configUtils import configUtils
 
 
@@ -130,6 +131,7 @@ class ConstantUtils:
 
     @classmethod
     def updateDetectSessionTime(cls, serviceSessionId):
+        loggerUtils.info("update session:"+serviceSessionId+"/"+str(dateUtils.getTimeStamp()))
         cls.detectSessionMap[serviceSessionId] = dateUtils.getTimeStamp()
 
 
