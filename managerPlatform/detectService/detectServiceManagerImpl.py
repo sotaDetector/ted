@@ -150,7 +150,7 @@ class detectServiceImpl:
             yoloDetectServiceImpl.launchYoloDetectService(sessionId=detectServiceIns["dtsServiceKey"],
                                                           dmtvid=detectServiceIns["dmtvId"])
         else:
-            yoloDetectServiceImpl.releaseYoloDetectService(detectServiceIns["dtsServiceKey"])
+            yoloDetectServiceImpl.releaseYoloDetectThread(detectServiceIns["dtsServiceKey"])
         #更改数据库状态
         detectServiceIns.update(dtsSwitch=jsonData['dtsSwitch'])
 

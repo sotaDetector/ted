@@ -30,12 +30,12 @@ class detectThreadWatcher(threading.Thread):
 
     def run(self):
         while(True):
-            time.sleep(10)
+            time.sleep(20)
             sessionMap=ConstantUtils.detectSessionMap
             nowTimeStamp=dateUtils.getTimeStamp()
             loggerUtils.info("detect session thread map:"+str(sessionMap))
             for sessionKey in list(sessionMap.keys()):
-                if nowTimeStamp-(10*1000)>int(sessionMap[sessionKey]):
+                if nowTimeStamp-int(sessionMap[sessionKey])>(30*1000):
                     detectThreadWatcher.releaseDetectSession(sessionKey)
 
 

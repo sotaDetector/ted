@@ -66,7 +66,7 @@ class yoloDetectService:
         detectThread = detectServiceThread(modelConfig)
 
         # 加载检测参数
-        detectConfig = detectConfigUtils.getBasicDetectConfig(str(config['source']),
+        detectConfig = detectConfigUtils.getBasicDetectConfig(str(config['source'].replace(" ","")),
                                                               outPath=ConstantUtils.videoDetectOut + sessionId)
 
         detectThread.setDetectConfig(detectConfig)
