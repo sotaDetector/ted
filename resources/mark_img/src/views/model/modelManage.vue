@@ -376,7 +376,6 @@ export default {
         }, {
           "title": "标签",
           "align": "center",
-          // "key": "dlidList",
           "className": 'label_cell',
           "width": 220,
           "key": "dlNameList",

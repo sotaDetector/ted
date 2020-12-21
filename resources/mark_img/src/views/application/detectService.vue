@@ -32,7 +32,7 @@
             <template slot-scope="{row, index}" slot="action">
               <div>
                 <span class="action" style="margin-right:5px" @click="modifyModal(row._id)">编辑</span>
-                <span class="action" @click="delDatas(row._id)">删除</span>
+                <span class="action" @click="deleteModal(row._id)">删除</span>
               </div>
             </template>
           </Table>
@@ -253,7 +253,6 @@ export default {
       let params = {
         pageIndex: this.pageNow,
         pageSize: this.pagesize,
-        // dtsName: this.search.dtsName
       }
       this.$Spin.show()
       this.$post('/dts/getDetectServicePageList', params).then(data => {
@@ -276,29 +275,6 @@ export default {
     handleChange (page) {
       this.pageNow = page;//赋值当前页
       this.queryPageInfo();
-    },
-
-    handleBeforeUpload (e) {
-      if(e.type == 'application/x-zip-compressed') {
-        this.fileType = 1
-        this.files.push(e)
-      } else if(e.type.indexOf('image/') >= 0) {
-        this.fileType = 2
-        this.files.push(e)
-      } else {
-        this.$Message.error('请上传图片或zip压缩包！')
-      }
-
-      // this.importDatas()
-      return false
-    },
-    delFile (idx) {
-      this.files.splice(idx, 1)
-    },
-    // 删除弹框
-    deleteModal (channelId) {
-      this.channelId = channelId
-      this.modal_delete = true
     },
     // 新增弹框
     addModal () {
@@ -391,8 +367,7 @@ export default {
       this.secret = secret
       this.modal_view = true
     },
-
-    delDatas (id) {
+    deleteModal (id) {
       this.dtsid = id
       this.modal_delete = true
     },

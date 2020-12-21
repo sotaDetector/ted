@@ -28,7 +28,7 @@
                 <span v-if="row.dsImageCount" class="action" @click="markDatas(row.dsId,index)">标注</span>
                 <span class="action" style="margin:0 4px;" @click="clickImport(row.dsId)">导入</span>
                 <span class="action" style="margin-right:4px;" @click="modifyModal(row.dsId)">编辑</span>
-                <span class="action" @click="delDatas(row.dsId)">删除</span>
+                <span class="action" @click="deleteModal(row.dsId)">删除</span>
               </div>
             </template>
           </Table>
@@ -53,7 +53,6 @@
       </div>
       <div slot="footer">
         <Button type="success" @click="importDatas" icon="ios-cloud-upload-outline" style="width:115px;">点击上传</Button>
-        <!-- <Button type="primary" class="confirm_btn" ghost @click="deleteMethod(channelId)">确定</Button> -->
         <Button type="default" class="clear_btn" @click="cancel()">取消</Button>
       </div>
     </Modal>
@@ -204,47 +203,6 @@ export default {
           'align': 'center',
           'key': 'action',
           'slot': 'action'
-          // render: (h, params) => {
-          //   return h('div', [
-          //     h('span', {
-          //       style: {
-          //         color: '#8c0776',
-          //         cursor: 'pointer'
-          //       },
-          //       on: {
-          //         click: () => {
-          //           // 点击操作事件
-          //           this.markDatas(params.row.dsId)
-          //         }
-          //       }
-          //     }, '标注'),
-          //     h('span', {
-          //       style: {
-          //         color: '#8c0776',
-          //         cursor: 'pointer',
-          //         margin: '0 4px'
-          //       },
-          //       on: {
-          //         click: () => {
-          //           // 点击操作事件
-          //           this.importDatas(params.row.dsId)
-          //         }
-          //       }
-          //     }, '导入'),
-          //     h('span', {
-          //       style: {
-          //         color: '#8c0776',
-          //         cursor: 'pointer'
-          //       },
-          //       on: {
-          //         click: () => {
-          //           // 点击操作事件
-          //           this.delDatas(params.row.dsId)
-          //         }
-          //       }
-          //     }, '删除'),
-          //   ])
-          // }
         }],
       pageInfo: {},
       files: []
@@ -297,11 +255,6 @@ export default {
     },
     delFile (idx) {
       this.files.splice(idx, 1)
-    },
-    // 删除弹框
-    deleteModal (channelId) {
-      this.channelId = channelId
-      this.modal_delete = true
     },
     // 新增弹框
     addModal () {
@@ -396,8 +349,6 @@ export default {
       this.modal_list = true
     },
     importDatas () {
-      // console.log(id)
-      // this.dsId = id
       if(!this.files.length) {
         this.$Message.error('请选择文件')
         return false
@@ -440,7 +391,7 @@ export default {
         }
       })
     },
-    delDatas (id) {
+    deleteModal (id) {
       this.dsId = id
       this.modal_delete = true
     },

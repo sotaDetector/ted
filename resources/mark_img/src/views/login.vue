@@ -2,6 +2,7 @@
   <div class="login">
     <div class="inner">
       <!-- <img src="../assets/images/avatar.jpg" alt="" class="avatar"> -->
+      <div class="title">TED千眼通用目标检测平台</div>
       <Form class="formItem ivu-form-label-left" ref="userInfo" :model="userInfo" :rules="rules">
         <FormItem prop="user">
           <Input type="text" v-model="userInfo.user" placeholder="用户名">
@@ -20,7 +21,7 @@
           </div>
         </div>
         <FormItem>
-          <Button style="height:45px;" long type="primary" @click="handleSubmit('userInfo')">登 录</Button>
+          <Button style="height:40px;" long type="primary" @click="handleSubmit('userInfo')" :loading="loading">登 录</Button>
         </FormItem>
       </Form>
     </div>
@@ -37,6 +38,7 @@ export default {
     return {
       menuList,
       checked: true,
+      loading: false,
       userInfo: {
         name: '',
         password: ''
@@ -50,7 +52,7 @@ export default {
       }
     }
   },
-  mounted() {
+  mounted () {
     this.getCookie()
   },
   methods: {
@@ -62,9 +64,11 @@ export default {
       this.$refs[name].validate((valid) => {
         if(valid) {
           // 引用login.js中的方法，.then回调
-          this.$Spin.show()
+          this.loading = true
+          // this.$Spin.show()
           loginMethod(this.userInfo.user, this.$md5(this.userInfo.password)).then(data => {
-            this.$Spin.hide()
+            // this.$Spin.hide()
+            this.loading = false
             if(data.rs === 1) {
               const self = this;
               if(self.checked == true) {
@@ -141,16 +145,24 @@ export default {
   position: relative;
 }
 .inner {
-  width: 330px;
-  height: 280px;
-  background: #fff;
+  width: 350px;
+  height: 320px;
+  background: rgba(255,255,255,.7);
   border-radius: 6px;
   position: absolute;
   top: 50%;
   left: 50%;
-  margin-left: -165px;
-  margin-top: -140px;
-  padding: 50px 20px 20px;
+  margin-left: -175px;
+  margin-top: -160px;
+  padding: 0 20px 20px;
+}
+.inner .title {
+  text-align: center;
+  line-height: 80px;
+  font-size: 20px;
+  background-image: linear-gradient(135deg, red, blue);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 .register {
   float: right;

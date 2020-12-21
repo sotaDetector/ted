@@ -2,6 +2,7 @@
   <div class="login">
     <div class="inner">
       <!-- <img src="../assets/images/avatar.jpg" alt="" class="avatar"> -->
+      <div class="title">TED千眼通用目标检测平台</div>
       <Form class="formItem ivu-form-label-left" ref="userInfo" :model="userInfo" :rules="rules">
         <FormItem prop="nick">
           <Input type="text" v-model="userInfo.nick" placeholder="昵称">
@@ -17,11 +18,11 @@
         </FormItem>
         <div class="ivu-form-item">
           <div class="go_login" @click="goLogin">
-            去登录
+            已有账号，直接登录
           </div>
         </div>
         <FormItem>
-          <Button style="height:45px;" long type="primary" @click="handleSubmit('userInfo')">注 册</Button>
+          <Button style="height:40px;" long type="primary" @click="handleSubmit('userInfo')">注 册</Button>
         </FormItem>
       </Form>
     </div>
@@ -91,14 +92,24 @@ export default {
   overflow: hidden;
 }
 .inner {
-  width: 330px;
-  height: 330px;
-  background: #fff;
+  width: 350px;
+  height: 355px;
+  background: rgba(255, 255, 255, 0.7);
   border-radius: 6px;
-  margin: 250px 0 0 50%;
-  transform: translateX(-115px);
-  padding: 50px 20px 20px;
-  position: relative;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -175px;
+  margin-top: -177.5px;
+  padding: 0 20px 20px;
+}
+.inner .title {
+  text-align: center;
+  line-height: 80px;
+  font-size: 20px;
+  background-image: linear-gradient(135deg, red, blue);
+  -webkit-background-clip: text;
+  color: transparent;
 }
 .go_login {
   float: right;

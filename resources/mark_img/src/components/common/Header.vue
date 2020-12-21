@@ -87,7 +87,7 @@ export default {
 .avatar,.quit{
   display: flex;
   align-items: center;
-  border-left: 1px solid #e3e3e3;
+  /* border-left: 1px solid #e3e3e3; */
   padding-left: 10px;
   cursor: pointer;
 }

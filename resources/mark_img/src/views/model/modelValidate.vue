@@ -186,6 +186,11 @@ export default {
       })
     },
     changeType (e) {
+
+      if(this.sessionIdForClose) {
+        this.stopDetect()
+      }
+
       this.threshold = 0.3
       this.file = ''
       this.mediaSrc = ''
@@ -199,10 +204,6 @@ export default {
 
       if(e == 3) { // 摄像头
         this.getCameraDeviceList()
-      }
-
-      if(this.sessionIdForClose) {
-        this.stopDetect()
       }
     },
     getDefaultSource () {
