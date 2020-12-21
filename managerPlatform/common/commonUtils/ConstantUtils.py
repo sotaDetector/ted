@@ -1,3 +1,4 @@
+from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.config.configUtils import configUtils
 
@@ -123,6 +124,13 @@ class ConstantUtils:
             return None
         else:
             return "models/"+cls.CFG_MAP[modelType]
+
+
+    detectSessionMap = {}
+
+    @classmethod
+    def updateDetectSessionTime(cls, serviceSessionId):
+        cls.detectSessionMap[serviceSessionId] = dateUtils.getTimeStamp()
 
 
 

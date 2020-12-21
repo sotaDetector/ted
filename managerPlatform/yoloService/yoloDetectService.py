@@ -4,7 +4,6 @@ from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
-from managerPlatform.common.watcherMangaer.detectThreadWatcher import detectThreadWatcher
 from managerPlatform.detectModelManager.detectModelTrainService import detectModelTrainService
 
 
@@ -30,6 +29,8 @@ class yoloDetectService:
         modelConfig["weights"] = dmVersionBean['ckptModelSavePath']
         modelConfig["device"] = ''
 
+        if modelConfig["weights"]==None:
+            return
         detectSerIns = detectServiceThread(modelConfig)
 
         if sessionId is None:
@@ -40,7 +41,7 @@ class yoloDetectService:
 
         # 把sessionId放入到redis中供监控线程监控
         if isWatch:
-            detectThreadWatcher.updateDetectSessionTime(sessionId)
+            ConstantUtils.updateDetectSessionTime(sessionId)
 
         loggerUtils.info("模型启动完毕...." + sessionId)
         loggerUtils.info("sessions of detectThreadMap:" + str(yoloDetectThreadMap.keys()))
@@ -76,7 +77,7 @@ class yoloDetectService:
         yoloDetectThreadMap[sessionId] = detectThread
 
         #把sessionId放入到redis中供监控线程监控
-        detectThreadWatcher.updateDetectSessionTime(sessionId)
+        ConstantUtils.updateDetectSessionTime(sessionId)
 
         result = {
             ConstantUtils.serviceSessionId:sessionId,
@@ -98,8 +99,6 @@ class yoloDetectService:
     #释放检测线程
     def releaseYoloDetectThread(self,serviceSessionId):
 
-        loggerUtils.info("stop session :" + str(serviceSessionId))
-
         if yoloDetectThreadMap.keys().__contains__(serviceSessionId):
 
             #先关闭线程
@@ -117,7 +116,6 @@ class yoloDetectService:
                 sessionDmtvMap.pop(serviceSessionId)
 
             loggerUtils.info("release model:" + str(serviceSessionId))
-            loggerUtils.info("sessions of detectThreadMap:" + str(yoloDetectThreadMap.keys()))
             return True
         else:
             loggerUtils.info("sessions not in detectThreadMap:" + str(serviceSessionId))
