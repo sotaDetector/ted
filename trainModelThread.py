@@ -26,6 +26,7 @@ import testCustom  # import test.py to get mAP after each epoch
 from managerPlatform.bean.detectModel.detectModelTrainStatistics import detectModelTrainStatistics
 from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
+from managerPlatform.detectModelManager.dmTrainStatisService import dmTrainStatisService
 from models.yolo import Model
 from utils.autoanchor import check_anchors
 from utils.datasetsCustom import create_dataloader
@@ -37,7 +38,6 @@ from utils.loss import compute_loss
 from utils.plots import plot_images, plot_labels, plot_results, plot_evolution
 from utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_distributed_zero_first
 
-from managerPlatform.modelsManager.dmTrainStatisService import dmTrainStatisService
 
 
 logger = logging.getLogger(__name__)

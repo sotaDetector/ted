@@ -2,7 +2,7 @@ from flask import Blueprint, request
 
 from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
 from managerPlatform.common.baseBean.pageBean import pageBean
-from managerPlatform.modelsManager.detectModelService import detectModelService
+from managerPlatform.detectModelManager.detectModelService import detectModelService
 
 detect_model_blp = Blueprint("detectModelDispacher", __name__, url_prefix="/detectModel")
 
@@ -46,3 +46,9 @@ def getDetectModelDetail():
 def delDetectModelDetail():
     dmId=request.get_json()['dmId']
     return dctMoldeService.delDetectModelDetail(dmId)
+
+
+@detect_model_blp.route('/getAllDetectModels', methods=['POST'])
+def getAllDetectModels():
+
+    return dctMoldeService.getAllDetectModels()

@@ -62,16 +62,17 @@ class detectModelService:
 
             for modelItem in modelJsonList:
                 for versionItem in modelVersionJsonList:
-                    if modelItem['latestVersionId'] == versionItem['dmtvid']:
-                        versionItem['trainState']=ConstantUtils.getModelVersionTrainState(versionItem['trainState'])
-                        versionItem['inferencePlatformValue']=ConstantUtils.getModelPlatform(versionItem['inferencePlatform'])
-                        versionItem['dmPrecisionValue']=ConstantUtils.getModelPrisision(versionItem['dmPrecision'])
-                        datasetNames=[]
-                        for item in versionItem['ds_dl_list']:
-                            datasetNames.append(datasetMap[item['dsId']])
-                        versionItem['datasetNames']=datasetNames
-                        modelItem["latestVersionItem"] = [versionItem]
-                        break
+                    if modelItem.keys().__contains__("latestVersionId"):
+                        if modelItem['latestVersionId'] == versionItem['dmtvid']:
+                            versionItem['trainState']=ConstantUtils.getModelVersionTrainState(versionItem['trainState'])
+                            versionItem['inferencePlatformValue']=ConstantUtils.getModelPlatform(versionItem['inferencePlatform'])
+                            versionItem['dmPrecisionValue']=ConstantUtils.getModelPrisision(versionItem['dmPrecision'])
+                            datasetNames=[]
+                            for item in versionItem['ds_dl_list']:
+                                datasetNames.append(datasetMap[item['dsId']])
+                            versionItem['datasetNames']=datasetNames
+                            modelItem["latestVersionItem"] = [versionItem]
+                            break
 
         pageItem.set_totalCount(totalCount)
 
@@ -96,3 +97,11 @@ class detectModelService:
         detectModelItem = detectModelBean.objects(dmId=dmId)
         detectModelItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
         return resultPackerUtils.update_success()
+
+
+    def getAllDetectModels(self):
+        detectModels=detectModelBean.objects(state=ConstantUtils.DATA_STATUS_ACTIVE,
+                                userId=session['userId']).only("dmId","dmName")
+
+        return resultPackerUtils.packDataListResults(detectModels.to_json(),"dmId")
+

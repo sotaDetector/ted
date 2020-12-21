@@ -28,7 +28,7 @@ class ffmpegUtils:
         result = subprocess.getstatusoutput(ffmIns)
         cameraList = []
         for item in result[1].split("\n"):
-            if item.__contains__("Camera"):
+            if item.__contains__("Camera") or item.__contains__("CAMERA") or item.__contains__("摄像头"):
                 tempStr = item[item.index("] [") + 1:].replace("[", "").split("]")
                 cameraList.append(cameraDevice.getCameraDevice(deviceIndex=tempStr[0], deviceName=tempStr[1],deviceUID=""))
 

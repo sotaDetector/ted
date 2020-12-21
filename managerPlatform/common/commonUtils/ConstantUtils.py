@@ -30,7 +30,11 @@ class ConstantUtils:
 
     imageItemPrefix = configUtils.getConfigProperties("file", "imageItemPrefix")+"dsc/imageItem/"
 
+    videoPlayPrefix = configUtils.getConfigProperties("video", "videoPlayPrefix")
+    streamPlayPrefix = configUtils.getConfigProperties("video", "streamPlayPrefix")
 
+    serviceSessionId="serviceSessionId"
+    videoPlayUrl="videoPlayUrl"
 
     UP_FILE_TYPE_COMPRESSFILE="1"
     UP_FILE_TYPE_IMAGEFILE = "2"
@@ -79,7 +83,12 @@ class ConstantUtils:
         MODEL_WEIGHT_M: "中",
         MODEL_WEIGHT_L: "大",
         MODEL_WEIGHT_X: "超大"
+
     }
+
+    SERVICE_SWITCH_ON=1
+    SERVICE_SWITCH_CLOSE=2
+
 
 
     @classmethod

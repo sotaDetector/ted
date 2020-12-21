@@ -1,6 +1,6 @@
 from flask import Blueprint, request, Response
 
-from managerPlatform.serviceCaller.videoDetectService import videoDetectService
+from managerPlatform.detectModelValidation.videoDetectService import videoDetectService
 
 video_detect_blp = Blueprint("vedioDetectDispacher", __name__, url_prefix="/videoDetect")
 
@@ -14,10 +14,5 @@ def getVideoDetectResult():
 
     return videoDetectSer.getVideoDetectResult(serviceSessionId,threshold,detectVideo)
 
-
-@video_detect_blp.route('/getVideoStream', methods=['POST','GET'])
-def getVideoSource():
-    videoPlayId = request.args.get("videoPlayId")
-    return Response(videoDetectSer.gen_frames(videoPlayId), mimetype='multipart/x-mixed-replace; boundary=frame')
 
 

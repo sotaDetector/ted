@@ -1,8 +1,12 @@
+import json
 import threading
+
+from flask import session
 
 from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
 from managerPlatform.bean.detectModel.detectModelTrainConfig import detectModelTrainConfig
 from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
+from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
@@ -63,7 +67,24 @@ class detectModelTrainService:
     def getDMVersionList(self,queryData):
         dataList = detectModelTrainVersion.objects(dmid=queryData['dmid'], state=ConstantUtils.DATA_STATUS_ACTIVE)\
             .exclude("state","create_date").order_by('-create_date')
-        return resultPackerUtils.packDataListResults(dataList.to_json(),"dmtvid")
+
+        datasetIdNames = datasetsBean.objects(userId=session.get("userId"), state=ConstantUtils.DATA_STATUS_ACTIVE).only(
+            "dsId", "dsName")
+        datasetMap = {}
+        for item in datasetIdNames:
+            datasetMap[item['dsId']] = item['dsName']
+
+        modelVersionJsonList = json.loads(dataList.to_json().replace("_id", "dmtvid"))
+        for versionItem in modelVersionJsonList:
+            versionItem['trainState'] = ConstantUtils.getModelVersionTrainState(versionItem['trainState'])
+            versionItem['inferencePlatformValue'] = ConstantUtils.getModelPlatform(versionItem['inferencePlatform'])
+            versionItem['dmPrecisionValue'] = ConstantUtils.getModelPrisision(versionItem['dmPrecision'])
+            datasetNames = []
+            for item in versionItem['ds_dl_list']:
+                datasetNames.append(datasetMap[item['dsId']])
+            versionItem['datasetNames'] = datasetNames
+
+        return resultPackerUtils.packJsonListResults(modelVersionJsonList)
 
 
     def getDetectModelVersionNameList(self,queryData):

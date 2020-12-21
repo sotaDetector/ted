@@ -1,6 +1,9 @@
 import time
 import cv2
 
+from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
+
+
 class videoRecordUtils:
 
 
@@ -23,7 +26,7 @@ class videoRecordUtils:
 
     @classmethod
     def closeVideoWrite(cls,vw):
-        print("关闭录制。。。")
+        loggerUtils.info("关闭录制。。。")
         vw.release()
 
 

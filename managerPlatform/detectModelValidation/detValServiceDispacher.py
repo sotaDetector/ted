@@ -1,6 +1,6 @@
 from flask import Blueprint, request
 
-from managerPlatform.serviceCaller.detValServiceImpl import detValServiceImpl
+from managerPlatform.detectModelValidation.detValServiceImpl import detValServiceImpl
 
 detect_service_blp = Blueprint("detectService", __name__, url_prefix="/detectService")
 

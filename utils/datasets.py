@@ -255,7 +255,16 @@ class LoadWebcam:  # for inference
 
 
 class LoadStreams:  # multiple IP or RTSP cameras
+
+    # 停止抓取数据流
+    def stopGrabStreamData(self):
+        self.isGrab = False
+        self.thread.join()
+        self.cap.release()
+        print("执行stop grab函数。。。")
+
     def __init__(self, sources='streams.txt', img_size=640):
+        self.isGrab = True
         self.mode = 'images'
         self.img_size = img_size
 
@@ -272,15 +281,15 @@ class LoadStreams:  # multiple IP or RTSP cameras
             # Start the thread to read frames from the video stream
             print('%g/%g: %s... ' % (i + 1, n, s), end='')
             cap = cv2.VideoCapture(eval(s) if s.isnumeric() else s)
-            self.cap=cap
+            self.cap = cap
             assert cap.isOpened(), 'Failed to open %s' % s
             w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS) % 100
             _, self.imgs[i] = cap.read()  # guarantee first frame
-            thread = Thread(target=self.update, args=([i, cap]), daemon=True)
+            self.thread = Thread(target=self.update, args=([i, cap]), daemon=True)
             print(' success (%gx%g at %.2f FPS).' % (w, h, fps))
-            thread.start()
+            self.thread.start()
         print('')  # newline
 
         # check for common shapes
@@ -289,14 +298,14 @@ class LoadStreams:  # multiple IP or RTSP cameras
         if not self.rect:
             print('WARNING: Different stream shapes detected. For optimal performance supply similarly-shaped streams.')
 
-
     def getCap(self):
         return self.cap
 
     def update(self, index, cap):
         # Read next stream frame in a daemon thread
         n = 0
-        while cap.isOpened():
+        print("***"+str(self.isGrab))
+        while cap.isOpened() and self.isGrab:
             n += 1
             # _, self.imgs[index] = cap.read()
             cap.grab()
@@ -304,6 +313,7 @@ class LoadStreams:  # multiple IP or RTSP cameras
                 _, self.imgs[index] = cap.retrieve()
                 n = 0
             time.sleep(0.01)  # wait time
+
 
     def __iter__(self):
         self.count = -1
@@ -314,6 +324,9 @@ class LoadStreams:  # multiple IP or RTSP cameras
         img0 = self.imgs.copy()
         if cv2.waitKey(1) == ord('q'):  # q to quit
             cv2.destroyAllWindows()
+            raise StopIteration
+
+        if not self.isGrab:
             raise StopIteration
 
         # Letterbox
