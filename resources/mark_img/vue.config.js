@@ -27,7 +27,7 @@ module.exports = {
       // detail: https://cli.vuejs.org/config/#devserver-proxy
       '/api': {
         // target: `http://192.168.1.67:8100/`,
-        target: `http://47.111.130.154:8200/`,
+        target: `http://localhost:8100/`,
         // target: `http://192.168.1.86:8100/`, // 家伟
         changeOrigin: true,
         pathRewrite: {
