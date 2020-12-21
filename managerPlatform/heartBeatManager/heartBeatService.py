@@ -1,3 +1,4 @@
+from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.common.watcherMangaer.detectThreadWatcher import detectThreadWatcher
 
@@ -9,7 +10,7 @@ class heartBeatService:
 
         for sessionItem in jsonData['sessionIds'].split(","):
             if sessionItem != "":
-                detectThreadWatcher.updateDetectSessionTime(sessionItem)
+                ConstantUtils.updateDetectSessionTime(sessionItem)
 
         return resultPackerUtils.save_success()
 

@@ -166,7 +166,8 @@ class detectServiceImpl:
                                                      state=ConstantUtils.DATA_STATUS_ACTIVE)
 
         for item in detectServiceList:
-            yoloDetectServiceImpl.launchYoloDetectService(sessionId=item['dtsServiceKey'],
+            if item['dmtvId'] != None:
+                yoloDetectServiceImpl.launchYoloDetectService(sessionId=item['dtsServiceKey'],
                                                           dmtvid=item['dmtvId'])
 
         loggerUtils.info("init detect model finish***")
