@@ -62,6 +62,16 @@ const routes = [{
         name: 'ModelValidate',
         component: () => import('@/views/model/modelValidate.vue')
       },
+      {
+        path: '/detectService/',
+        name: 'DetectService',
+        component: () => import('@/views/application/detectService.vue')
+      },
+      {
+        path: '/detectTask/',
+        name: 'DetectTask',
+        component: () => import('@/views/application/detectTask.vue')
+      },
     ]
   },
 ]
