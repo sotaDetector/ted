@@ -2,8 +2,11 @@
   <div class="login">
     <div class="inner">
       <!-- <img src="../assets/images/avatar.jpg" alt="" class="avatar"> -->
-      <div class="title">TED千眼通用目标检测平台</div>
-      <Form class="formItem ivu-form-label-left" ref="userInfo" :model="userInfo" :rules="rules">
+      <div class="logo_box">
+        <img class="logo" src="@/assets/img/logo1.png" alt="">
+      </div>
+      <div class="title"><Icon size="26" type="ios-planet" /><span class="en"> TED</span> 千眼通用目标检测平台</div>
+      <Form class="formItem ivu-form-label-left" ref="userInfo" :model="userInfo" :rules="rules" style="width:90%;margin:0 auto">
         <FormItem prop="nick">
           <Input type="text" v-model="userInfo.nick" placeholder="昵称">
           </Input>
@@ -22,7 +25,7 @@
           </div>
         </div>
         <FormItem>
-          <Button style="height:40px;" long type="primary" @click="handleSubmit('userInfo')">注 册</Button>
+          <Button style="height:40px;width:80%;margin:0 auto;display:block;" long type="primary" @click="handleSubmit('userInfo')">注 册</Button>
         </FormItem>
       </Form>
     </div>
@@ -92,24 +95,58 @@ export default {
   overflow: hidden;
 }
 .inner {
-  width: 350px;
-  height: 355px;
+  width: 390px;
+  height: 380px;
   background: rgba(255, 255, 255, 0.7);
   border-radius: 6px;
   position: absolute;
   top: 50%;
   left: 50%;
-  margin-left: -175px;
-  margin-top: -177.5px;
+  margin-left: -195px;
+  margin-top: -250px;
   padding: 0 20px 20px;
 }
 .inner .title {
   text-align: center;
-  line-height: 80px;
-  font-size: 20px;
+  line-height: 125px;
+  height: 110px;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: 2px;
   background-image: linear-gradient(135deg, red, blue);
   -webkit-background-clip: text;
   color: transparent;
+  .en {
+    font:italic 1em Georgia, serif;
+  }
+}
+@keyframes logo {
+  from {
+  }
+  to {
+    transform: rotate(360deg);
+    width: 60px;
+    height: 60px;
+  }
+}
+.logo_box {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  margin-left: -30px;
+  background: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  animation: logo 8s linear infinite;
+  .logo {
+    width: 75%;
+    height: 75%;
+    display: inline-block;
+  }
 }
 .go_login {
   float: right;

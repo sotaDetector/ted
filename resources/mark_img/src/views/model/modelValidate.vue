@@ -108,14 +108,15 @@
                   <Slider v-model="threshold" @on-change="changeThreshold" :min="0" :max="1" :step="0.01" style="width:65%;margin: 0 18px"></Slider>
                   {{threshold}}
                 </div>
-                <div class="link_url">
+                <div v-if="deviceList.length && !deviceList[0].deviceName" style="margin-top:100px;text-align:center;color:#ccc;">暂未连接任何摄像设备</div>
+                <div class="link_url" v-if="deviceList[0] && deviceList[0].deviceName">
                   <span style="margin-top:10px;font-size:12px;margin-right:18px">选择摄像设备</span>
                   <Select style="width:75%;" v-model="source" placeholder="请选择摄像设备">
                     <Option v-for="item in deviceList" :value="item.deviceIndex" :key="item.deviceIndex">{{item.deviceName}}</Option>
                   </Select>
                 </div>
-                <Button type="primary" size="small" :loading="waiting" @click="startDetect" style="margin-top:40px;" :disabled="sessionIdForClose!='' || source==''">开启摄像头检测</Button>
-                <Button size="small" type="primary" ghost @click="stopDetect" style="margin-top:40px;margin-left:25px;" :disabled="!sessionIdForClose">关闭摄像头检测</Button>
+                <Button v-if="deviceList[0] && deviceList[0].deviceName" type="primary" size="small" :loading="waiting" @click="startDetect" style="margin-top:40px;" :disabled="sessionIdForClose!='' || source==''">开启摄像头检测</Button>
+                <Button v-if="deviceList[0] && deviceList[0].deviceName" size="small" type="primary" ghost @click="stopDetect" style="margin-top:40px;margin-left:25px;" :disabled="!sessionIdForClose">关闭摄像头检测</Button>
               </div>
             </div>
           </TabPane>

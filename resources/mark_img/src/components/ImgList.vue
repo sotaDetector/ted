@@ -22,7 +22,7 @@
       <Icon type="ios-arrow-forward" />
     </div>
 
-    <Page style="margin-top:5px;" size="small" :total="total" :page-size='pagesize' @on-change="handleChange" show-total show-elevator></Page>
+    <Page style="margin-top:10px;" size="small" :total="total" :page-size='pagesize' @on-change="handleChange" show-total show-elevator></Page>
     <!-- 模态框 -->
     <Modal class="sys_modal" v-model="modal_delete" class-name="vertical_modal" width="316">
       <div class="modal_body modal_body_delete">
@@ -223,7 +223,7 @@ export default {
   color: #fff;
   height: 110px;
   position: absolute;
-  bottom: 0;
+  bottom: 10px;
   left: 0;
   padding: 5px 60px 0;
 }

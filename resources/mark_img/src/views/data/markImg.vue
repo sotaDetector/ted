@@ -321,10 +321,10 @@ export default {
           });
           $('.img_box').mousemove(function (e) {
             // console.log(e.pageX <= width + iLeft, e.pageX >= iLeft)
-            // if (e.pageX <= width + iLeft && e.pageX >= iLeft && e.pageY <= height + iTop && e.pageY >= iTop) {} else {
-            //   $('.active').remove()
-            //   drawing = false
-            // }
+            if(drawing && e.pageX <= width + iLeft && e.pageX >= iLeft && e.pageY <= height + iTop && e.pageY >= iTop) { } else {
+              $('.active').remove()
+              drawing = false
+            }
             if(drawing && $(".active").length) {
               $(".active").width(e.pageX - startX);
               $(".active").height(e.pageY - startY);
@@ -638,9 +638,9 @@ export default {
     // max-width: 710px;
     width: 52%;
     // height: 90%;
-    height: 80%;
+    height: 78%;
     position: absolute;
-    top: 45%;
+    top: 42%;
     left: 50%;
     transform: translate(-50%, -50%);
     // overflow-x: auto;
