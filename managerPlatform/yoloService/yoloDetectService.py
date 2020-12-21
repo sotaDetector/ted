@@ -3,6 +3,7 @@ from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
+from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
 from managerPlatform.common.keyGen.keyGenarator import keyGenarator
 from managerPlatform.detectModelManager.detectModelTrainService import detectModelTrainService
@@ -50,7 +51,7 @@ class yoloDetectService:
             ConstantUtils.serviceSessionId: sessionId
         }
 
-        return resultMap
+        return resultPackerUtils.packCusResult(resultMap)
 
 
     def createYoloDetectThread(self,config):
@@ -84,7 +85,7 @@ class yoloDetectService:
             ConstantUtils.videoPlayUrl:ConstantUtils.streamPlayPrefix+sessionId
         }
 
-        return result
+        return resultPackerUtils.packCusResult(result)
 
 
     def getDetectServiceInstance(self,serviceSessionId):
@@ -119,8 +120,10 @@ class yoloDetectService:
 
             loggerUtils.info("release model:" + str(serviceSessionId))
             loggerUtils.info("sessions of detectThreadMap:" + str(yoloDetectThreadMap.keys()))
+            return True
         else:
             loggerUtils.info("sessions not in detectThreadMap:" + str(serviceSessionId))
+            return True
 
 
 

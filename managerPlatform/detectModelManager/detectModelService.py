@@ -97,3 +97,11 @@ class detectModelService:
         detectModelItem = detectModelBean.objects(dmId=dmId)
         detectModelItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
         return resultPackerUtils.update_success()
+
+
+    def getAllDetectModels(self):
+        detectModels=detectModelBean.objects(state=ConstantUtils.DATA_STATUS_ACTIVE,
+                                userId=session['userId']).only("dmId","dmName")
+
+        return resultPackerUtils.packDataListResults(detectModels.to_json(),"dmId")
+

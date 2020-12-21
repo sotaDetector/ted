@@ -14,6 +14,7 @@ from managerPlatform.detectModelManager.dmTrainStatisDispacher import dm_train_s
 from managerPlatform.detectModelValidation.cameraStreamDispacher import camera_stream_val_blp
 from managerPlatform.detectModelValidation.detValServiceDispacher import detect_service_blp
 from managerPlatform.detectModelValidation.videoDetectDispacher import video_detect_blp
+from managerPlatform.heartBeatManager.heartBeatDispacher import heart_beat_blp
 from managerPlatform.streamPlayerService.mediaPlayerDispacher import media_Player_blp
 from managerPlatform.userManager.userManagerDispacher import user_manager_blp
 from managerPlatform.detectModelValidation.imageDetectDispacher import iamge_detect_blp
@@ -33,6 +34,7 @@ app.register_blueprint(video_detect_blp)
 app.register_blueprint(dts_blp)
 app.register_blueprint(media_Player_blp)
 app.register_blueprint(dts_caller_blp)
+app.register_blueprint(heart_beat_blp)
 
 app.config["SECRET_KEY"] = '79537d00f4834892986f09a100aa1edf'
 app.config["SESSION_COOKIE_HTTPONLY"]=False
