@@ -138,16 +138,19 @@ export default {
   background: url("../assets/img/login.jpg") no-repeat center;
   background-size: 100% 100%;
   overflow: hidden;
+  position: relative;
 }
 .inner {
   width: 330px;
   height: 280px;
   background: #fff;
   border-radius: 6px;
-  margin: 250px 0 0 50%;
-  transform: translateX(-115px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: -165px;
+  margin-top: -140px;
   padding: 50px 20px 20px;
-  position: relative;
 }
 .register {
   float: right;

@@ -639,7 +639,6 @@ export default {
     // 新增弹框
     addModal () {
       this.modal_add = true
-      this.addInfo.id = this.defaultRoleId
     },
     // 确认新增
     addInfoMethod (name) {

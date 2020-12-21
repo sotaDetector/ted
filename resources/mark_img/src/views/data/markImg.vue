@@ -38,7 +38,7 @@
           <img src="@/assets/img/delete_red.png" alt="" class="delete delete_div" @click="delDiv(item.id, 'delDiv')" />
         </li>
       </ul>
-      <Button type="success" size="small" @click="submit" v-if="divList.length" style="width: 150px; margin-top: 20px">提交标注结果</Button>
+      <Button type="success" size="small" @click="submit" v-if="divList.length" style="width:150px;margin-top:20px;margin-left:-30px;">提交标注结果</Button>
     </div>
 
     <!-- 图片列表 -->

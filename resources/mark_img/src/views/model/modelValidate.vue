@@ -88,9 +88,10 @@
                 </div>
                 <div class="link_url">
                   <span style="margin-top:10px;font-size:12px;margin-right:18px">直播地址</span>
-                  <Input style="width:65%;" v-model="source" placeholder="请输入直播地址"></Input>
+                  <Input style="width:75%;" v-model="source" placeholder="请输入直播地址"></Input>
                 </div>
-                <Button type="primary" size="small" :loading="waiting" @click="startDetect" style="margin-top:40px;">开始检测</Button>
+                <Button type="primary" size="small" :loading="waiting" @click="startDetect" style="margin-top:40px;" :disabled="sessionIdForClose!='' ||  source==''">开始检测</Button>
+                <Button size="small" type="primary" ghost @click="stopDetect" style="margin-top:40px;margin-left:25px;" :disabled="!sessionIdForClose">关闭检测</Button>
               </div>
             </div>
           </TabPane>
@@ -109,12 +110,12 @@
                 </div>
                 <div class="link_url">
                   <span style="margin-top:10px;font-size:12px;margin-right:18px">选择摄像设备</span>
-                  <Select style="width:65%;" v-model="source" placeholder="请选择摄像设备">
+                  <Select style="width:75%;" v-model="source" placeholder="请选择摄像设备">
                     <Option v-for="item in deviceList" :value="item.deviceIndex" :key="item.deviceIndex">{{item.deviceName}}</Option>
                   </Select>
                 </div>
-                <Button type="primary" size="small" :loading="waiting" @click="startDetect" style="margin-top:40px;">开启摄像头检测</Button>
-                <Button size="small" @click="stopDetect" style="margin-top:40px;margin-left:25px;" :disabled="!videoPlayId">关闭摄像头检测</Button>
+                <Button type="primary" size="small" :loading="waiting" @click="startDetect" style="margin-top:40px;" :disabled="sessionIdForClose!='' || source==''">开启摄像头检测</Button>
+                <Button size="small" type="primary" ghost @click="stopDetect" style="margin-top:40px;margin-left:25px;" :disabled="!sessionIdForClose">关闭摄像头检测</Button>
               </div>
             </div>
           </TabPane>
@@ -141,21 +142,20 @@ export default {
       resultList: [],
       source: '',
       waiting: false,
+      defaultSource: '',
       deviceList: [],
-      videoPlayId: '', // 开启摄像头检测，返回此id，关闭后置空
-      timer: null
+      sessionIdForClose: '', // 开启 摄像头检测/直播流检测，返回此id，关闭后置空
+      timer: null,
+      sessionIdsList: []
 
     }
   },
   mounted () {
     this.dmtvid = parseInt(this.$route.params.id)
-
-
   },
   destroyed () {
-    if(this.videoPlayId) {
+    if(this.sessionIdForClose) {
       this.stopDetect()
-      clearInterval(this.timer)
     }
   },
   methods: {
@@ -174,6 +174,7 @@ export default {
         this.openText = '启动模型校验服务'
         if(data.rs === 1) {
           this.serviceSessionId = data.serviceSessionId
+          this.sessionIdsList.push(data.serviceSessionId)
           this.isOpenShow = false
         } else {
           if(data.data && data.data.errorMsg) {
@@ -189,20 +190,42 @@ export default {
       this.file = ''
       this.mediaSrc = ''
       this.source = '' // 直播流地址或摄像头设备
-      this.resultList = []
+      this.sessionIdForClose = ''
+      this.resultList = [] // 图片检测结果标签列表
 
-      if(!this.deviceList.length && e == 3) {
+      if(e == 2) { // 直播流
+        this.getDefaultSource()
+      }
+
+      if(e == 3) { // 摄像头
         this.getCameraDeviceList()
       }
-      if(e != 3 && this.videoPlayId) {
+
+      if(this.sessionIdForClose) {
         this.stopDetect()
-        clearInterval(this.timer)
       }
+    },
+    getDefaultSource () {
+      this.$Spin.show()
+      var params = {}
+      this.$post('/cameraStreamVal/getSampleStreamUrl', params).then(data => {
+        this.$Spin.hide()
+        if(data.rs === 1) {
+          this.defaultSource = data.data[0]
+          this.source = this.defaultSource
+        } else {
+          if(data.data && data.data.errorMsg) {
+            this.$Message.error(data.data.errorMsg);
+          } else {
+            this.$Message.error(data.errorMsg);
+          }
+        }
+      })
     },
     getCameraDeviceList () {
       this.$Spin.show()
       var params = {}
-      this.$post('/natCamera/getCameraDeviceList', params).then(data => {
+      this.$post('/cameraStreamVal/getCameraDeviceList', params).then(data => {
         this.$Spin.hide()
         if(data.rs === 1) {
           this.deviceList = data.data
@@ -290,7 +313,7 @@ export default {
     },
     startDetect () {
       var str = this.tabName == 2 ? '直播地址不能为空' : '请选择摄像设备'
-      var url = this.tabName == 2 ? '/natCamera/startLiveStreamDetect' : '/natCamera/startNativeCameraDetect'
+      var url = this.tabName == 2 ? '/cameraStreamVal/startLiveStreamDetect' : '/cameraStreamVal/startNativeCameraDetect'
       if(!this.source) {
         this.$Message.error(str)
         return false
@@ -309,15 +332,10 @@ export default {
         this.waiting = false
         if(data.rs == 1) {
           // this.mediaSrc = 'http://47.111.130.154:8200/videoDetect/getVideoStream?videoPlayId=12'
-          console.log(typeof data.videoPlayUrl)
           this.mediaSrc = data.videoPlayUrl
-          // setTimeout(() => {
-          //   this.mediaSrc = 'http://47.111.130.154:8200/videoDetect/getVideoStream?videoPlayId=12'
-          // }, 250);
-          if(this.tabName == 3) { // 摄像头检测
-            this.videoPlayId = data.videoPlayId
-            this.setTimer()
-          }
+          this.sessionIdForClose = data.serviceSessionId
+          this.sessionIdsList.push(data.serviceSessionId)
+          this.setTimer()
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
@@ -331,14 +349,16 @@ export default {
     stopDetect () {
       this.$Spin.show()
       var params = {
-        videoPlayId: this.videoPlayId
+        serviceSessionId: this.sessionIdForClose
       }
 
-      this.$post('/natCamera/stopNativeCameraDetect', params).then(data => {
+      this.$post('/cameraStreamVal/stopDetectService', params).then(data => {
         this.$Spin.hide()
         if(data.rs === 1) {
-          this.$Message.success('摄像头检测已关闭')
-          this.videoPlayId = ''
+          // this.$Message.success('摄像头检测已关闭')
+          this.sessionIdForClose = ''
+          this.sessionIdsList.pop()
+          clearInterval(this.timer)
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
@@ -350,9 +370,9 @@ export default {
     },
     sendHeartbeat () {
       var params = {
-        serviceSessionId: this.serviceSessionId
+        sessionIds: this.sessionIdsList.join(',')
       }
-      this.$post('/natCamera/sendDetectHeartbeat', params).then(data => {
+      this.$post('/heartBeat/sendDetectHeartbeat', params).then(data => {
         if(data.rs === 1) {
 
         } else {
