@@ -3,8 +3,6 @@ import time
 
 from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
-from managerPlatform.common.dataManager import redisSource
-from managerPlatform.common.keyGen.keyGenarator import keyGenarator
 from managerPlatform.yoloService.yoloDetectService import yoloDetectThreadMap,yoloDetectService
 
 yoloDetectService=yoloDetectService()

@@ -1,13 +1,11 @@
 from detectServiceThread import detectServiceThread
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
-from managerPlatform.common.commonUtils.dateUtils import dateUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.common.config.detectConfigUtils import detectConfigUtils
-from managerPlatform.common.keyGen.keyGenarator import keyGenarator
+from managerPlatform.common.watcherMangaer.detectThreadWatcher import detectThreadWatcher
 from managerPlatform.detectModelManager.detectModelTrainService import detectModelTrainService
-from managerPlatform.common.dataManager.redisSource import redisClient
 
 
 modelVersionService=detectModelTrainService()
@@ -42,7 +40,7 @@ class yoloDetectService:
 
         # 把sessionId放入到redis中供监控线程监控
         if isWatch:
-            redisClient.hset(keyGenarator.getDetectWatchKey(), sessionId, str(dateUtils.getTimeStamp()))
+            detectThreadWatcher.updateDetectSessionTime(sessionId)
 
         loggerUtils.info("模型启动完毕...." + sessionId)
         loggerUtils.info("sessions of detectThreadMap:" + str(yoloDetectThreadMap.keys()))
@@ -78,7 +76,7 @@ class yoloDetectService:
         yoloDetectThreadMap[sessionId] = detectThread
 
         #把sessionId放入到redis中供监控线程监控
-        redisClient.hset(keyGenarator.getDetectWatchKey(),sessionId,str(dateUtils.getTimeStamp()))
+        detectThreadWatcher.updateDetectSessionTime(sessionId)
 
         result = {
             ConstantUtils.serviceSessionId:sessionId,
