@@ -158,6 +158,7 @@ export default {
     if(this.sessionIdForClose) {
       this.stopDetect()
     }
+    clearInterval(this.timer)
   },
   methods: {
     openValidate () {
@@ -177,6 +178,7 @@ export default {
           this.serviceSessionId = data.serviceSessionId
           this.sessionIdsList.push(data.serviceSessionId)
           this.isOpenShow = false
+          this.setTimer()
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
@@ -187,7 +189,6 @@ export default {
       })
     },
     changeType (e) {
-
       if(this.sessionIdForClose) {
         this.stopDetect()
       }
@@ -337,6 +338,7 @@ export default {
           this.mediaSrc = data.videoPlayUrl
           this.sessionIdForClose = data.serviceSessionId
           this.sessionIdsList.push(data.serviceSessionId)
+          clearInterval(this.timer)
           this.setTimer()
         } else {
           if(data.data && data.data.errorMsg) {
@@ -360,7 +362,6 @@ export default {
           // this.$Message.success('摄像头检测已关闭')
           this.sessionIdForClose = ''
           this.sessionIdsList.pop()
-          clearInterval(this.timer)
         } else {
           if(data.data && data.data.errorMsg) {
             this.$Message.error(data.data.errorMsg);
