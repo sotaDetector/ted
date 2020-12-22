@@ -102,6 +102,7 @@
           </FormItem>
           <FormItem label="添加训练数据">
             <Button icon="ios-add-circle-outline" type="primary" style="margin-bottom:20px" ghost size="small" @click="chooseData">请选择</Button>
+            <span v-if="trainData.length" style="margin-left:20px">已选择 <span style="color: #8c0776">{{trainData.length}}</span> 个数据集，<span style="color: #8c0776">{{labelNumber}}</span> 个标签</span>
             <Table :columns="columns1" :data="trainData"></Table>
           </FormItem>
           <FormItem label="数据增强策略" prop="dataEnhanceType">
@@ -431,6 +432,15 @@ export default {
         // }
       ],
       pageInfo: {},
+    }
+  },
+  computed: {
+    labelNumber () {
+      var num = 0
+      this.trainData.forEach(item => {
+        num += item.dlidList.length
+      })
+      return num
     }
   },
   methods: {

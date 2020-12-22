@@ -47,7 +47,7 @@
                   </div>
                   <ul class="label_box">
                     <li class="no_data" v-if="!resultList.length">没有满足条件的识别结果</li>
-                    <li class="label" v-for="(item,idx) in resultList" :key="idx">{{item.label}}</li>
+                    <li class="label" v-for="(item,idx) in resultList" :key="idx" :style="{color: 'rgb('+item.color.join()+')', 'font-size': '16px'}">{{item.label}}</li>
                   </ul>
                 </div>
               </div>
