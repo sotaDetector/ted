@@ -164,7 +164,7 @@ export default {
         var iLeft = img.offset().left;
         var bTop = imgBox.offset().top;
         var bLeft = imgBox.offset().left;
-        console.log(iTop, iLeft)
+        // console.log(iTop, iLeft)
         // console.log(ratio, width, height)
 
         var startX, startY, endX, endY;

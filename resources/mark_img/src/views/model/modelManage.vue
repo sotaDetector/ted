@@ -615,13 +615,13 @@ export default {
               "isUsePreTraindModel": this.trainInfo.isUsePreTraindModel == 1 ? 'true' : 'false'
             }
           }
-          console.log(params)
           this.$Spin.show()
           this.$post('/detectModelTrain/DMVersionTrain', params).then(data => {
             this.$Spin.hide()
             if(data.rs === 1) {
-              this.$Message.success('新增成功')
+              this.$Message.success('新增成功！')
               this.modal_train = false
+              this.queryPageInfo()
             } else {
               if(data.data && data.data.errorMsg) {
                 this.$Message.error(data.data.errorMsg);

@@ -8,7 +8,7 @@ import {
 import router from '@/router/index'
 
 // axio.defaults.crossDomain = true;
-axios.defaults.withCredentials = true
+// axios.defaults.withCredentials = true
 // axios.defaults.baseURL = '/api'
 
 export function request(config) {
