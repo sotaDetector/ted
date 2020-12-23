@@ -29,7 +29,7 @@ data_transforms = {
     ]),
 }
 
-data_dir = 'data/hymenoptera_data'
+data_dir = '/home/MASK_DTASET'
 image_datasets = {x: datasets.ImageFolder(os.path.join(data_dir, x),
                                           data_transforms[x])
                   for x in ['train', 'val']}
@@ -43,7 +43,6 @@ device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 
 def imshow(inp, title=None):
-    print("---")
     """Imshow for Tensor."""
     inp = inp.numpy().transpose((1, 2, 0))
     mean = np.array([0.485, 0.456, 0.406])
@@ -157,7 +156,7 @@ def visualize_model(model, num_images=6):
                 if images_so_far == num_images:
                     model.train(mode=was_training)
                     return
-        model.train(mode=was_training)
+        # model.train(mode=was_training)
 
 model_ft = models.resnet18(pretrained=True)
 num_ftrs = model_ft.fc.in_features
@@ -177,4 +176,7 @@ exp_lr_scheduler = lr_scheduler.StepLR(optimizer_ft, step_size=7, gamma=0.1)
 
 
 model_ft = train_model(model_ft, criterion, optimizer_ft, exp_lr_scheduler,
-                       num_epochs=25)
+                       num_epochs=50)
+
+
+torch.save(model_ft,"mask_clssify.pt")
