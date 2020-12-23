@@ -156,7 +156,7 @@ export default {
       this.activeIdx = 0
       this.getImgs();
       setTimeout(() => {
-        $('.list').css({left: 0})
+        $('.list').css({ left: 0 })
       }, 200);
     },
     reset () {
@@ -191,6 +191,16 @@ export default {
     chooseImg (item, idx, isChoose) {
       this.activeIdx = idx
       this.$emit('chooseImg', item, isChoose)
+    },
+    previousImg () {
+      if(this.activeIdx == 0) return false
+      this.activeIdx -= 1
+      this.$emit('chooseImg', this.imgList[this.activeIdx], true)
+    },
+    nextImg () {
+      if(this.activeIdx == this.imgList.length - 1) return false
+      this.activeIdx += 1
+      this.$emit('chooseImg', this.imgList[this.activeIdx], true)
     },
     clickLeft () {
       var left = $('.list').position().left

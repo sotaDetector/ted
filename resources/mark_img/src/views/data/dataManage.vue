@@ -87,11 +87,17 @@
           <FormItem label="数据集名称" prop="dsName">
             <Input v-model="addInfo.dsName"></Input>
           </FormItem>
-          <FormItem label="数据集类型" prop="dsType">
+          <FormItem label="数据类型" prop="dsType">
             <Select v-model="addInfo.dsType">
               <Option :value=1>图片</Option>
               <!-- <Option :value=1>开启</Option> -->
             </Select>
+          </FormItem>
+          <FormItem label="任务类型" prop="taskType">
+            <RadioGroup v-model="addInfo.taskType">
+              <Radio :label="1">图像分类</Radio>
+              <Radio :label="2">物体检测</Radio>
+            </RadioGroup>
           </FormItem>
         </Form>
       </div>
@@ -106,12 +112,18 @@
           <FormItem label="数据集名称" prop="dsName">
             <Input v-model="modifyInfo.dsName"></Input>
           </FormItem>
-          <FormItem label="数据集类型" prop="dsType">
+          <FormItem label="数据类型" prop="dsType">
             <span v-if="modifyInfo.dsType == 1">图片</span>
             <span v-else>其它</span>
             <!-- <Select v-model="modifyInfo.dsType">
               <Option :value=1>图片</Option>
             </Select> -->
+          </FormItem>
+          <FormItem label="任务类型" prop="taskType">
+            <RadioGroup v-model="modifyInfo.taskType">
+              <Radio :label="1">图像分类</Radio>
+              <Radio :label="2">物体检测</Radio>
+            </RadioGroup>
           </FormItem>
         </Form>
       </div>
@@ -142,6 +154,7 @@ export default {
       addInfo: {
         dsName: '',
         dsType: 1,
+        taskType: 1
       },
       ruleValidate: {
         dsName: [
@@ -162,7 +175,7 @@ export default {
           "align": "center",
           "key": "dsName"
         }, {
-          "title": "标注类型",
+          "title": "数据类型",
           "align": "center",
           "key": "dsType",
           render: (h, params) => {
@@ -342,6 +355,7 @@ export default {
     },
     markDatas (id, idx) {
       this.$router.push({ path: '/markImg/' + id })
+      // this.$router.push({ path: '/classifyImg/' + id })
     },
     clickImport (id) {
       this.dsId = id

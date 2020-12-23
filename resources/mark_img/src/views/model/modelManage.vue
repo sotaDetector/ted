@@ -602,7 +602,7 @@ export default {
         })
       }
 
-      console.log(this.trainData)
+      // console.log(this.trainData)
       this.modal_trainData = false
     },
     clearDataItem (idx) {
