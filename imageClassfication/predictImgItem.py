@@ -7,14 +7,14 @@ import torch
 from PIL import Image
 
 #1. load the model
-maskClassifyModel=torch.load("mask_clssify.pt")
+maskClassifyModel=torch.load("mask_train.pt")
 
 maskClassifyModel.eval()
 
 
 names=["mask","noMask"]
 
-#2.read the img
+#2.read the
 
 data_trans=transforms.Compose([
         transforms.RandomResizedCrop(224),
@@ -23,7 +23,7 @@ data_trans=transforms.Compose([
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
-img=Image.open("2020-12-23-173209.jpg")
+img=Image.open("0042.jpg")
 img_tensor=data_trans(img)
 print(type(img_tensor))
 print(img_tensor.shape)
