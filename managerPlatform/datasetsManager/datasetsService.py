@@ -5,6 +5,7 @@ import numpy as np
 from flask import session
 
 from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
+from managerPlatform.bean.trainDataset.classifyImageItem import classifyImageItem
 from managerPlatform.bean.trainDataset.dataImageItem import dataImageItem
 from managerPlatform.bean.trainDataset.dataLabelBean import dataLabelBean
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
@@ -15,8 +16,7 @@ from managerPlatform.common.commonUtils.imageUtils import imageUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
 from managerPlatform.dataLabel.dataLabelService import dataLabelService
-
-
+from managerPlatform.datasetsManager.clssifyDatasetsService import clssifyDatasetsService
 
 labelService = dataLabelService()
 
@@ -29,8 +29,10 @@ class datasetsService:
 
         return resultPackerUtils.save_success()
 
-    def getAllDSNamesList(self):
-        datasetsList = datasetsBean.objects(state=1, userId=session['userId']).only("dsId","dsName")
+    def getAllDSNamesList(self,jsonData):
+        datasetsList = datasetsBean.objects(state=1,
+                                            userId=session['userId'],
+                                            cvTaskType=jsonData['cvTaskType']).only("dsId","dsName")
 
         return resultPackerUtils.packDataListResults(datasetsList.to_json(),"dsId")
 
@@ -77,7 +79,9 @@ class datasetsService:
                 "dsImageCount":item['dsImageCount'],
                 "dsImgTagSP":item['dsImgTagSP'],
                 "labelCount":len(labelList),
-                "labelList":labelList
+                "labelList":labelList,
+                "cvTaskType":item['cvTaskType'],
+                "cvTaskName":ConstantUtils.getCVTaskTypaName(item['cvTaskType'])
             }
             datasetsList.append(datasetItem)
 
@@ -107,6 +111,11 @@ class datasetsService:
         return resultPackerUtils.update_success()
 
     def upImageData(self, dsId, fileType, compreImgPack, imageslist):
+
+        #获取dataset detail
+        datasetItem = datasetsBean.objects(dsId=dsId, state=ConstantUtils.DATA_STATUS_ACTIVE).first()
+
+
         imageFiles = None
 
         folderName = str(uuid.uuid4())
@@ -120,6 +129,10 @@ class datasetsService:
             imageNameList, imagePathList = self.saveMultiImages(desFolderBasePath, imageslist)
 
         # 保存到数据库
+        #如果是图像分类数据集
+        if datasetItem["cvTaskType"]==ConstantUtils.CV_TASK_TYPE_CLASSIFY:
+            return self.dealClassifyDatasets(dsId,desFolderBasePath,folderName,imageNameList, imagePathList)
+
         saveImageItemList = []
         for i in range(imageNameList.__len__()):
             fileName = imageNameList[i]
@@ -138,6 +151,28 @@ class datasetsService:
         #更新数据集数量
         self.updateDataSetStatisData(dsId)
         return resultPackerUtils.save_success()
+
+    def dealClassifyDatasets(self,dsId,desFolderBasePath,folderName,imageNameList,imagePathList,):
+        saveImageItemList = []
+        for i in range(imageNameList.__len__()):
+            fileName = imageNameList[i]
+            filePath = imagePathList[i]
+            # 获取图片信息
+            imageSize = imageUtils.getImageSize(desFolderBasePath + "/" + filePath)
+            saveImageItemList.append(classifyImageItem(
+                imgFileName=fileName,
+                imgPath=folderName + "/" + filePath,
+                dsId=dsId,
+                imgWidth=imageSize[0],
+                imgHeight=imageSize[1],
+                isLabeled=ConstantUtils.IMAGE_UNLABEL
+            ))
+
+        classifyImageItem.objects.insert(saveImageItemList, load_bulk=False)
+        # 更新数据集数量
+        clssifyDatasetsService().updateDataSetStatisData(dsId)
+        return resultPackerUtils.save_success()
+
 
     def saveMultiImages(self, desFolderBasePath, imageslist):
         # 新建该文件加，并保存图片
@@ -339,3 +374,23 @@ class datasetsService:
         }
 
         return trainDataDict, valDataDict
+
+    def getAllCVTaskTypes(self):
+
+        taskTypeList=[
+            {
+                "cvTaskType":ConstantUtils.CV_TASK_TYPE_CLASSIFY,
+                "cvTaskName":ConstantUtils.getCVTaskTypaName(ConstantUtils.CV_TASK_TYPE_CLASSIFY)
+            },
+            {
+                "cvTaskType": ConstantUtils.CV_TASK_TYPE_DETECT,
+                "cvTaskName": ConstantUtils.getCVTaskTypaName(ConstantUtils.CV_TASK_TYPE_DETECT)
+            }
+        ]
+
+        return resultPackerUtils.packCusResult({"taskTypeList":taskTypeList})
+
+
+
+
+

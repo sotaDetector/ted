@@ -4,6 +4,7 @@ from managerPlatform.common.dataManager.mongoSource import mongoSource
 from managerPlatform.common.resourceInit.appResourceManager import appResourceManager
 from managerPlatform.common.watcherMangaer.detectThreadWatcher import detectThreadWatcher
 from managerPlatform.dataLabel.dataLabelDispacher import dataLabel_blp
+from managerPlatform.datasetsManager.clssifyDatasetsDispacher import clsImgDS_blp
 from managerPlatform.datasetsManager.datasetsDispacher import *
 from managerPlatform.datasetsManager.testDataInitDispacher import test_data_init_blp
 from managerPlatform.detectService.detectServiceCallerDispacher import dts_caller_blp
@@ -35,6 +36,7 @@ app.register_blueprint(dts_blp)
 app.register_blueprint(media_Player_blp)
 app.register_blueprint(dts_caller_blp)
 app.register_blueprint(heart_beat_blp)
+app.register_blueprint(clsImgDS_blp)
 
 app.config["SECRET_KEY"] = '79537d00f4834892986f09a100aa1edf'
 app.config["SESSION_COOKIE_HTTPONLY"]=False
@@ -50,7 +52,7 @@ appResource.resourceInit()
 #启动监控线程
 detectThread=detectThreadWatcher()
 detectThread.start()
-
+#
 @app.before_request
 def appInterceptor():
     unInterceptPath=["login","userLogin","userRegister","index.html",".js",".css",".jpg",".png"]

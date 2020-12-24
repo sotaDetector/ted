@@ -19,6 +19,9 @@ class detectModelBean(baseBean):
 
     latestVersionItem=mongoSource.mdb.ReferenceField(detectModelTrainVersion)
 
+    # computer vision task type
+    cvTaskType = mongoSource.mdb.IntField(required=True, default=0)
+
 
     @staticmethod
     def convertToBean(jsonData):

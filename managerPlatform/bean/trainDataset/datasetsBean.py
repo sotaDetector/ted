@@ -23,7 +23,7 @@ class datasetsBean(baseBean):
         return datasetsBean(
             dsName=jsonData['dsName'],
             dsType=jsonData['dsType'],
-            cvTaskType=jsonData['dsType'],
+            cvTaskType=jsonData['cvTaskType'],
             userId=session.get("userId")
         )
 
