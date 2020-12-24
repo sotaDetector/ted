@@ -27,20 +27,30 @@ const routes = [{
         // which is lazy-loaded when the route is visited.
         component: () => import( /* webpackChunkName: "about" */ '../views/data/dataManage.vue')
       },
-      {
-        path: '/markData',
-        name: 'MarkData',
-        component: () => import('@/views/data/markData.vue')
-      },
+      // {
+      //   path: '/markData',
+      //   name: 'MarkData',
+      //   component: () => import('@/views/data/markData.vue')
+      // },
       {
         path: '/markImg/:id/',
         name: 'MarkImg',
         component: () => import('@/views/data/markImg.vue')
       },
       {
-        path: '/markImg/:id/:ditId',
+        path: '/markImg/:id/:ditId', // 数据集id，数据集图片id
         name: 'MarkImgDetail',
         component: () => import('@/views/data/markImg.vue')
+      },
+      {
+        path: '/classifyImg/:id/', // 数据集id
+        name: 'ClassifyImg',
+        component: () => import('@/views/data/classifyImg.vue')
+      },
+      {
+        path: '/classifyImg/:id/:ditId', // 数据集id，数据集图片id
+        name: 'ClassifyImgDetail',
+        component: () => import('@/views/data/classifyImg.vue')
       },
       {
         path: '/modelManage',

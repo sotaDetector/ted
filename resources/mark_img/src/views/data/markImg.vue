@@ -37,8 +37,10 @@
           </Select>
           <img src="@/assets/img/delete_red.png" alt="" class="delete delete_div" @click="delDiv(item.id, 'delDiv')" />
         </li>
+        <li>
+          <Button type="success" size="small" @click="submit" v-if="divList.length" style="width:150px;margin-top:20px;margin-left:-30px;">提交标注结果</Button>
+        </li>
       </ul>
-      <Button type="success" size="small" @click="submit" v-if="divList.length" style="width:150px;margin-top:20px;margin-left:-30px;">提交标注结果</Button>
     </div>
 
     <!-- 图片列表 -->
@@ -648,8 +650,6 @@ export default {
   }
 
   #img {
-    // max-width: 100%;
-    // height: 100%;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -693,13 +693,14 @@ export default {
   .choose_label {
     float: right;
     margin-right: 20px;
+    padding-left: 20px;
   }
   .add {
-    max-height: calc(100% - 265px);
+    max-height: calc(100% - 228px);
     overflow-y: auto;
   }
   .choose {
-    max-height: calc(100% - 165px);
+    max-height: calc(100% - 175px);
     overflow-y: auto;
   }
 
@@ -723,33 +724,6 @@ export default {
     // -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
     -webkit-box-shadow: inset 0 0 6px rgba(255, 0, 0, 0.8);
   }
-  // ::-webkit-scrollbar-thumb:window-inactive {
-  //   background: rgba(255, 0, 0, 0.4);
-  // }
-
-  // /*滚动条样式*/
-  // .choose_label::-webkit-scrollbar,
-  // .add_label::-webkit-scrollbar {
-  //   width: 4px;
-  //   /*height: 4px;*/
-  // }
-  // .choose_label::-webkit-scrollbar-thumb,
-  // .choose_label::-webkit-scrollbar-thumb,
-  // .choose_label::-webkit-scrollbar-track-piece,
-  // .choose_label::-webkit-scrollbar-track-piece
-  // {
-  //   border-radius: 10px;
-  //   // -webkit-box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
-  //   background:blue;
-  // }
-  // .choose_label::-webkit-scrollbar-track,
-  // .add_label::-webkit-scrollbar-track {
-  //   // -webkit-box-shadow: inset 0 0 5px rgba(255, 255, 255, 0.1);
-  //   border-radius: 0;
-  //   background: red;
-  //   // background: rgba(255, 255, 255, 0.1);
-  // }
-
   .delete {
     width: 16px;
     height: 16px;
@@ -761,13 +735,13 @@ export default {
   .cho_li {
     line-height: 40px;
     height: 40px;
+    text-align: left;
     // vertical-align: middle;
   }
   .add_label {
     float: left;
-    // margin-left: 30px;
     .add {
-      margin: 20px 0 20px 20px;
+      margin: 20px 0 20px 55px;
     }
   }
 }
