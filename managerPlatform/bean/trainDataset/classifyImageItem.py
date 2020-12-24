@@ -9,4 +9,6 @@ class classifyImageItem(imageBaseBean):
     # 标签ID
     classifyLabel = mongoSource.mdb.IntField(required=True)
 
+    classifyLabelName = mongoSource.mdb.StringField()
+
 

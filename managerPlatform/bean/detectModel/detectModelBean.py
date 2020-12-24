@@ -11,6 +11,8 @@ class detectModelBean(baseBean):
     dmName = mongoSource.mdb.StringField()
     #mmodel type
     dmType=mongoSource.mdb.IntField(required=True)
+    #任务类型
+    cvTaskType=mongoSource.mdb.IntField(required=True)
     #detectModel remark
     dmRemark=mongoSource.mdb.StringField()
 
@@ -20,7 +22,9 @@ class detectModelBean(baseBean):
     latestVersionItem=mongoSource.mdb.ReferenceField(detectModelTrainVersion)
 
     # computer vision task type
-    cvTaskType = mongoSource.mdb.IntField(required=True, default=0)
+    cvTaskType = mongoSource.mdb.IntField(required=True)
+
+    cvTaskTypeName = mongoSource.mdb.StringField()
 
 
     @staticmethod
@@ -29,6 +33,7 @@ class detectModelBean(baseBean):
             dmName=jsonData['dmName'],
             dmType=jsonData['dmType'],
             dmRemark=jsonData['dmRemark'],
+            cvTaskType=jsonData['cvTaskType'],
             userId=session.get("userId")
         )
 

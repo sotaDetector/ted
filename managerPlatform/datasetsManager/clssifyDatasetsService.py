@@ -1,10 +1,13 @@
+import json
 from datetime import datetime
 
 from managerPlatform.bean.trainDataset.classifyImageItem import classifyImageItem
 from managerPlatform.bean.trainDataset.datasetsBean import datasetsBean
 from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
+from managerPlatform.dataLabel.dataLabelService import dataLabelService
 
+labelService = dataLabelService()
 
 class clssifyDatasetsService:
 
@@ -41,22 +44,38 @@ class clssifyDatasetsService:
 
         pageItem.set_totalCount(totalCount)
 
-        # 获取该数据集下所有的标签
 
-        pageItem.set_dataList(dataList, "clsimgid")
+        labelMap, nameList = labelService.getLabelsBylids(data['dsId'])
+        # 获取该数据集下所有的标签
+        jsonArray=json.loads(dataList.to_json())
+        for item in jsonArray:
+            item["ditFilePath"]=ConstantUtils.imageItemPrefix +item["ditFilePath"].replace("/","_")
+            if item.keys().__contains__('classifyLabel'):
+                if labelMap !=None and labelMap.keys().__contains__(item['classifyLabel']):
+                    item["classifyLabelName"]=labelMap[item['classifyLabel']]
+
+
+        pageItem.set_numpy_dataList(jsonArray)
 
         return resultPackerUtils.packPageResult(pageItem)
 
     def getClsImgDetail(self, queryData):
         classImageItem = classifyImageItem.objects(clsimgid=queryData['clsimgid'],
-                                                   state=ConstantUtils.DATA_STATUS_ACTIVE)
+                                                   state=ConstantUtils.DATA_STATUS_ACTIVE).first()
 
-        return resultPackerUtils.packDataItemResults(classImageItem.to_json())
+        labelItem=labelService.getLabelBylid(classImageItem['classifyLabel'])
+
+        classImageItem.classifyLabelName=labelItem['dlName']
+        classImageItem.imgPath=ConstantUtils.imageItemPrefix +"_"+classImageItem['ditFilePath'].replace("/","_")
+
+        return resultPackerUtils.packDataListResults(classImageItem.to_json())
 
     def delClsImgItem(self,queryData):
         classImageItem = classifyImageItem.objects(clsimgid=queryData['clsimgid'],
-                                                   state=ConstantUtils.DATA_STATUS_ACTIVE)
+                                                   state=ConstantUtils.DATA_STATUS_ACTIVE).first()
 
         classImageItem.update(state=ConstantUtils.DATA_STATUS_DELETED)
+
+        self.updateDataSetStatisData(classImageItem.dsId)
 
         return resultPackerUtils.update_success()

@@ -144,7 +144,8 @@ class datasetsService:
                 ditFilePath=folderName + "/" + filePath,
                 dsId=dsId,
                 ditWidth=imageSize[0],
-                ditHeight=imageSize[1]
+                ditHeight=imageSize[1],
+                isLabeled=ConstantUtils.IMAGE_UNLABEL
             ))
 
         dataImageItem.objects.insert(saveImageItemList, load_bulk=False)
@@ -160,11 +161,11 @@ class datasetsService:
             # 获取图片信息
             imageSize = imageUtils.getImageSize(desFolderBasePath + "/" + filePath)
             saveImageItemList.append(classifyImageItem(
-                imgFileName=fileName,
-                imgPath=folderName + "/" + filePath,
+                ditFileName=fileName,
+                ditFilePath=folderName + "/" + filePath,
                 dsId=dsId,
-                imgWidth=imageSize[0],
-                imgHeight=imageSize[1],
+                ditWidth=imageSize[0],
+                ditHeight=imageSize[1],
                 isLabeled=ConstantUtils.IMAGE_UNLABEL
             ))
 
