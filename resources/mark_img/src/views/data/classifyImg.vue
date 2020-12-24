@@ -102,8 +102,9 @@ export default {
       $('.content-box').scrollLeft(0)
 
       console.log(imgInfo)
-      // this.dlid_result = imgInfo.dlid
-      // this.dlName_result = imgInfo.dlName
+      // 回显！！！！记得改变量名
+      this.dlid_result = imgInfo.dlid
+      this.dlName_result = imgInfo.dlName
 
       var _this = this;
       var ratio = imgInfo.ditWidth / imgInfo.ditHeight
@@ -134,7 +135,7 @@ export default {
         }
         s2 = setTimeout(() => {
           this.$Spin.hide()
-        }, 500);
+        }, 150);
       }, 200);
     },
     getLabelList () {
