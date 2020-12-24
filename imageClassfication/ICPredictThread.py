@@ -5,14 +5,17 @@ from torchvision import datasets, models, transforms
 from PIL import Image
 class ICTrainThread(threading.Thread):
 
-    def __init__(self,modelPath):
+    def __init__(self,modelPath,nameList):
+        threading.Thread.__init__(self)
+
         self.modelPath=modelPath
+        self.nameList=nameList
 
 
     #1.load the model
-    def loadModel(self,modelPath):
+    def loadModel(self):
 
-        classifyModel = torch.load(modelPath)
+        classifyModel = torch.load(self.modelPath)
 
         classifyModel.eval()
 
@@ -35,11 +38,14 @@ class ICTrainThread(threading.Thread):
 
         _, preds = torch.max(result, 1)
 
-        print(preds)
+        return self.nameList[preds]
 
     def run(self):
-        threading.Thread.__init__(self)
+        pass
 
 
 if __name__=="__main__":
-    
+    names = ["mask", "noMask"]
+    trainThread=ICTrainThread("mask_train.pt",names)
+    trainThread.loadModel()
+    print(trainThread.getClassifyResult("2020-12-23-173330.jpg"))

@@ -23,7 +23,7 @@ data_trans=transforms.Compose([
         transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
     ])
 
-img=Image.open("0042.jpg")
+img=Image.open("2020-12-23-173209.jpg")
 img_tensor=data_trans(img)
 print(type(img_tensor))
 print(img_tensor.shape)
