@@ -11,8 +11,8 @@
         <li @click="chooseImg()"><img src="@/assets/img/timg (3).jpg" alt="" /></li>
         <li @click="chooseImg()"><img src="@/assets/img/white.jpg" alt="" /></li>
       </ul> -->
-      <ul class="list">
-        <li :class="{'actived': idx==activeIdx}" @click="chooseImg(item,idx,true)" v-for="(item,idx) in imgList" :key="idx">
+      <ul class="list" v-if="imgList.length">
+        <li :class="{'actived': idx==activeIdx}" @click="chooseImg(item,idx,true)" v-for="(item,idx) in imgList" :key="item._id">
           <img :src="item.ditFilePath" alt="" />
           <Icon type="md-close-circle" class="del" @click.stop.prevent="delImg(item._id)" />
         </li>
@@ -43,13 +43,13 @@
 export default {
   data () {
     return {
-      // left: '',
       ditId: '',
       modal_delete: false,
       activeIdx: 0,
       total: 0,// 初始化信息总条数
       pageNow: 1,
       pagesize: 20,// 每页显示多少条
+      isLabeled: 2, // 未标注
       imgList: [
         // require('@/assets/img/美女.jpg'),
         // require("@/assets/img/timg (2).jpg"),
@@ -97,23 +97,42 @@ export default {
   },
   mounted () {
     this.getImgs(true)
+    console.log(this.taskType)
+  },
+  props: {
+    taskType: Number
   },
   methods: {
+    changeQuery (isLabeled) {
+      this.isLabeled = isLabeled
+      this.ditId = ''
+      this.activeIdx = 0
+      this.pageNow = 1
+      this.getImgs()
+    },
     getImgs (isInit) {
-      // if(!this.hasNextPage) return false
-      var id = this.$route.params.id
-      let params = {
+      var type = this.taskType
+      var id = parseInt(this.$route.params.id)
+      var url = ''
+      var params = {
         pageSize: this.pagesize,
         pageIndex: this.pageNow,
-        dsId: parseInt(id)
+        dsId: id
       }
+      if(type == 1) { // 图像分类
+        url = '/clsImgDS/getClsImgItemList'
+        params.isLabeled = this.isLabeled
+      } else if(type == 2) { // 目标检测
+        url = '/dsc/getImageItemList'
+      }
+
       this.$Spin.show()
-      this.$post('/dsc/getImageItemList', params).then(data => {
+      this.$post(url, params).then(data => {
         if(data.rs === 1) {
           var pageData = data.pageData
 
           // 最后一页删除了最后一个数据之后，往回退一页
-          if(pageData.page > pageData.totalPages && !pageData.dataList.length) {
+          if(pageData.page > pageData.totalPages && !pageData.dataList.length && type == 2) { // 图片分类-未标注或已标注图片数量都有可能为0
             this.reset()
             return false
           }
@@ -130,7 +149,18 @@ export default {
             }
           }
 
+          if(type == 1) {
+            if(!this.imgList.length) { // 图片分类-未标注或已标注图片数量都有可能为0
+              this.$Spin.hide()
+              this.$emit('emptyImg', true)
+              return false
+            } else {
+              this.$emit('emptyImg', false)
+            }
+          }
+
           var index = this.imgList[this.activeIdx] ? this.activeIdx : 0
+          this.activeIdx = index
           this.chooseImg(this.imgList[index], this.activeIdx)
 
           setTimeout(() => {
@@ -172,8 +202,11 @@ export default {
       this.ditId = id
     },
     deleteMethod () {
+      var url = this.taskType == 1 ? '/clsImgDS/delClsImgItem' : '/dsc/delImageItem'
+      var params = this.taskType == 1 ? { clsimgid: this.ditId } : { ditId: this.ditId }
+
       this.$Spin.show()
-      this.$post('/dsc/delImageItem', { ditId: this.ditId }).then(data => {
+      this.$post(url, params).then(data => {
         this.$Spin.hide()
         if(data.rs === 1) {
           this.modal_delete = false

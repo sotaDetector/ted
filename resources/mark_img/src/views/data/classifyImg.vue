@@ -1,28 +1,37 @@
 <template>
   <div class="classify_container">
-    <div class="img_box unselect" ondragstart="return false">
+    <div class="query">
+      <RadioGroup v-model="isLabeled" type="button" @on-change="changeQuery">
+        <Radio :label="2">未标注图片</Radio>
+        <Radio :label="1">已标注图片</Radio>
+      </RadioGroup>
+    </div>
+    <div class="empty" v-if="isEmpty">
+      暂无数据
+    </div>
+    <div class="img_box unselect" ondragstart="return false" v-if="!isEmpty">
       <img id="img" :src="imgSrc" alt="" ondragstart="return false" class="unselect" />
       <Icon class="left" type="ios-arrow-back" @click="previousImg()" />
       <Icon class="right" type="ios-arrow-forward" @click="nextImg()" />
     </div>
     <!-- 标注结果 -->
     <div class="result">
+      <Button type="primary" icon="ios-arrow-back" size="small" @click="back" style="margin-right:40%;">返 回</Button>
       <div class="title">
         <Icon style="font-size:22px;margin-right:6px;" type="ios-menu" />
         <span style="margin-right:25px;">标注结果</span>
       </div>
       <div class="tip">请在右侧选择标签</div>
-      <div v-if="dlName_result" style="font-size:30px;color:red">{{dlName_result}}</div>
-      <div v-else style="color:#ccc">本图片暂未标注分类</div>
+      <div v-if="dlName_result" style="font-size:30px;color:red;">{{dlName_result}}</div>
+      <div v-else style="color:red">本图片暂未标注分类</div>
     </div>
     <!-- 添加标签 -->
     <div class="add_label">
-      <Button type="primary" icon="ios-arrow-back" size="small" @click="back" style="margin-right:40%;">返 回</Button>
       <div class="title">
         <Icon style="font-size:22px;margin-top:3px;margin-right:6px;" type="ios-menu" />
         <span style="margin-right:25px;">标签管理</span>
         <!-- <Button icon="ios-add-circle-outline" type="success" size="small" @click="addLabel">新增标签</Button> -->
-        <Button type="success" size="small" @click="addLabel">新增</Button>
+        <Button type="success" size="small" @click="addLabel">新 增</Button>
       </div>
       <ul class="add">
         <li class="add_li" v-for="(item, idx) in labelList" :key="idx">
@@ -35,7 +44,7 @@
       </ul>
     </div>
     <!-- 图片列表 -->
-    <img-list @chooseImg="chooseImg" @back="back" ref="imgList"></img-list>
+    <img-list @chooseImg="chooseImg" @back="back" :taskType="1" @emptyImg="emptyImg" ref="imgList"></img-list>
 
     <!-- 模态框 -->
     <Modal class="sys_modal" v-model="modal_delete" class-name="vertical_modal" width="316">
@@ -67,6 +76,7 @@ export default {
   },
   data () {
     return {
+      isLabeled: 2,
       imgSrc: '',
       dsId: '', // 数据集Id
       labelList: [],
@@ -74,10 +84,19 @@ export default {
       dlid: '',
       modal_delete: false,
       dlid_result: '',
-      dlName_result: ''
+      dlName_result: '',
+      isEmpty: false
     };
   },
   methods: {
+    emptyImg (e) {
+      this.isEmpty = e
+      this.dlName_result = ''
+      this.dlid_result = ''
+    },
+    changeQuery (e) {
+      this.$refs.imgList.changeQuery(e)
+    },
     previousImg () {
       this.$refs.imgList.previousImg()
     },
@@ -101,10 +120,10 @@ export default {
     initPage (imgInfo) {
       $('.content-box').scrollLeft(0)
 
-      console.log(imgInfo)
+      // console.log(imgInfo)
       // 回显！！！！记得改变量名
-      this.dlid_result = imgInfo.dlid
-      this.dlName_result = imgInfo.dlName
+      this.dlid_result = imgInfo.classifyLabel
+      this.dlName_result = imgInfo.classifyLabelName
 
       var _this = this;
       var ratio = imgInfo.ditWidth / imgInfo.ditHeight
@@ -229,7 +248,7 @@ export default {
         this.$Spin.hide()
         if(data.rs === 1) {
           this.modal_delete = false
-          this.$Message.success('删除成功')
+          this.$Message.success('删除成功！')
           this.getLabelList()
           this.$refs.imgList.getImgs();
         } else {
@@ -245,43 +264,35 @@ export default {
       this.modal_delete = false
     },
     selectResult (item) {
+      if(this.isEmpty) return false
       this.dlid_result = item._id
       this.dlName_result = item.dlName
       this.submit()
     },
     submit () {
       if(!this.dlid_result) return false
-      console.log(this.dlid_result)
-      // this.dlid_result = ''
-      // this.dlName_result = ''
-      // this.$Spin.show()
-      // this.$post('/dsc/upImageItemRecLabels', {
-      //   dsId: this.dsId,
-      //   ditId: this.ditId,
-      //   recLabelList: this.divList.map(item => {
-      //     return {
-      //       "rec_lt_x": item.x,
-      //       "rec_lt_y": item.y,
-      //       "rec_w": item.w,
-      //       "rec_h": item.h,
-      //       "dlid": item.dlid,
-      //       // 'dlName': item.dlName
-      //     }
-      //   })
-      // }).then(data => {
-      //   this.$Spin.hide()
-      //   if(data.rs === 1) {
-      //     this.modal_modify = false
-      //     this.$Message.success('自动保存成功!');
-      //     this.$refs.imgList.getImgs();
-      //   } else {
-      //     if(data.data && data.data.errorMsg) {
-      //       this.$Message.error(data.data.errorMsg);
-      //     } else {
-      //       this.$Message.error(data.errorMsg);
-      //     }
-      //   }
-      // })
+
+      this.$Spin.show()
+      this.$post('/clsImgDS/upClsImgItem', {
+        dsId: this.dsId,
+        clsimgid: this.ditId,
+        classifyLabel: this.dlid_result
+      }).then(data => {
+        this.$Spin.hide()
+        if(data.rs === 1) {
+          this.modal_modify = false
+          this.$Message.success('保存成功!');
+          this.dlid_result = ''
+          this.dlName_result = ''
+          this.$refs.imgList.getImgs();
+        } else {
+          if(data.data && data.data.errorMsg) {
+            this.$Message.error(data.data.errorMsg);
+          } else {
+            this.$Message.error(data.errorMsg);
+          }
+        }
+      })
     },
     clearTime () {
       for(var i = 1; i <= 2; i++) {
@@ -308,7 +319,19 @@ export default {
   text-align: center;
   background: #333;
   position: relative;
-  // padding-bottom: 110px;
+  padding-top: 1px;
+  .query {
+    margin-top: 13px;
+    .ivu-radio-group-button .ivu-radio-wrapper-checked {
+      background: #8c0776;
+      color: #fff;
+    }
+  }
+  .empty {
+    display: inline-block;
+    padding-top: 200px;
+    color: #ccc;
+  }
   .unselect {
     -moz-user-select: none;
     -webkit-user-select: none;
@@ -320,9 +343,9 @@ export default {
     // max-width: 710px;
     width: 52%;
     // height: 90%;
-    height: 78%;
+    height: 71%;
     position: absolute;
-    top: 42%;
+    top: 45%;
     left: 50%;
     transform: translate(-50%, -50%);
     .left,
@@ -384,9 +407,9 @@ export default {
   .add_label {
     // max-height: calc(100% - 110px);
     // overflow-y: auto;
-    padding-top: 20px;
+    // padding-top: 20px;
     width: 22%;
-    height: 100%;
+    height: calc(100% - 32px);
   }
 
   .result {

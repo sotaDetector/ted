@@ -25,6 +25,7 @@
           <div class="table_head">
             {{table.dmName}}
             <span style="margin-left:20px">模型ID：{{table.dmId}}</span>
+            <span>{{table.}}</span>
             <div class="model_action">
               <span class="action" @click="trainModel(table.dmId)">
                 <Icon type="ios-book-outline" /> 训练
@@ -210,6 +211,12 @@
           <FormItem label="功能描述" prop="dmRemark">
             <Input v-model="addInfo.dmRemark" type="textarea" :autosize="{minRows: 2,maxRows: 5}"></Input>
           </FormItem>
+          <FormItem label="任务类型" prop="cvTaskType">
+            <RadioGroup v-model="addInfo.cvTaskType">
+              <Radio :label="item.cvTaskType" v-for="item in cvTaskTypeList" :key="item.cvTaskType">{{item.cvTaskName}}</Radio>
+              <!-- <Radio :label="2">物体检测</Radio> -->
+            </RadioGroup>
+          </FormItem>
         </Form>
       </div>
       <div slot="footer">
@@ -225,6 +232,9 @@
           </FormItem>
           <FormItem label="功能描述" prop="dmRemark">
             <Input v-model="modifyInfo.dmRemark" type="textarea" :autosize="{minRows: 2,maxRows: 5}"></Input>
+          </FormItem>
+          <FormItem label="任务类型" prop="cvTaskType">
+            <span>{{modifyInfo.cvTaskType == 1 ? '图像分类' : modifyInfo.cvTaskType == 2 ? '目标检测' : '其它'}}</span>
           </FormItem>
         </Form>
       </div>
@@ -253,6 +263,7 @@ export default {
       modal_train: false, // 新增模型
       modal_trainData: false, // 新增模型数据
       modal_option: false, // 查看模型版本配置
+      cvTaskTypeList: [],
       dataList: [],
       labelList: [],
       addInfo: {},
@@ -472,6 +483,22 @@ export default {
     handleChange (page) {
       this.pageNow = page;//赋值当前页
       this.queryPageInfo();
+    },
+    getTaskType () {
+      let params = {}
+      this.$Spin.show()
+      this.$post('/dsc/getAllCVTaskTypes', params).then(data => {
+        this.$Spin.hide()
+        if(data.rs === 1) {
+          this.cvTaskTypeList = data.taskTypeList
+        } else {
+          if(data.data && data.data.errorMsg) {
+            this.$Message.error(data.data.errorMsg);
+          } else {
+            this.$Message.error(data.errorMsg);
+          }
+        }
+      })
     },
     getDatas () {
       let params = {}

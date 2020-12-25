@@ -5,12 +5,12 @@
     </div>
     <!-- 添加标签 -->
     <div class="add_label">
-      <Button type="primary" icon="ios-arrow-back" size="small" @click="back" style="margin-right:40%;">返 回</Button>
+      <Button type="primary" icon="ios-arrow-back" size="small" @click="back" style="margin-left:20px;">返 回</Button>
       <div class="title">
         <Icon style="font-size:22px;margin-top:3px;margin-right:6px;margin-left:20px;" type="ios-menu" />
         <span style="margin-right:25px;">标签管理</span>
         <!-- <Button icon="ios-add-circle-outline" type="success" size="small" @click="addLabel">新增标签</Button> -->
-        <Button type="success" size="small" @click="addLabel">新增</Button>
+        <Button type="success" size="small" @click="addLabel">新 增</Button>
       </div>
       <ul class="add">
         <li class="add_li" v-for="(item, idx) in labelList" :key="idx">
@@ -44,7 +44,7 @@
     </div>
 
     <!-- 图片列表 -->
-    <img-list @chooseImg="chooseImg" @back="back" ref="imgList"></img-list>
+    <img-list @chooseImg="chooseImg" @back="back" :taskType="2" ref="imgList"></img-list>
 
     <!-- 模态框 -->
     <Modal class="sys_modal" v-model="modal_delete" class-name="vertical_modal" width="316">
@@ -63,7 +63,6 @@
 <script>
 
 var s1, s2, s3, s4, s5, s6
-
 
 import ImgList from '@/components/ImgList.vue'
 export default {
@@ -740,6 +739,7 @@ export default {
   }
   .add_label {
     float: left;
+    text-align: left;
     .add {
       margin: 20px 0 20px 55px;
     }
