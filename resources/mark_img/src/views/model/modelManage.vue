@@ -15,6 +15,9 @@
         <!-- 查询条件 -->
         <div class="query_option">
           <Input style="width: 200px;" v-model="search.dmName" placeholder="请输入模型名称"></Input>
+          <Select v-model="search.cvTaskType" style="width:200px;margin-left:20px;" placeholder="请选择任务类型">
+            <Option :value="item.cvTaskType" v-for="(item,idx) in cvTaskTypeList" :key="idx">{{item.cvTaskName}}</Option>
+          </Select>
           <span class="query_btn">
             <Button type="primary" @click="queryPageInfo">查询</Button>
             <Button @click="clearSearch">重置</Button>
@@ -25,7 +28,7 @@
           <div class="table_head">
             {{table.dmName}}
             <span style="margin-left:20px">模型ID：{{table.dmId}}</span>
-            <span>{{table.}}</span>
+            <span v-if="table.cvTaskTypeName" class="type_name">{{table.cvTaskTypeName}}</span>
             <div class="model_action">
               <span class="action" @click="trainModel(table.dmId)">
                 <Icon type="ios-book-outline" /> 训练
@@ -214,7 +217,6 @@
           <FormItem label="任务类型" prop="cvTaskType">
             <RadioGroup v-model="addInfo.cvTaskType">
               <Radio :label="item.cvTaskType" v-for="item in cvTaskTypeList" :key="item.cvTaskType">{{item.cvTaskName}}</Radio>
-              <!-- <Radio :label="2">物体检测</Radio> -->
             </RadioGroup>
           </FormItem>
         </Form>
@@ -249,6 +251,7 @@
 export default {
   mounted () {
     this.queryPageInfo()
+    this.getTaskType()
   },
   data () {
     return {
@@ -266,7 +269,9 @@ export default {
       cvTaskTypeList: [],
       dataList: [],
       labelList: [],
-      addInfo: {},
+      addInfo: {
+        cvTaskType: 1
+      },
       trainInfo: {
         inferencePlatform: 1,
         dmPrecision: 1,
@@ -286,6 +291,9 @@ export default {
         ],
         dmRemark: [
           { required: true, message: '请输入功能描述', trigger: 'blur' }
+        ],
+        cvTaskType: [
+          { required: true, message: '请选择任务类型', trigger: 'blur', type: 'number' }
         ],
       },
       rules: {
@@ -460,7 +468,8 @@ export default {
       let params = {
         pageIndex: this.pageNow,
         pageSize: this.pagesize,
-        dmName: this.search.dmName
+        dmName: this.search.dmName,
+        cvTaskType: this.search.cvTaskType
       }
       this.$Spin.show()
       this.$post('/detectModel/getDetectModelsPages', params).then(data => {
@@ -684,7 +693,8 @@ export default {
           this.$post('/detectModel/addDetectModel', {
             dmName: this.addInfo.dmName,
             dmRemark: this.addInfo.dmRemark,
-            dmType: 1
+            dmType: 1,
+            cvTaskType: this.addInfo.cvTaskType
           }).then(data => {
             this.$Spin.hide()
             if(data.rs === 1) {
@@ -842,6 +852,15 @@ export default {
     padding: 0 20px 0 14px;
     line-height: 64px;
     background-color: #eee;
+    .type_name {
+      padding: 4px 8px;
+      border-radius: 11px;
+      text-align: center;
+      margin-left: 25px;
+      border: 1px solid #8c0776;
+      font-size: 12px;
+      color: #8c0776;
+    }
     .model_action {
       float: right;
       text-align: right;

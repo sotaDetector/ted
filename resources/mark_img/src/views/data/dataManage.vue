@@ -15,6 +15,9 @@
         <!-- 查询条件 -->
         <div class="query_option">
           <Input style="width: 200px;" v-model="search.dsName" placeholder="请输入数据集名称"></Input>
+          <Select v-model="search.cvTaskType" style="width:200px;margin-left:20px;" placeholder="请选择任务类型">
+            <Option :value="item.cvTaskType" v-for="(item,idx) in cvTaskTypeList" :key="idx">{{item.cvTaskName}}</Option>
+          </Select>
           <span class="query_btn">
             <Button type="primary" @click="queryPageInfo">查询</Button>
             <Button @click="clearSearch">重置</Button>
@@ -165,7 +168,10 @@ export default {
           { required: true, message: '请输入数据集名称', trigger: 'blur' },
         ],
         dsType: [
-          { required: true, message: '请选择类型', trigger: 'blur', type: 'number' }
+          { required: true, message: '请选择数据类型', trigger: 'blur', type: 'number' }
+        ],
+        cvTaskType: [
+          { required: true, message: '请选择任务类型', trigger: 'blur', type: 'number' }
         ],
       },
       modifyInfo: {
@@ -234,7 +240,8 @@ export default {
       let params = {
         pageIndex: this.pageNow,
         pageSize: this.pagesize,
-        dsName: this.search.dsName
+        dsName: this.search.dsName,
+        cvTaskType: this.search.cvTaskType
       }
       this.$Spin.show()
       this.$post('/dsc/getDataSetPages', params).then(data => {
