@@ -1,6 +1,5 @@
-from urllib import request
 
-from flask import Blueprint
+from flask import Blueprint, request
 
 from managerPlatform.imgClsModel.imgClsTrainService import imgClsTrainService
 

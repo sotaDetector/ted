@@ -72,7 +72,8 @@ class detectModelService:
                             versionItem['dmPrecisionValue']=ConstantUtils.getModelPrisision(versionItem['dmPrecision'])
                             datasetNames=[]
                             for item in versionItem['ds_dl_list']:
-                                datasetNames.append(datasetMap[item['dsId']])
+                                if datasetMap.keys().__contains__("item['dsId']"):
+                                    datasetNames.append(datasetMap[item['dsId']])
                             versionItem['datasetNames']=datasetNames
                             modelItem["latestVersionItem"] = [versionItem]
                             break
