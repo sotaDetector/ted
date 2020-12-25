@@ -15,6 +15,9 @@
         <!-- 查询条件 -->
         <div class="query_option">
           <Input style="width: 200px;" v-model="search.dsName" placeholder="请输入数据集名称"></Input>
+          <Select v-model="search.cvTaskType" style="width:200px;margin-left:20px;" placeholder="请选择任务类型">
+            <Option :value="item.cvTaskType" v-for="(item,idx) in cvTaskTypeList" :key="idx">{{item.cvTaskName}}</Option>
+          </Select>
           <span class="query_btn">
             <Button type="primary" @click="queryPageInfo">查询</Button>
             <Button @click="clearSearch">重置</Button>
@@ -23,9 +26,9 @@
         <!-- 表格列表 -->
         <div class="container_table">
           <Table :columns="columns" :data="pageInfo.dataList">
-            <template slot-scope="{row, index}" slot="action">
+            <template slot-scope="{row}" slot="action">
               <div>
-                <span v-if="row.dsImageCount" class="action" @click="markDatas(row.dsId,index)">标注</span>
+                <span v-if="row.dsImageCount" class="action" @click="markDatas(row)">标注</span>
                 <span class="action" style="margin:0 4px;" @click="clickImport(row.dsId)">导入</span>
                 <span class="action" style="margin-right:4px;" @click="modifyModal(row.dsId)">编辑</span>
                 <span class="action" @click="deleteModal(row.dsId)">删除</span>
@@ -93,10 +96,10 @@
               <!-- <Option :value=1>开启</Option> -->
             </Select>
           </FormItem>
-          <FormItem label="任务类型" prop="taskType">
-            <RadioGroup v-model="addInfo.taskType">
-              <Radio :label="1">图像分类</Radio>
-              <Radio :label="2">物体检测</Radio>
+          <FormItem label="任务类型" prop="cvTaskType">
+            <RadioGroup v-model="addInfo.cvTaskType">
+              <Radio :label="item.cvTaskType" v-for="item in cvTaskTypeList" :key="item.cvTaskType">{{item.cvTaskName}}</Radio>
+              <!-- <Radio :label="2">物体检测</Radio> -->
             </RadioGroup>
           </FormItem>
         </Form>
@@ -119,11 +122,11 @@
               <Option :value=1>图片</Option>
             </Select> -->
           </FormItem>
-          <FormItem label="任务类型" prop="taskType">
-            <RadioGroup v-model="modifyInfo.taskType">
-              <Radio :label="1">图像分类</Radio>
-              <Radio :label="2">物体检测</Radio>
-            </RadioGroup>
+          <FormItem label="任务类型" prop="cvTaskType">
+            <span>{{modifyInfo.cvTaskType == 1 ? '图像分类' : modifyInfo.cvTaskType == 2 ? '目标检测' : '其它'}}</span>
+            <!-- <RadioGroup v-model="modifyInfo.cvTaskType">
+              <Radio :label="item.cvTaskType" v-for="item in cvTaskTypeList" :key="item.cvTaskType">{{item.cvTaskName}}</Radio>
+            </RadioGroup> -->
           </FormItem>
         </Form>
       </div>
@@ -138,6 +141,9 @@
 export default {
   mounted () {
     this.queryPageInfo()
+    if(!this.cvTaskTypeList.length) {
+      this.getTaskType()
+    }
   },
   data () {
     return {
@@ -150,21 +156,24 @@ export default {
       modal_view: false,
       modal_add: false,
       modal_modify: false,
+      cvTaskTypeList: [],
       labelList: [],
       addInfo: {
         dsName: '',
         dsType: 1,
-        taskType: 1
+        cvTaskType: 1
       },
       ruleValidate: {
         dsName: [
           { required: true, message: '请输入数据集名称', trigger: 'blur' },
         ],
         dsType: [
-          { required: true, message: '请选择类型', trigger: 'blur', type: 'number' }
+          { required: true, message: '请选择数据类型', trigger: 'blur', type: 'number' }
+        ],
+        cvTaskType: [
+          { required: true, message: '请选择任务类型', trigger: 'blur', type: 'number' }
         ],
       },
-
       modifyInfo: {
         dsName: '',
         dsType: ''
@@ -181,8 +190,11 @@ export default {
           render: (h, params) => {
             return h('span', params.row.dsType == 1 ? '图片' : '其它')
           }
-        },
-        {
+        }, {
+          "title": "任务类型",
+          "align": "center",
+          "key": "cvTaskName",
+        }, {
           "title": "数据数量",
           "align": "center",
           "key": "dsImageCount",
@@ -202,7 +214,8 @@ export default {
             return h('div', {
               style: {
                 color: '#8c0776',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                display: params.row.labelList.length ? 'block' : 'none'
               },
               on: {
                 click: () => {
@@ -227,7 +240,8 @@ export default {
       let params = {
         pageIndex: this.pageNow,
         pageSize: this.pagesize,
-        dsName: this.search.dsName
+        dsName: this.search.dsName,
+        cvTaskType: this.search.cvTaskType
       }
       this.$Spin.show()
       this.$post('/dsc/getDataSetPages', params).then(data => {
@@ -251,7 +265,22 @@ export default {
       this.pageNow = page;//赋值当前页
       this.queryPageInfo();
     },
-
+    getTaskType () {
+      let params = {}
+      this.$Spin.show()
+      this.$post('/dsc/getAllCVTaskTypes', params).then(data => {
+        this.$Spin.hide()
+        if(data.rs === 1) {
+          this.cvTaskTypeList = data.taskTypeList
+        } else {
+          if(data.data && data.data.errorMsg) {
+            this.$Message.error(data.data.errorMsg);
+          } else {
+            this.$Message.error(data.errorMsg);
+          }
+        }
+      })
+    },
     handleBeforeUpload (e) {
       if(e.type == 'application/x-zip-compressed') {
         this.fileType = 1
@@ -262,7 +291,6 @@ export default {
       } else {
         this.$Message.error('请上传图片或zip压缩包！')
       }
-
       // this.importDatas()
       return false
     },
@@ -278,10 +306,7 @@ export default {
       this.$refs[name].validate((valid) => {
         if(valid) {
           this.$Spin.show()
-          this.$post('/dsc/addDataSet', {
-            dsName: this.addInfo.dsName,
-            dsType: this.addInfo.dsType,
-          }).then(data => {
+          this.$post('/dsc/addDataSet', this.addInfo).then(data => {
             this.$Spin.hide()
             if(data.rs === 1) {
               this.modal_add = false
@@ -353,9 +378,12 @@ export default {
       this.labelList = list
       this.modal_view = true
     },
-    markDatas (id, idx) {
-      this.$router.push({ path: '/markImg/' + id })
-      // this.$router.push({ path: '/classifyImg/' + id })
+    markDatas (row, idx) {
+      if(row.cvTaskType == 1) {
+        this.$router.push({ path: '/classifyImg/' + row.dsId })
+      } else {
+        this.$router.push({ path: '/markImg/' + row.dsId })
+      }
     },
     clickImport (id) {
       this.dsId = id
