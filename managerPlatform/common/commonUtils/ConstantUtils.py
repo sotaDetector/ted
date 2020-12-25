@@ -136,3 +136,23 @@ class ConstantUtils:
 
 
 
+    CV_TASK_TYPE_CLASSIFY=1
+    CV_TASK_TYPE_DETECT = 2
+
+    CV_TASK_TYPE_NAME_MAP={
+        CV_TASK_TYPE_CLASSIFY:"图像分类",
+        CV_TASK_TYPE_DETECT:"目标检测"
+    }
+
+
+    @classmethod
+    def getCVTaskTypaName(cls,cvTaskType):
+        if cls.CV_TASK_TYPE_NAME_MAP.keys().__contains__(cvTaskType):
+            return cls.CV_TASK_TYPE_NAME_MAP[cvTaskType]
+
+
+
+    #图片已标注
+    IMAGE_LBALED=1
+    #图片为标注
+    IMAGE_UNLABEL = 2

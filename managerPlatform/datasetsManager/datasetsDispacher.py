@@ -34,8 +34,8 @@ def getDataSetPages():
 
 @dsm_blp.route('/getAllDSNamesList', methods=['POST'])
 def getAllDSNamesList():
-
-    return dsService.getAllDSNamesList()
+    data = request.get_json()
+    return dsService.getAllDSNamesList(data)
 
 
 @dsm_blp.route('/getDataSetDetail', methods=['POST'])
@@ -96,13 +96,20 @@ def getImageItemDetail():
 
 
 """
-上传图片标注数据
+上传目标检测标注数据
 """
 @dsm_blp.route('/upImageItemRecLabels', methods=['POST'])
 def upImageItemRecLabels():
     data = request.get_json()
 
     return dsService.upImageItemRecLabels(data)
+
+
+#获取所有视觉任务类型
+@dsm_blp.route('/getAllCVTaskTypes', methods=['POST'])
+def getAllCVTaskTypes():
+
+    return dsService.getAllCVTaskTypes()
 
 
 

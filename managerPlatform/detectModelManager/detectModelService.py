@@ -41,6 +41,7 @@ class detectModelService:
             if item['latestVersionId'] is not None:
                 modelVersonIdList.append(item['latestVersionId'])
 
+
         if len(modelVersonIdList)>0:
             trainVersionList = detectModelTrainVersion.objects(dmtvid__in=modelVersonIdList,
                                                            state=ConstantUtils.DATA_STATUS_ACTIVE).exclude("create_date","state")
@@ -61,6 +62,8 @@ class detectModelService:
 
 
             for modelItem in modelJsonList:
+                if modelItem.keys().__contains__('cvTaskType'):
+                    modelItem['cvTaskTypeName']=ConstantUtils.getCVTaskTypaName(modelItem['cvTaskType'])
                 for versionItem in modelVersionJsonList:
                     if modelItem.keys().__contains__("latestVersionId"):
                         if modelItem['latestVersionId'] == versionItem['dmtvid']:
@@ -90,8 +93,9 @@ class detectModelService:
         return resultPackerUtils.update_success()
 
     def getDetectModelDetail(self, dmId):
-        result = detectModelBean.objects(dmId=dmId, state=1).exclude("state", "userId").to_json()
-        return resultPackerUtils.packDataItemResults(result)
+        detectModel = detectModelBean.objects(dmId=dmId, state=1).exclude("state", "userId").first()
+        detectModel.cvTaskTypeName=ConstantUtils.getCVTaskTypaName(detectModel['cvTaskType'])
+        return resultPackerUtils.packDataListResults(detectModel.to_json())
 
     def delDetectModelDetail(self, dmId):
         detectModelItem = detectModelBean.objects(dmId=dmId)

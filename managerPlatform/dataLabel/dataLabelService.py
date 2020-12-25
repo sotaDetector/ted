@@ -42,3 +42,8 @@ class dataLabelService:
         return labelMap,nameList
 
 
+    def getLabelBylid(self,dlId):
+        labeItem = dataLabelBean.objects(dlid=dlId,state=ConstantUtils.DATA_STATUS_ACTIVE).first()
+        return labeItem
+
+
