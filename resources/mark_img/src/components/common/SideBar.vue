@@ -2,7 +2,7 @@
   <div class="sidebar">
     <Row>
       <Col span="4">
-      <Menu :theme="theme2" accordion width="200px" active-name="$route.path" ref="side_menu">
+      <Menu :theme="theme2" accordion width="200px" :active-name="actName" ref="side_menu" :open-names="openItem">
         <div v-for="info in menuList" :key="info.menuId">
           <Submenu v-if="info.children && info.children.length>0" :name="info.menuId">
             <template slot="title">
@@ -13,7 +13,8 @@
             <MenuItem :name="item.url" :to="{ path: '/' +item.url}" v-for="item in info.children" :key="item.menuId" ref="menu_item">
             <Icon class="menu_icon" :type="item.ico" :size="20" :key="'ico' + item.menuName" style="color:#8c0776" />{{item.menuName}}</MenuItem>
           </Submenu>
-          <MenuItem v-else active-name="$route.path" :name="info.url" :to="{ path: '/' + info.url }" ref="menu_item">
+
+          <MenuItem v-else :name="info.url" :to="{ path: '/' + info.url }" ref="menu_item">
           <!-- <img class="menuicon" :src="info.ico" /> -->
           <Icon class="menu_icon" :type="info.ico" :size="10" :key="'ico' + info.menuName" style="color:#8c0776" />
           {{info.menuName}}
@@ -33,7 +34,29 @@ export default {
   data () {
     return {
       theme2: 'light',
-      menuList
+      menuList,
+      actName: '',
+      openItem: []
+    }
+  },
+  watch: {
+    '$route.name': {
+      handler (n) {
+        // var actName = n == 'morningExamDetail' ? 'morningExamManage' : n == 'ops/morningExamDetail' ? 'ops/morningExamManage' : n
+        var actName = n.slice(0,1).toLowerCase() + n.slice(1)
+        var findItem = this.menuList.find(i => i.children && i.children.find(j => j.url == actName))
+        if(findItem) {
+          this.openItem = []
+          this.openItem.push(findItem.menuId)
+        }
+        this.actName = actName
+        this.$nextTick(() => {
+          this.$refs.side_menu.updateOpened()
+          this.$refs.side_menu.updateActiveName()
+        })
+      },
+      immediate: true,
+      deep: true
     }
   },
   created () {

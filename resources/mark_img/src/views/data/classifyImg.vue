@@ -121,7 +121,6 @@ export default {
       $('.content-box').scrollLeft(0)
 
       // console.log(imgInfo)
-      // 回显！！！！记得改变量名
       this.dlid_result = imgInfo.classifyLabel
       this.dlName_result = imgInfo.classifyLabelName
 
