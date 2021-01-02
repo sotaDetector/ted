@@ -1,8 +1,5 @@
 import json
-import threading
-
 from flask import session
-
 from managerPlatform.bean.detectModel.detectModelBean import detectModelBean
 from managerPlatform.bean.detectModel.detectModelTrainConfig import detectModelTrainConfig
 from managerPlatform.bean.detectModel.detectModelVersion import detectModelTrainVersion
@@ -12,8 +9,8 @@ from managerPlatform.common.commonUtils.fileUtils import fileUtils
 from managerPlatform.common.commonUtils.loggerUtils import loggerUtils
 from managerPlatform.common.commonUtils.randomUtils import randomUtils
 from managerPlatform.common.commonUtils.resultPackerUtils import resultPackerUtils
-from managerPlatform.common.config.configUtils import configUtils
 from managerPlatform.datasetsManager.datasetsService import datasetsService
+from nanodetService.nanodetTrain import nanodetTrainThread
 from trainModelThread import trainModelThread
 
 datasetService = datasetsService()
@@ -26,42 +23,70 @@ class detectModelTrainService:
 
 
     def detectModelVersionTrain(self, jsonData):
+
+        projectName=randomUtils.getRandomStr()
+        projectDir,ckptModel, entireModel = fileUtils.getModelSavePath(ConstantUtils.modelBasePath,projectName)
+        jsonData['projectDir']=projectDir
+        jsonData['ckptModelSavePath']=ckptModel
+        jsonData['entireModelSavePath'] = entireModel
+
         # 1.保存训练版本bean
         modelTrainVersion = detectModelTrainVersion.convertToBean(jsonData)
         modelTrainVersion.save()
 
-        # 更新该模型最新版本
+        #2.更新该模型最新版本
         detectModelItem = detectModelBean.objects(dmId=jsonData['dmid'], state=ConstantUtils.DATA_STATUS_ACTIVE)
         detectModelItem.update(latestVersionId=modelTrainVersion.dmtvid)
+
+        #区分部署平台
+        if jsonData["inferencePlatform"]==ConstantUtils.MODEL_PLATFORM_SERVER:
+            self.train_server_yolo_model(projectName,jsonData,modelTrainVersion)
+        elif jsonData["inferencePlatform"]==ConstantUtils.MODEL_PLATFORM_LITE:
+            self.trainMobile_nanodet_model()
+
+
+        return resultPackerUtils.save_success()
+
+    #训练服务器端 yolo模型
+    def train_server_yolo_model(self,projectName,jsonData,modelTrainVersion):
+        loggerUtils.info("start server yolo model train thread [end]")
         # 2.训练
         # 2.1. 准备数据
-        trainDataDict,valDataDict = datasetService.loadTrainData(modelTrainVersion.dmtvid,modelTrainVersion['ds_dl_list'])
+        trainDataDict, valDataDict = datasetService.loadTrainData(modelTrainVersion.dmtvid,
+                                                                  modelTrainVersion['ds_dl_list'])
         # 2.2 组装，保存 训练参数
-        trainConfig=jsonData["advancedSet"]
-        isUsePreTraindModel=trainConfig["isUsePreTraindModel"]
-        modelDir=randomUtils.getRandomStr()
-        modelTrainConfig=detectModelTrainConfig.getDetectModelTrainConfig(
+        trainConfig = jsonData["advancedSet"]
+        isUsePreTraindModel = trainConfig["isUsePreTraindModel"]
+        modelTrainConfig = detectModelTrainConfig.getDetectModelTrainConfig(
             dmtvid=modelTrainVersion.dmtvid,
-            cfg=ConstantUtils.getModelCfgPath(isUsePreTraindModel,modelTrainVersion.dmPrecision),
-            weights=ConstantUtils.getModelWeightsPath(isUsePreTraindModel,modelTrainVersion.dmPrecision),
+            cfg=ConstantUtils.getModelCfgPath(isUsePreTraindModel, modelTrainVersion.dmPrecision),
+            weights=ConstantUtils.getModelWeightsPath(isUsePreTraindModel, modelTrainVersion.dmPrecision),
             epochs=trainConfig['epochs'],
             batch_size=trainConfig['batch_size'],
             project=ConstantUtils.modelBasePath,
-            name=modelDir
+            name=projectName
         )
         modelTrainConfig.save()
         # #2.3 开启训练线程
-        trainModelTH=trainModelThread(trainDataDict,valDataDict,modelTrainConfig)
+        trainModelTH = trainModelThread(trainDataDict, valDataDict, modelTrainConfig)
         trainModelTH.start()
 
-        #3.更新模型路径
-        ckptModel,entireModel=fileUtils.getModelSavePath(ConstantUtils.modelBasePath,modelDir)
-        modelTrainVersion.update(ckptModelSavePath=ckptModel,entireModelSavePath=entireModel)
+    def trainMobile_nanodet_model(self,jsonData):
+        loggerUtils.info("start lite nanodet model train thread [end]")
 
+        nanoTrainConfig = {
+            "local_rank": -1,
+            "save_dir":jsonData['projectDir'],
+            "ds_dl_list": jsonData['ds_dl_list'],
+            "cfg": "data/nanodet-self.yml",
+            "imageBasePath":ConstantUtils.dataBasePath,
+            'ckptModelSavePath':jsonData["ckptModel"],
+            'entireModelSavePath':jsonData["entireModelSavePath"]
+        }
+        nanodetThread=nanodetTrainThread(nanoTrainConfig)
 
+        nanodetThread.start()
 
-        loggerUtils.info("start detect detectModel train thread [end]")
-        return resultPackerUtils.save_success()
 
 
     def getDMVersionList(self,queryData):

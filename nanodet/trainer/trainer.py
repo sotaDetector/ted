@@ -109,12 +109,15 @@ class Trainer:
         epoch_loss_dict = {k: v.avg for k, v in epoch_losses.items()}
         return results, epoch_loss_dict
 
-    def run(self, train_loader, val_loader, evaluator):
+    def run(self, train_loader, val_loader, evaluator,trainConfig):
         """
         start running
         :param train_loader:
         :param val_loader:
         :param evaluator:
+
+        Args:
+            trainConfig:
         """
         start_epoch = self.epoch
         save_flag = -10
@@ -130,7 +133,7 @@ class Trainer:
         for epoch in range(start_epoch, self.cfg.schedule.total_epochs + 1):
             results, train_loss_dict = self.run_epoch(epoch, train_loader, mode='train')
             self.lr_scheduler.step()
-            save_model(self.rank, self.model, os.path.join(self.cfg.save_dir, 'model_last.pth'), epoch, self._iter, self.optimizer)
+            save_model(self.rank, self.model,trainConfig['ckptModelSavePath'], epoch, self._iter, self.optimizer)
             for k, v in train_loss_dict.items():
                 self.logger.scalar_summary('Epoch_loss/' + k, 'train', v, epoch)
 
@@ -160,6 +163,9 @@ class Trainer:
                     else:
                         warnings.warn('Warning! Save_key is not in eval results! Only save model last!')
             self.epoch += 1
+
+        #训练完保存完整的模型
+        torch.save(self.model,trainConfig['entireModelSavePath'])
 
     def get_warmup_lr(self, cur_iters):
         if self.cfg.schedule.warmup.name == 'constant':

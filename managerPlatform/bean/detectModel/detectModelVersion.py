@@ -52,7 +52,11 @@ class detectModelTrainVersion(baseBean):
             dmPrecision=jsonData['dmPrecision'],
             inferencePlatform=jsonData['inferencePlatform'],
             dataEnhanceType=jsonData['dataEnhanceType'],
-            ds_dl_list=jsonData['ds_dl_list']
+            ds_dl_list=jsonData['ds_dl_list'],
+            ckptModelSavePath=jsonData['ckptModelSavePath'],
+            entireModelSavePath=jsonData['entireModelSavePath']
+
+
         )
 
 

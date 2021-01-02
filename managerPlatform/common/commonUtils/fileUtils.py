@@ -63,6 +63,6 @@ class fileUtils:
     def getModelSavePath(cls,basePath,projectPath):
         basePath=basePath+projectPath+"/weights"
 
-        return basePath+"/best.pt",basePath+"/entireModel.pt"
+        return basePath+projectPath,basePath+"/best.pt",basePath+"/entireModel.pt"
 
 

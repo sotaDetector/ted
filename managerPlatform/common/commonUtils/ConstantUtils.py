@@ -10,8 +10,8 @@ class ConstantUtils:
     DATA_STATUS_DELETED = 0
 
 
-    TRUE_TAG=True
-    FALSE_TAG=False
+    TRUE_TAG="true"
+    FALSE_TAG="false"
 
 
 
