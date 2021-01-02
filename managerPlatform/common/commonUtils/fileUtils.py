@@ -63,6 +63,9 @@ class fileUtils:
     def getModelSavePath(cls,basePath,projectPath):
         basePath=basePath+projectPath+"/weights"
 
+        if not os.path.exists(basePath):
+            os.makedirs(basePath)
+
         return basePath+projectPath,basePath+"/best.pt",basePath+"/entireModel.pt"
 
 

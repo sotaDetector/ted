@@ -1,5 +1,6 @@
 import torch
 from .rank_filter import rank_filter
+import os
 
 def load_model_weight(model, checkpoint, logger):
     state_dict = checkpoint['state_dict']
@@ -33,5 +34,6 @@ def save_model(model, path, epoch, iter, optimizer=None):
             'iter': iter}
     if optimizer is not None:
         data['optimizer'] = optimizer.state_dict()
+
 
     torch.save(data, path)

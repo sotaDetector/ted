@@ -42,7 +42,7 @@ class detectModelTrainService:
         if jsonData["inferencePlatform"]==ConstantUtils.MODEL_PLATFORM_SERVER:
             self.train_server_yolo_model(projectName,jsonData,modelTrainVersion)
         elif jsonData["inferencePlatform"]==ConstantUtils.MODEL_PLATFORM_LITE:
-            self.trainMobile_nanodet_model()
+            self.trainMobile_nanodet_model(jsonData)
 
 
         return resultPackerUtils.save_success()
@@ -80,7 +80,7 @@ class detectModelTrainService:
             "ds_dl_list": jsonData['ds_dl_list'],
             "cfg": "data/nanodet-self.yml",
             "imageBasePath":ConstantUtils.dataBasePath,
-            'ckptModelSavePath':jsonData["ckptModel"],
+            'ckptModelSavePath':jsonData["ckptModelSavePath"],
             'entireModelSavePath':jsonData["entireModelSavePath"]
         }
         nanodetThread=nanodetTrainThread(nanoTrainConfig)
