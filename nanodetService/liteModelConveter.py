@@ -1,5 +1,3 @@
-import zipfile
-
 import onnx
 import torch
 from onnxsim import simplify
