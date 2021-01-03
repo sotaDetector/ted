@@ -61,11 +61,30 @@ class fileUtils:
 
     @classmethod
     def getModelSavePath(cls,basePath,projectPath):
-        basePath=basePath+projectPath+"/weights"
+        projectPath=basePath + projectPath
+        modelBasePath=projectPath+"/weights"
 
-        if not os.path.exists(basePath):
-            os.makedirs(basePath)
+        if not os.path.exists(modelBasePath):
+            os.makedirs(modelBasePath)
 
-        return basePath+projectPath,basePath+"/best.pt",basePath+"/entireModel.pt"
+        return projectPath,modelBasePath+"/best.pt",modelBasePath+"/entireModel.pt"
+
+    @classmethod
+    def make_zip(cls,source_dir, output_filename):
+        zipf = zipfile.ZipFile(output_filename, 'w')
+        pre_len = len(os.path.dirname(source_dir))
+        for parent, dirnames, filenames in os.walk(source_dir):
+            for filename in filenames:
+                pathfile = os.path.join(parent, filename)
+                arcname = pathfile[pre_len:].strip(os.path.sep)  # 相对路径
+                zipf.write(pathfile, arcname)
+        zipf.close()
+
+    @classmethod
+    def createFolder(cls, folderPath):
+        if not os.path.exists(folderPath):
+            os.makedirs(folderPath)
+
+
 
 

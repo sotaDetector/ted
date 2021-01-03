@@ -1,4 +1,6 @@
-from flask import Blueprint,request
+from flask import Blueprint, request, send_from_directory
+
+from managerPlatform.common.commonUtils.ConstantUtils import ConstantUtils
 from managerPlatform.detectModelManager.detectModelTrainService import detectModelTrainService
 
 detect_model_train_blp = Blueprint("detectModelTrainDispacher", __name__, url_prefix="/detectModelTrain")
@@ -49,4 +51,15 @@ def delDMVersion():
 
 
     return modelTrainService.delDMVersion(jsonData)
+
+
+#下载检测模型
+@detect_model_train_blp.route('/downloadDetectModel/<dmtvid>', methods=['POST','GET'])
+def imageItem(dmtvid):
+
+    filePath=modelTrainService.getDownloadModelUrl(dmtvid)
+    basePath=filePath[:filePath.rindex("/")]
+    filePath=filePath[filePath.rindex("/")+1:]
+
+    return send_from_directory(basePath,filePath,as_attachment=True)
 
